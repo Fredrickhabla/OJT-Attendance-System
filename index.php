@@ -87,7 +87,7 @@ $conn->close();
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE MONITORING SYSTEM</a>
+    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE SYSTEM</a>
   </div>
 </nav>
 
