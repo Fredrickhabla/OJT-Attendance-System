@@ -77,7 +77,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="mb-3 text-end">
       <a href="export_csv.php" class="btn btn-success btn-sm">
-        <i class="bi bi-file-earmark-spreadsheet"></i> Export as CSV
+        <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
       </a>
     </div>
 
