@@ -26,10 +26,8 @@ if (!$record) {
 // Handle form submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
-    $morning_in = $_POST['morning_in'];
-    $morning_out = $_POST['morning_out'];
-    $afternoon_in = $_POST['afternoon_in'];
-    $afternoon_out = $_POST['afternoon_out'];
+    $time_in = $_POST['time_in'];
+    $time_out = $_POST['time_out'];
     $hours = $_POST['hours'];
     $work_description = $_POST['work_description'];
     $signature_path = $_POST['existing_signature'] ?? $record['signature'];
@@ -49,10 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $update = $pdo->prepare("UPDATE attendance_records SET 
-        date = ?, morning_in = ?, morning_out = ?, afternoon_in = ?, afternoon_out = ?, 
+        date = ?, time_in = ?, time_out = ?,  
         hours = ?, work_description = ?, signature = ? WHERE id = ?");
     $update->execute([
-        $date, $morning_in, $morning_out, $afternoon_in, $afternoon_out,
+        $date, $time_in, $time_out,
         $hours, $work_description, $signature_path, $id
     ]);
 
@@ -141,31 +139,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="mb-3">
-        <label>Morning In</label>
-        <input type="time" name="morning_in" class="form-control"
-               value="<?= date('H:i', strtotime($record['morning_in'])) ?>" required>
-        <div class="text-time">Current: <?= date('g:i A', strtotime($record['morning_in'])) ?></div>
+        <label>Time In</label>
+        <input type="time" name="time_in" class="form-control"
+               value="<?= date('H:i', strtotime($record['time_in'])) ?>" required>
+        <div class="text-time">Current: <?= date('g:i A', strtotime($record['time_in'])) ?></div>
       </div>
 
       <div class="mb-3">
-        <label>Morning Out</label>
-        <input type="time" name="morning_out" class="form-control"
-               value="<?= date('H:i', strtotime($record['morning_out'])) ?>" required>
-        <div class="text-time">Current: <?= date('g:i A', strtotime($record['morning_out'])) ?></div>
-      </div>
-
-      <div class="mb-3">
-        <label>Afternoon In</label>
-        <input type="time" name="afternoon_in" class="form-control"
-               value="<?= date('H:i', strtotime($record['afternoon_in'])) ?>" required>
-        <div class="text-time">Current: <?= date('g:i A', strtotime($record['afternoon_in'])) ?></div>
-      </div>
-
-      <div class="mb-3">
-        <label>Afternoon Out</label>
-        <input type="time" name="afternoon_out" class="form-control"
-               value="<?= date('H:i', strtotime($record['afternoon_out'])) ?>" required>
-        <div class="text-time">Current: <?= date('g:i A', strtotime($record['afternoon_out'])) ?></div>
+        <label>Time Out</label>
+        <input type="time" name="time_out" class="form-control"
+               value="<?= date('H:i', strtotime($record['time_out'])) ?>" required>
+        <div class="text-time">Current: <?= date('g:i A', strtotime($record['time_out'])) ?></div>
       </div>
 
       <div class="mb-3">
