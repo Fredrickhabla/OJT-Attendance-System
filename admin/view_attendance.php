@@ -15,7 +15,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>View Attendance - OJT Attendance Monitoring</title>
+  <title>View Attendance - OJT Attendance System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -42,6 +42,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .signature-img {
       max-width: 120px;
       max-height: 60px;
+      cursor: pointer;
+    }
+    .modal-img {
+      max-width: 100%;
+      height: auto;
     }
   </style>
 </head>
@@ -88,7 +93,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>Afternoon Out</th>
             <th>Hours</th>
             <th>Work Description</th>
-            <th>Signature</th>
+            <th>E-Signature Image</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -96,15 +101,31 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($records as $row): ?>
           <tr>
             <td><?= htmlspecialchars($row['date']) ?></td>
-            <td><?= htmlspecialchars($row['morning_in']) ?></td>
-            <td><?= htmlspecialchars($row['morning_out']) ?></td>
-            <td><?= htmlspecialchars($row['afternoon_in']) ?></td>
-            <td><?= htmlspecialchars($row['afternoon_out']) ?></td>
+            <td><?= date('g:i A', strtotime($row['morning_in'])) ?></td>
+            <td><?= date('g:i A', strtotime($row['morning_out'])) ?></td>
+            <td><?= date('g:i A', strtotime($row['afternoon_in'])) ?></td>
+            <td><?= date('g:i A', strtotime($row['afternoon_out'])) ?></td>
             <td><?= htmlspecialchars($row['hours']) ?></td>
             <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
             <td>
               <?php if (!empty($row['signature'])): ?>
-                <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img">
+                <img src="<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img"
+                     data-bs-toggle="modal" data-bs-target="#modal<?= $row['id'] ?>" title="Click to view">
+                
+                <!-- Modal -->
+                <div class="modal fade" id="modal<?= $row['id'] ?>" tabindex="-1" aria-labelledby="modalLabel<?= $row['id'] ?>" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabel<?= $row['id'] ?>">E-Signature Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body text-center">
+                        <img src="<?= htmlspecialchars($row['signature']) ?>" alt="Full Signature" class="modal-img">
+                      </div>
+                    </div>
+                  </div>
+                </div>
               <?php else: ?>
                 <span class="text-muted">No signature</span>
               <?php endif; ?>
@@ -113,7 +134,8 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <a href="edit_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">
                 <i class="bi bi-pencil"></i>
               </a>
-              <a href="delete_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');">
+              <a href="delete_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger"
+                 onclick="return confirm('Are you sure you want to delete this record?');">
                 <i class="bi bi-trash"></i>
               </a>
             </td>
