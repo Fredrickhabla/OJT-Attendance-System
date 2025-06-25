@@ -1,0 +1,359 @@
+<?php
+$trainees = [
+  1 => [
+    "name" => "Juan Dela Cruz",
+    "email" => "juan.delacruz@example.com",
+    "phone" => "09212497344",
+    "address" => "Pandacan, Manila",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  2 => [
+    "name" => "Maria Santos",
+    "email" => "maria.santos@example.com",
+    "phone" => "09181234567",
+    "address" => "Malate, Manila",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  3 => [
+    "name" => "Pedro Ramirez",
+    "email" => "pedro.ramirez@example.com",
+    "phone" => "09331234567",
+    "address" => "Diliman, Quezon City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  4 => [
+    "name" => "Anna Reyes",
+    "email" => "anna.reyes@example.com",
+    "phone" => "09279876543",
+    "address" => "Rosario, Pasig City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  5 => [
+    "name" => "Mark Villanueva",
+    "email" => "mark.villanueva@example.com",
+    "phone" => "09093456789",
+    "address" => "Brgy. Ususan, Taguig City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  6 => [
+    "name" => "Luisa Tan",
+    "email" => "luisa.tan@example.com",
+    "phone" => "09112223344",
+    "address" => "Park West, Caloocan City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+
+  7 => [
+    "name" => "Luisa Tan",
+    "email" => "luisa.tan@example.com",
+    "phone" => "09112223344",
+    "address" => "Park West, Caloocan City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  8 => [
+    "name" => "Luisa Tan",
+    "email" => "luisa.tan@example.com",
+    "phone" => "09112223344",
+    "address" => "Park West, Caloocan City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+  9 => [
+    "name" => "Luisa Tan",
+    "email" => "luisa.tan@example.com",
+    "phone" => "09112223344",
+    "address" => "Park West, Caloocan City",
+    "image" => "/ojtform/images/sampleprofile.jpg"
+  ],
+];
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trainee - OJT ACER</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 300px;
+      background-color: #44830f;
+      color: white;
+      padding: 24px;
+    }
+    .sidebar h1 {
+      font-size: 22px;
+      margin-bottom: 40px;
+    }
+    .menu-label {
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .nav a:hover {
+      background-color: #14532d;
+    }
+    .nav svg {
+      margin-right: 8px;
+    }
+    .acerlogo {
+      text-align: center;
+      font-size: 20px;
+    }
+    .topbar {
+      background-color: #14532d;
+      color: white;
+      padding: 10px 16px;
+      font-size: 20px;
+      font-weight: bold;
+
+      display: flex;
+      align-items: center;
+      height: 55px;
+      text-align: left;
+    }
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      margin-left: 20px;
+      margin-right: 20px;
+      margin-top: 10px;
+    }
+    .trainee-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trainee-box {
+  background-color: white;
+  border: 2px solid #166534;
+  border-radius: 12px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin: 0px;
+  text-align: center;
+
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out forwards;
+  animation-fill-mode: forwards;
+
+  transform: translateY(40px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.trainee-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+    .trainee-box:nth-child(1) { animation-delay: 0.1s; }
+.trainee-box:nth-child(2) { animation-delay: 0.2s; }
+.trainee-box:nth-child(3) { animation-delay: 0.3s; }
+.trainee-box:nth-child(4) { animation-delay: 0.4s; }
+.trainee-box:nth-child(5) { animation-delay: 0.5s; }
+.trainee-box:nth-child(6) { animation-delay: 0.6s; }
+
+    .trainee-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 12px;
+      object-fit: cover;
+    }
+    .trainee-name {
+      margin-bottom: 6px;
+      color: #166534;
+      line-height: 5px;
+    }
+    .trainee-email {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .trainee-btn {
+      background-color: #166534;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .trainee-contact {
+      font-size: 16px;
+      color: #444;
+      margin-top: 20px;
+    }
+
+    #searchInput:focus {
+  border-color: #166534;
+  box-shadow: 0 0 4px rgba(22, 101, 52, 0.3);
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  padding: 8px 12px 8px 36px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 240px;
+  transition: 0.3s ease;
+  outline: none;
+  margin-right: 36px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  width: 18px;
+  height: 18px;
+  color: #888;
+}
+
+.topbar-space-between {
+  justify-content: space-between;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h1 class="acerlogo">OJT - ACER</h1>
+    <div class="menu-label">Menu</div>
+    <nav class="nav">
+      <a href="dashboardv2.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
+        </svg>
+        Dashboard
+      </a>
+      <a href="trainee.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Trainee
+      </a>
+      <a href="coordinator.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zM12 14v7m0-7l-9-5m9 5l9-5" />
+        </svg>
+        Coordinator
+      </a>
+      <a href="report.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+        </svg>
+        Report
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Area -->
+  <div style="flex: 1; display: flex; flex-direction: column;">
+
+        <div class="topbar topbar-space-between">
+                <div class="topbar-left">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="30" height="30">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            TRAINEE
+            </div>
+         <div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search by name..." class="search-input">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+       viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
+  </svg>
+</div>
+
+        </div>
+    <main class="main">
+      <div class="trainee-grid">
+        <?php foreach ($trainees as $id => $trainee): ?>
+          <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
+
+            <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
+            <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
+            <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
+            <a href="traineeview.php?id=<?= $id ?>"><button class="trainee-btn">View Profile</button></a>
+            <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const traineeBoxes = document.querySelectorAll('.trainee-box');
+
+  searchInput.addEventListener('input', function () {
+    const query = this.value.toLowerCase();
+
+    traineeBoxes.forEach(box => {
+      const name = box.getAttribute('data-name');
+      box.style.display = name.includes(query) ? 'block' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
+
+
