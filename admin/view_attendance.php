@@ -99,7 +99,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($records as $row): ?>
           <tr>
             <td><?= htmlspecialchars($row['date']) ?></td>
-            <td><?= date('g:i A', strtotime($row['morning_in'])) ?></td>
+            <td><?= date('g:i A', strtotime($row['time_in'])) ?></td>
             <td><?= date('g:i A', strtotime($row['afternoon_out'])) ?></td>
             <td><?= htmlspecialchars($row['hours']) ?></td>
             <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
