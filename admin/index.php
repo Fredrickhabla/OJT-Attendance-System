@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <nav class="navbar navbar-expand-lg navbar-glass">
   <div class="container">
     <a class="navbar-brand fw-bold" href="#">
-      <i class="bi bi-calendar-check"></i> OJT Attendance Monitoring System
+      <i class="bi bi-calendar-check"></i> OJT Attendance System
     </a>
   </div>
 </nav>
