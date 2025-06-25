@@ -3,7 +3,7 @@ session_start();
 
 // ✅ MySQL database connection
 $host = "localhost";
-$dbname = "ojtform";   // change if needed
+$dbname = "ojtform";
 $username = "root";
 $password = "";
 
@@ -20,56 +20,38 @@ if (!isset($_SESSION['user_id'])) {
 // ✅ Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect form data
-    $user_id        = $_SESSION['user_id'];
-    $date           = $_POST['date'] ?? '';
-    $morning_in     = $_POST['morning_in'] ?? '';
-    $morning_out    = $_POST['morning_out'] ?? '';
-    $afternoon_in   = $_POST['afternoon_in'] ?? '';
-    $afternoon_out  = $_POST['afternoon_out'] ?? '';
-    $hours          = floatval($_POST['hours'] ?? 0);
-    $work_desc      = $_POST['work_description'] ?? '';
+    $user_id   = $_SESSION['user_id'];
+    $date      = $_POST['date'] ?? '';
+    $time_in   = $_POST['time_in'] ?? '';
+    $time_out  = $_POST['time_out'] ?? '';
+    $hours     = floatval($_POST['hours'] ?? 0);
+    $work_desc = $_POST['work_description'] ?? '';
 
     // Validate required fields
-    if (empty($date) || empty($morning_in) || empty($morning_out) || empty($afternoon_in) || empty($afternoon_out) || empty($hours) || empty($work_desc)) {
+    if (empty($date) || empty($time_in) || empty($time_out) || empty($hours) || empty($work_desc)) {
         die("All fields are required.");
     }
 
-    // handle signature upload with Remove.bg background removal
+    // ✅ Handle signature upload (no background removal)
     $signature_path = '';
     if (!empty($_FILES['signature']['name'])) {
         if ($_FILES['signature']['error'] === UPLOAD_ERR_OK) {
             $tmpName = $_FILES['signature']['tmp_name'];
-            $apiKey = 'YOUR_REMOVE_BG_API_KEY'; // 
-            // Call Remove.bg API
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'https://api.remove.bg/v1.0/removebg');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                "X-Api-Key: $apiKey"
-            ]);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, [
-                'image_file' => new CURLFile($tmpName),
-                'size' => 'auto',
-            ]);
+            $originalName = basename($_FILES['signature']['name']);
+            $ext = pathinfo($originalName, PATHINFO_EXTENSION);
 
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+            $uploadDir = 'uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
 
-            if ($httpCode === 200) {
-                $uploadDir = 'uploads/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
+            $uniqueFilename = uniqid("sig_") . "." . $ext;
+            $destination = $uploadDir . $uniqueFilename;
 
-                $uniqueFilename = uniqid("sig_") . ".png";
-                $destination = $uploadDir . $uniqueFilename;
-
-                file_put_contents($destination, $response);
+            if (move_uploaded_file($tmpName, $destination)) {
                 $signature_path = $destination;
             } else {
-                die("Failed to remove background: $response");
+                die("Failed to upload signature image.");
             }
         } else {
             die("Signature upload error.");
@@ -77,31 +59,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // ✅ Insert data into the database
-    $stmt = $conn->prepare(
-        "INSERT INTO attendance_records 
-        (user_id, date, morning_in, morning_out, afternoon_in, afternoon_out, hours, work_description, signature, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())"
-    );
+    $stmt = $conn->prepare("
+        INSERT INTO attendance_records 
+        (user_id, date, time_in, time_out, hours, work_description, signature, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+    ");
 
     if (!$stmt) {
         die("Prepare failed: " . $conn->error);
     }
 
     $stmt->bind_param(
-        "isssssdss",
+        "isssdss",
         $user_id,
         $date,
-        $morning_in,
-        $morning_out,
-        $afternoon_in,
-        $afternoon_out,
+        $time_in,
+        $time_out,
         $hours,
         $work_desc,
         $signature_path
     );
 
     if ($stmt->execute()) {
-        // Success
         header("Location: success.php");
         exit();
     } else {
