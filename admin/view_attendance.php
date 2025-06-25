@@ -87,10 +87,8 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <thead class="table-success">
           <tr>
             <th>Date</th>
-            <th>Morning In</th>
-            <th>Morning Out</th>
-            <th>Afternoon In</th>
-            <th>Afternoon Out</th>
+            <th>Time In</th>
+            <th>Time Out</th>
             <th>Hours</th>
             <th>Work Description</th>
             <th>E-Signature Image</th>
@@ -102,8 +100,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <tr>
             <td><?= htmlspecialchars($row['date']) ?></td>
             <td><?= date('g:i A', strtotime($row['morning_in'])) ?></td>
-            <td><?= date('g:i A', strtotime($row['morning_out'])) ?></td>
-            <td><?= date('g:i A', strtotime($row['afternoon_in'])) ?></td>
             <td><?= date('g:i A', strtotime($row['afternoon_out'])) ?></td>
             <td><?= htmlspecialchars($row['hours']) ?></td>
             <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
