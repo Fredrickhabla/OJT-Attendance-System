@@ -7,11 +7,26 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     exit;
 }
 
-// Fetch users without 'created_at'
+// CSV export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $stmt = $pdo->query("SELECT id, full_name, username FROM users ORDER BY id DESC");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="users.csv"');
+    $output = fopen("php://output", "w");
+
+    fputcsv($output, ['ID', 'Full Name', 'Username']);
+    foreach ($users as $user) {
+        fputcsv($output, [$user['id'], $user['full_name'], $user['username']]);
+    }
+    fclose($output);
+    exit;
+}
+
 $stmt = $pdo->query("SELECT id, full_name, username FROM users ORDER BY id DESC");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +43,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background-size: cover;
       font-family: Arial, sans-serif;
       padding-top: 70px;
+      font-size: 0.95rem;
     }
     .navbar-glass {
       background: rgba(255,255,255,0.9);
@@ -36,9 +52,20 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     .content-box {
       background: white;
-      padding: 30px;
+      padding: 25px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,.1);
+      overflow-x: auto;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+    table {
+      font-size: 0.9rem;
+    }
+    table td, table th {
+      padding: 8px 12px;
+      word-break: break-word;
+      max-width: 250px;
     }
   </style>
 </head>
@@ -47,7 +74,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
     <a class="navbar-brand fw-bold text-success" href="dashboard.php">
-      <i class="bi bi-people-fill"></i> OJT Attendance Monitoring
+      <i class="bi bi-people-fill"></i> OJT Attendance System
     </a>
     <div class="ms-auto">
       <a href="view_attendance.php" class="btn btn-outline-success btn-sm me-2">
@@ -63,26 +90,41 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </nav>
 
-<div class="container mt-5">
+<div class="container mt-4">
   <div class="content-box">
-    <h3 class="text-center text-success mb-4"><i class="bi bi-person-lines-fill"></i> User Accounts</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="text-success mb-0"><i class="bi bi-person-lines-fill"></i> User Accounts</h4>
+      <a href="?export=csv" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-download"></i> Export CSV
+      </a>
+    </div>
 
     <?php if ($users): ?>
     <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead class="table-success">
+      <table class="table table-bordered table-striped table-sm">
+        <thead class="table-success text-center">
           <tr>
             <th>ID</th>
             <th>Full Name</th>
             <th>Username</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($users as $user): ?>
           <tr>
-            <td><?= htmlspecialchars($user['id']) ?></td>
+            <td class="text-center"><?= htmlspecialchars($user['id']) ?></td>
             <td><?= htmlspecialchars($user['full_name']) ?></td>
             <td><?= htmlspecialchars($user['username']) ?></td>
+            <td class="text-center">
+              <a href="edit_user.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-primary me-1">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <a href="delete_user.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-danger"
+                 onclick="return confirm('Are you sure you want to delete this user?');">
+                <i class="bi bi-trash-fill"></i>
+              </a>
+            </td>
           </tr>
           <?php endforeach; ?>
         </tbody>
