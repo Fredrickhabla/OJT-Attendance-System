@@ -7,32 +7,41 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     exit;
 }
 
-$stmt = $pdo->query("SELECT * FROM attendance_records ORDER BY date DESC");
+// Fetch attendance records joined with user full name
+$stmt = $pdo->query("
+    SELECT ar.*, u.full_name 
+    FROM attendance_records ar
+    LEFT JOIN users u ON ar.user_id = u.id
+    ORDER BY ar.date DESC
+");
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Attendance Records</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <style>
-    * {
+  * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
     body {
-      background-color: #f4f6f9;
+      background-color: #f0f2f5;
       color: #333;
     }
+
     .layout {
       display: flex;
       height: 100vh;
     }
+
     .sidebar {
       width: 300px;
       background-color: #44830f;
@@ -41,11 +50,13 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: flex;
       flex-direction: column;
     }
+
     .sidebar h1 {
       font-size: 22px;
       margin-bottom: 40px;
       text-align: center;
     }
+
     .menu-label {
       text-transform: uppercase;
       font-size: 13px;
@@ -53,11 +64,13 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       margin-bottom: 16px;
       opacity: 0.8;
     }
+
     .nav {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
+
     .nav a {
       display: flex;
       align-items: center;
@@ -65,16 +78,21 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: white;
       text-decoration: none;
       border-radius: 4px;
+      transition: 0.2s;
     }
+
     .nav a:hover {
       background-color: #14532d;
     }
+
     .nav svg {
       margin-right: 8px;
     }
+
     .logout {
       margin-top: auto;
     }
+
     .logout a {
       display: flex;
       align-items: center;
@@ -82,9 +100,19 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: white;
       text-decoration: none;
       border-radius: 6px;
+      transition: 0.2s;
     }
+
     .logout a:hover {
       background-color: #2c6b11;
+    }
+
+    .bi {
+      margin-right: 6px;
+    }
+    .acerlogo {
+      text-align: center;
+      font-size: 20px;
     }
 
     .content {
@@ -92,7 +120,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: flex;
       flex-direction: column;
     }
-
     .topbar {
       background-color: #14532d;
       color: white;
@@ -104,20 +131,17 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       height: 55px;
       text-align: left;
     }
-
     .main {
       flex: 1;
       padding: 40px;
       overflow-y: auto;
     }
-
     .table-container {
       background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,.1);
     }
-
     .signature-img {
       max-width: 120px;
       max-height: 60px;
@@ -130,7 +154,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <h1>OJT - ACER</h1>
+      <h1 class="acerlogo">OJT - ACER</h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
@@ -184,6 +208,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <table class="table table-bordered table-striped">
             <thead class="table-success">
               <tr>
+                <th>Name</th>
                 <th>Date</th>
                 <th>Time In</th>
                 <th>Time Out</th>
@@ -196,6 +221,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tbody>
             <?php foreach ($records as $row): ?>
               <tr>
+                <td><?= htmlspecialchars($row['full_name']) ?></td>
                 <td><?= htmlspecialchars($row['date']) ?></td>
                 <td><?= htmlspecialchars($row['time_in']) ?></td>
                 <td><?= htmlspecialchars($row['time_out']) ?></td>
@@ -203,16 +229,16 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
                 <td>
                   <?php if (!empty($row['signature'])): ?>
-                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img">
+                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" />
                   <?php else: ?>
                     <span class="text-muted">No signature</span>
                   <?php endif; ?>
                 </td>
                 <td>
-                  <a href="edit_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">
+                  <a href="edit_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');">
+                  <a href="delete_attendance.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>

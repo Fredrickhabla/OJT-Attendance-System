@@ -4,16 +4,17 @@
   <meta charset="UTF-8">
   <title>Dashboard - OJT ACER</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    * {
+   * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background-color: #f4f6f9;
+      background-color: #f0f2f5;
       color: #333;
     }
 
@@ -22,17 +23,19 @@
       height: 100vh;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 300px;
       background-color: #44830f;
       color: white;
       padding: 24px;
+      display: flex;
+      flex-direction: column;
     }
 
     .sidebar h1 {
       font-size: 22px;
       margin-bottom: 40px;
+      text-align: center;
     }
 
     .menu-label {
@@ -56,6 +59,7 @@
       color: white;
       text-decoration: none;
       border-radius: 4px;
+      transition: 0.2s;
     }
 
     .nav a:hover {
@@ -64,6 +68,28 @@
 
     .nav svg {
       margin-right: 8px;
+    }
+
+    .logout {
+      margin-top: auto;
+    }
+
+    .logout a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #2c6b11;
+    }
+
+    .bi {
+      margin-right: 6px;
     }
 
     /* Main */
@@ -153,7 +179,7 @@
     <h1 class="acerlogo">OJT - ACER</h1>
     <div class="menu-label">Menu</div>
     <nav class="nav">
-      <a href="dashboard.php">
+      <a href="dashboardv2.php">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
         </svg>
@@ -178,6 +204,12 @@
         Report
       </a>
     </nav>
+
+    <div class="logout">
+      <a href="logout.php">
+        <i class="bi bi-box-arrow-right"></i>   Logout
+      </a>
+    </div>
   </aside>
 
   <!-- Main Content -->

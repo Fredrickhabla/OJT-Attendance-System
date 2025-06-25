@@ -105,10 +105,8 @@ $conn->close();
       </h5>
       <p><span class="label"><i class="bi bi-calendar-event"></i> Date:</span>
          <?= htmlspecialchars($record['date']) ?></p>
-      <p><span class="label"><i class="bi bi-brightness-high"></i> Morning Time:</span>
-         <?= date("g:i A", strtotime($record['morning_in'])) ?> – <?= date("g:i A", strtotime($record['morning_out'])) ?></p>
-      <p><span class="label"><i class="bi bi-moon-stars"></i> Afternoon Time:</span>
-         <?= date("g:i A", strtotime($record['afternoon_in'])) ?> – <?= date("g:i A", strtotime($record['afternoon_out'])) ?></p>
+      <p><span class="label"><i class="bi bi-brightness-high"></i> Scheduled Time:</span>
+         <?= date("g:i A", strtotime($record['time_in'])) ?> – <?= date("g:i A", strtotime($record['time_out'])) ?></p>
       <p><span class="label"><i class="bi bi-hourglass-split"></i> No.&nbsp;of&nbsp;Hours:</span>
          <?= htmlspecialchars($record['hours']) ?></p>
       <p><span class="label"><i class="bi bi-pencil-square"></i> Work Description:</span>

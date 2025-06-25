@@ -46,27 +46,97 @@ $coordinators = [
 <head>
   <meta charset="UTF-8">
   <title>Coordinator - OJT ACER</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background-color: #f4f6f9; color: #333; }
-    .container { display: flex; height: 100vh; }
+     * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f0f2f5;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
 
     .sidebar {
       width: 300px;
       background-color: #44830f;
       color: white;
       padding: 24px;
+      display: flex;
+      flex-direction: column;
     }
-    .sidebar h1 { font-size: 22px; margin-bottom: 40px; }
-    .menu-label { text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin-bottom: 16px; opacity: 0.8; }
-    .nav { display: flex; flex-direction: column; gap: 8px; }
+
+    .sidebar h1 {
+      font-size: 22px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .menu-label {
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .nav a {
-      display: flex; align-items: center; padding: 10px 16px;
-      color: white; text-decoration: none; border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: 0.2s;
     }
-    .nav a:hover { background-color: #14532d; }
-    .nav svg { margin-right: 8px; }
-    .acerlogo { text-align: center; font-size: 20px; }
+
+    .nav a:hover {
+      background-color: #14532d;
+    }
+
+    .nav svg {
+      margin-right: 8px;
+    }
+
+    .logout {
+      margin-top: auto;
+    }
+
+    .logout a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #2c6b11;
+    }
+
+    .bi {
+      margin-right: 6px;
+    }
+    .acerlogo {
+      text-align: center;
+      font-size: 20px;
+    }
 
     .topbar {
       background-color: #14532d;
@@ -233,6 +303,12 @@ $coordinators = [
         </svg> Report
       </a>
     </nav>
+
+     <div class="logout">
+      <a href="logout.php">
+        <i class="bi bi-box-arrow-right"></i>   Logout
+      </a>
+    </div>
   </aside>
 
   <!-- Main Content Area -->
