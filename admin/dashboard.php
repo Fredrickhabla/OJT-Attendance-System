@@ -47,7 +47,7 @@ $adminName = $_SESSION['user_name'] ?? 'Admin';
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
     <a class="navbar-brand fw-bold" href="#">
-      <i class="bi bi-speedometer2"></i> OJT Attendance Monitoring System
+      <i class="bi bi-speedometer2"></i> OJT Attendance System
     </a>
     <div class="ms-auto">
       <a href="logout.php" class="btn btn-danger btn-sm">
