@@ -55,7 +55,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
     <a class="navbar-brand fw-bold text-success" href="dashboard.php">
-      <i class="bi bi-calendar-check"></i> OJT Attendance Monitoring
+      <i class="bi bi-calendar-check"></i> OJT Attendance System
     </a>
     <div class="ms-auto">
       <a href="view_attendance.php" class="btn btn-outline-success btn-sm me-2">
