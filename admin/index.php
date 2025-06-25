@@ -77,6 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       text-decoration: underline;
       color: #1b5e20;
     }
+    .position-relative i {
+      position: absolute;
+      top: 38px;
+      right: 10px;
+      cursor: pointer;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -102,14 +109,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="text" name="username" class="form-control" required>
     </div>
 
-    <div class="mb-3">
+    <div class="mb-3 position-relative">
       <label for="password" class="form-label">Password</label>
-      <input type="password" name="password" class="form-control" required>
+      <input type="password" name="password" id="password" class="form-control" required>
+      <i class="bi bi-eye-slash" id="togglePassword"></i>
     </div>
 
     <button type="submit" class="btn btn-success w-100">Login</button>
   </form>
 </div>
+
+<script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+
+  togglePassword.addEventListener('click', function () {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+  });
+</script>
 
 </body>
 </html>
