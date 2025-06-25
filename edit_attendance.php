@@ -24,10 +24,8 @@ $error   = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id            = $_POST['id'] ?? '';
     $date          = $_POST['date'] ?? '';
-    $morning_in    = $_POST['morning_in'] ?? '';
-    $morning_out   = $_POST['morning_out'] ?? '';
-    $afternoon_in  = $_POST['afternoon_in'] ?? '';
-    $afternoon_out = $_POST['afternoon_out'] ?? '';
+    $time_in    = $_POST['time_in'] ?? '';
+    $time_out   = $_POST['time_out'] ?? '';
     $hours         = $_POST['hours'] ?? '';
     $description   = $_POST['work_description'] ?? '';
     $signature_path = $_POST['existing_signature'] ?? '';
@@ -46,11 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $conn->prepare("UPDATE attendance_records
-        SET date = ?, morning_in = ?, morning_out = ?, afternoon_in = ?, afternoon_out = ?,
+        SET date = ?, morning_in = ?, morning_out = ?,
             hours = ?, work_description = ?, signature = ?
         WHERE id = ? AND user_id = ?");
 
-    $stmt->bind_param("ssssssssii", $date, $morning_in, $morning_out, $afternoon_in, $afternoon_out,
+    $stmt->bind_param("ssssssssii", $date, $morning_in, $morning_out,
                       $hours, $description, $signature_path, $id, $user_id);
 
     if ($stmt->execute()) {
@@ -143,20 +141,12 @@ $conn->close();
           <input type="date" name="date" class="form-control" value="<?= htmlspecialchars($record['date']) ?>" required>
         </div>
         <div class="col-md-3 mb-3">
-          <label class="form-label">Morning In</label>
-          <input type="time" name="morning_in" class="form-control" value="<?= substr($record['morning_in'], 0, 5) ?>" required>
+          <label class="form-label">Time In</label>
+          <input type="time" name="time_in" class="form-control" value="<?= substr($record['time_in'], 0, 5) ?>" required>
         </div>
         <div class="col-md-3 mb-3">
-          <label class="form-label">Morning Out</label>
-          <input type="time" name="morning_out" class="form-control" value="<?= substr($record['morning_out'], 0, 5) ?>" required>
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Afternoon In</label>
-          <input type="time" name="afternoon_in" class="form-control" value="<?= substr($record['afternoon_in'], 0, 5) ?>" required>
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Afternoon Out</label>
-          <input type="time" name="afternoon_out" class="form-control" value="<?= substr($record['afternoon_out'], 0, 5) ?>" required>
+          <label class="form-label">Time Out</label>
+          <input type="time" name="time_out" class="form-control" value="<?= substr($record['time_out'], 0, 5) ?>" required>
         </div>
         <div class="col-md-3 mb-3">
           <label class="form-label">Hours</label>
