@@ -13,7 +13,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
   <title>Reports - OJT Attendance Monitoring</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    * {
+     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -28,17 +28,16 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
       height: 100vh;
     }
     .sidebar {
-      width: 300px;
-      background-color: #44830f;
-      color: white;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
+  width: 300px;
+  background-color: #44830f;
+  color: white;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
     }
     .sidebar h1 {
       font-size: 22px;
       margin-bottom: 40px;
-      text-align: center;
     }
     .menu-label {
       text-transform: uppercase;
@@ -50,7 +49,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     .nav {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .nav a {
       display: flex;
@@ -58,14 +57,17 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
       padding: 10px 16px;
       color: white;
       text-decoration: none;
-      border-radius: 6px;
-      transition: background 0.2s;
+      border-radius: 4px;
     }
     .nav a:hover {
       background-color: #14532d;
     }
-    .nav i {
-      margin-right: 10px;
+    .nav svg {
+      margin-right: 8px;
+    }
+    .acerlogo {
+      text-align: center;
+      font-size: 20px;
     }
     .logout {
       margin-top: auto;
@@ -89,13 +91,17 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     }
 
     .topbar {
-      background-color: #1b5e20;
+      background-color: #14532d;
       color: white;
-      padding: 18px 30px;
-      font-size: 22px;
+      padding: 10px 16px;
+      font-size: 20px;
       font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      height: 55px;
+      text-align: left;
     }
+
 
     .main {
       flex: 1;
@@ -159,6 +165,8 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     .report-btn i {
       font-size: 20px;
     }
+
+    
   </style>
 </head>
 <body>
@@ -167,14 +175,34 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <h1>OJT - ACER</h1>
+      <h1 class="acerlogo">OJT - ACER</h1>
       <div class="menu-label">Menu</div>
-      <nav class="nav">
-        <a href="dashboardv2.php"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a href="trainee.php"><i class="bi bi-person-lines-fill"></i> Trainee</a>
-        <a href="coordinator.php"><i class="bi bi-person-badge-fill"></i> Coordinator</a>
-        <a href="report.php"><i class="bi bi-clipboard-data-fill"></i> Report</a>
-      </nav>
+    <nav class="nav">
+      <a href="dashboardv2.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
+        </svg>
+        Dashboard
+      </a>
+      <a href="trainee.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        Trainee
+      </a>
+      <a href="coordinator.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zM12 14v7m0-7l-9-5m9 5l9-5" />
+        </svg>
+        Coordinator
+      </a>
+      <a href="report.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+        </svg>
+        Report
+      </a>
+    </nav>
     </div>
     <div class="logout">
       <a href="logout.php">
@@ -190,7 +218,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
       <div class="report-box">
         <h2>Access Report Pages</h2>
 
-        <a href="view_attendance.php" class="report-btn btn-green">
+        <a href="view_attendancev2.php" class="report-btn btn-green">
           <i class="bi bi-calendar-check-fill"></i> View Attendance Records
         </a>
 
