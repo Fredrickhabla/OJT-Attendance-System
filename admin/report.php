@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
-    header("Location: index.php");
+    header("Location: /ojtform/indexv2.php");
     exit;
 }
 ?>

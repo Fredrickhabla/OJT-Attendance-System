@@ -3,7 +3,7 @@ session_start();
 include('connection.php');
 
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
-    header("Location: index.php");
+    header("Location: indexv2.php");
     exit;
 }
 

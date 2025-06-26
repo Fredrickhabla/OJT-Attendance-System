@@ -26,11 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date          = $_POST['date'] ?? '';
     $time_in    = $_POST['time_in'] ?? '';
     $time_out   = $_POST['time_out'] ?? '';
-<<<<<<< HEAD
-=======
-    $afternoon_in  = $_POST['afternoon_in'] ?? '';
-    $afternoon_out = $_POST['afternoon_out'] ?? '';
->>>>>>> da6c7d3 (Third Commit)
     $hours         = $_POST['hours'] ?? '';
     $description   = $_POST['work_description'] ?? '';
     $signature_path = $_POST['existing_signature'] ?? '';
@@ -49,20 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $conn->prepare("UPDATE attendance_records
-<<<<<<< HEAD
         SET date = ?, morning_in = ?, morning_out = ?,
             hours = ?, work_description = ?, signature = ?
         WHERE id = ? AND user_id = ?");
 
     $stmt->bind_param("ssssssssii", $date, $morning_in, $morning_out,
                       $hours, $description, $signature_path, $id, $user_id);
-=======
-        SET date = ?, time_in = ?, time_out = ?, 
-            hours = ?, work_description = ?, signature = ?
-        WHERE id = ? AND user_id = ?");
-
-    $stmt->bind_param("ssssssssii", $date, $time_in, $time_out, $hours, $description, $signature_path, $id, $user_id);
->>>>>>> da6c7d3 (Third Commit)
 
     if ($stmt->execute()) {
         $success = "✅ Attendance updated successfully!";

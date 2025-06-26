@@ -3,7 +3,7 @@ session_start();
 include('connection.php'); // Optional, in case you need DB for other features
 
 if (isset($_SESSION['user_id']) || isset($_SESSION['ValidAdmin'])) {
-    header('Location: dashboard.php');
+    header('Location: dashboardv2.php');
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     } else {
         $_SESSION['login_error'] = 'Invalid username or password.';
-        header('Location: index.php');
+        header('Location: indexv2.php');
         exit;
     }
 }
