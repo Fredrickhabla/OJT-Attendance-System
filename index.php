@@ -77,23 +77,25 @@ $conn->close();
     label { color: #2e7d32; }
     .btn-success { background-color: #2e7d32; border-color: #2e7d32; }
     .alert { margin-top: 10px; }
-    .logo-img { display: block; margin: 0 auto 20px; max-width: 120px; border-radius: 10px; }
+    .logo-img { display: block; margin: 0 auto 20px;  border-radius: 10px; width:120px; }
     a { color: #2e7d32; text-decoration: none; }
     a:hover { text-decoration: underline; color: #1b5e20; }
+    .logo-img1 {margin-right: 10px;  border-radius: 10px; width:50px;  }
   </style>
-</head>
+</head> <img src="images/ojtlogo.png" alt="OJT Logo" class="logo-img1">
 <body>
 
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE SYSTEM</a>
+    
+    <a class="navbar-brand fw-bold text-success" href="#"> <img src="images/ojtlogo.png" alt="OJT Logo" class="logo-img1">OJT ATTENDANCE SYSTEM</a>
   </div>
 </nav>
 
 <!-- Login Form -->
 <div class="login-container">
-  <img src="images/logo.jpg" alt="OJT Logo" class="logo-img">
+  <img src="images/ojtlogo.png" alt="OJT Logo" class="logo-img">
   <h2>Login</h2>
 
   <?php if ($error): ?>
