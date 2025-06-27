@@ -149,7 +149,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <aside class="sidebar">
     <div>
 <h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
-  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img"><strong>OJT ACER</strong>
+  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img"><strong>OJT - ACER</strong>
 </h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
