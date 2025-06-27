@@ -22,15 +22,15 @@ $error   = "";
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id            = $_POST['id'] ?? '';
-    $date          = $_POST['date'] ?? '';
-    $time_in    = $_POST['time_in'] ?? '';
-    $time_out   = $_POST['time_out'] ?? '';
-    $hours         = $_POST['hours'] ?? '';
-    $description   = $_POST['work_description'] ?? '';
-    $signature_path = $_POST['existing_signature'] ?? '';
+    $id              = $_POST['id'] ?? '';
+    $date            = $_POST['date'] ?? '';
+    $time_in         = $_POST['time_in'] ?? '';
+    $time_out        = $_POST['time_out'] ?? '';
+    $hours           = $_POST['hours'] ?? '';
+    $description     = $_POST['work_description'] ?? '';
+    $signature_path  = $_POST['existing_signature'] ?? '';
 
-    // Handle file upload
+    // Handle new signature upload if provided
     if (!empty($_FILES['signature']['name']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = "uploads/";
         if (!is_dir($upload_dir)) {
@@ -44,17 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $stmt = $conn->prepare("UPDATE attendance_records
-        SET date = ?, morning_in = ?, morning_out = ?,
+        SET date = ?, time_in = ?, time_out = ?,
             hours = ?, work_description = ?, signature = ?
         WHERE id = ? AND user_id = ?");
 
-    $stmt->bind_param("ssssssssii", $date, $morning_in, $morning_out,
+    // ✅ FIXED BIND PARAM
+    $stmt->bind_param("ssssssii", $date, $time_in, $time_out,
                       $hours, $description, $signature_path, $id, $user_id);
 
     if ($stmt->execute()) {
         $success = "✅ Attendance updated successfully!";
     } else {
-        $error = "❌ Failed to update attendance.";
+        $error = "❌ Failed to update attendance: " . $stmt->error;
     }
     $stmt->close();
 }
@@ -142,22 +143,22 @@ $conn->close();
         </div>
         <div class="col-md-3 mb-3">
           <label class="form-label">Time In</label>
-          <input type="time" name="time_in" class="form-control" value="<?= substr($record['time_in'], 0, 5) ?>" required>
+          <input type="time" name="time_in" class="form-control" value="<?= substr($record['morning_in'], 0, 5) ?>" required>
         </div>
         <div class="col-md-3 mb-3">
           <label class="form-label">Time Out</label>
-          <input type="time" name="time_out" class="form-control" value="<?= substr($record['time_out'], 0, 5) ?>" required>
+          <input type="time" name="time_out" class="form-control" value="<?= substr($record['afternoon_out'], 0, 5) ?>" required>
         </div>
-        
+
         <div class="col-md-3 mb-3">
           <label class="form-label">Hours</label>
-          <input type="number" step="0.1" name="hours" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required>
+          <input type="text" name="hours" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required>
         </div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Work Description</label>
-        <textarea name="work_description" class="form-control" required><?= htmlspecialchars($record['work_description']) ?></textarea>
+        <textarea name="work_description" class="form-control" rows="3" required><?= htmlspecialchars($record['work_description']) ?></textarea>
       </div>
 
       <div class="mb-3">
