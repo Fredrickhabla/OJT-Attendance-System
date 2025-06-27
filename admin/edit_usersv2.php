@@ -1,0 +1,229 @@
+<?php
+session_start();
+include('connection.php');
+
+if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    die("No user ID provided.");
+}
+
+$user_id = intval($_GET['id']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $full_name  = trim($_POST['full_name'] ?? '');
+    $username   = trim($_POST['username'] ?? '');
+    $position   = trim($_POST['position'] ?? '');
+    $company    = trim($_POST['company'] ?? '');
+    $address    = trim($_POST['address'] ?? '');
+    $course     = trim($_POST['course'] ?? '');
+    $supervisor = trim($_POST['supervisor'] ?? '');
+
+    if (empty($full_name) || empty($username)) {
+        $error = "Full Name and Username are required.";
+    } else {
+        $stmt = $pdo->prepare("UPDATE users SET full_name = ?, username = ?, position = ?, training_company = ?, address = ?, course_year = ?, owner_manager = ? WHERE id = ?");
+        $stmt->execute([$full_name, $username, $position, $training_company, $address, $course_year, $owner_manager, $user_id]);
+        header("Location: manage_usersv2.php");
+        exit;
+    }
+}
+
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    die("User not found.");
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit User</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      font-family: Arial, sans-serif;
+    }
+    .layout {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 300px;
+      background-color: #44830f;
+      color: white;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    .acerlogo {
+      font-size: 22px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .menu-label {
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .nav a:hover {
+      background-color: #14532d;
+    }
+    .nav svg {
+      margin-right: 8px;
+    }
+    .logout {
+      margin-top: auto;
+    }
+    .logout a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+    .logout a:hover {
+      background-color: #2c6b11;
+    }
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      background-color: #14532d;
+      color: white;
+      padding: 10px 16px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      height: 55px;
+    }
+    .main {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
+      max-width: 700px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <h1 class="acerlogo"><strong>OJT - ACER</strong></h1>
+      <div class="menu-label">Menu</div>
+      <nav class="nav">
+        <a href="dashboardv2.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="trainee.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-line="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Trainee
+        </a>
+        <a href="coordinator.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zM12 14v7m0-7l-9-5m9 5l9-5" />
+          </svg>
+          Coordinator
+        </a>
+        <a href="report.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+          </svg>
+          Report
+        </a>
+      </nav>
+    </div>
+    <div class="logout">
+      <a href="logout.php">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </aside>
+  <div class="content">
+    <div class="topbar">Edit User</div>
+    <div class="main">
+      <div class="form-container">
+        <h4 class="text-center text-primary mb-4"><i class="bi bi-pencil-fill"></i> Edit User</h4>
+        <?php if (!empty($error)): ?>
+          <div class="alert alert-danger text-center"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" name="full_name" id="full_name" class="form-control" value="<?= htmlspecialchars($user['full_name']) ?>" required>
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" name="username" id="username" class="form-control" value="<?= htmlspecialchars($user['username']) ?>" required>
+          </div>
+          <div class="mb-3">
+            <label for="position" class="form-label">Position</label>
+            <input type="text" name="position" id="position" class="form-control" value="<?= htmlspecialchars($user['position']) ?>">
+          </div>
+          <div class="mb-3">
+            <label for="training_company" class="form-label">Company</label>
+            <input type="text" name="training_company" id="training_company" class="form-control" value="<?= htmlspecialchars($user['training_company']) ?>">
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <input type="text" name="address" id="address" class="form-control" value="<?= htmlspecialchars($user['address']) ?>">
+          </div>
+          <div class="mb-3">
+            <label for="course_year" class="form-label">Course/Year</label>
+            <input type="text" name="course_year" id="course_year" class="form-control" value="<?= htmlspecialchars($user['course_year']) ?>">
+          </div>
+          <div class="mb-3">
+            <label for="owner_manager" class="form-label">Supervisor</label>
+            <input type="text" name="owner_manager" id="owner_manager" class="form-control" value="<?= htmlspecialchars($user['owner_manager']) ?>">
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
+            <a href="manage_usersv2.php" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Back</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -7,41 +7,27 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     exit;
 }
 
-// Fetch attendance records joined with user full name
-$stmt = $pdo->query("
-    SELECT ar.*, u.full_name 
-    FROM attendance_records ar
-    LEFT JOIN users u ON ar.user_id = u.id
-    ORDER BY ar.date DESC
-");
-$records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Attendance Records</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <title>Manage Users</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-  * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
     body {
-      background-color: #f0f2f5;
+      background-color: #f4f6f9;
       color: #333;
+      font-family: Arial, sans-serif;
     }
-
     .layout {
       display: flex;
       height: 100vh;
     }
-
     .sidebar {
       width: 300px;
       background-color: #44830f;
@@ -50,13 +36,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: flex;
       flex-direction: column;
     }
-
-    .sidebar h1 {
+    .acerlogo {
       font-size: 22px;
       margin-bottom: 40px;
       text-align: center;
     }
-
     .menu-label {
       text-transform: uppercase;
       font-size: 13px;
@@ -64,13 +48,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       margin-bottom: 16px;
       opacity: 0.8;
     }
-
     .nav {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-
     .nav a {
       display: flex;
       align-items: center;
@@ -78,21 +60,16 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: white;
       text-decoration: none;
       border-radius: 4px;
-      transition: 0.2s;
     }
-
     .nav a:hover {
       background-color: #14532d;
     }
-
     .nav svg {
       margin-right: 8px;
     }
-
     .logout {
       margin-top: auto;
     }
-
     .logout a {
       display: flex;
       align-items: center;
@@ -100,21 +77,10 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: white;
       text-decoration: none;
       border-radius: 6px;
-      transition: 0.2s;
     }
-
     .logout a:hover {
       background-color: #2c6b11;
     }
-
-    .bi {
-      margin-right: 6px;
-    }
-    .acerlogo {
-      text-align: center;
-      font-size: 20px;
-    }
-
     .content {
       flex: 1;
       display: flex;
@@ -129,7 +95,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: flex;
       align-items: center;
       height: 55px;
-      text-align: left;
     }
     .main {
       flex: 1;
@@ -142,19 +107,14 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,.1);
     }
-    .signature-img {
-      max-width: 120px;
-      max-height: 60px;
-    }
   </style>
 </head>
 <body>
 
 <div class="layout">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <h1 class="acerlogo">OJT - ACER</h1>
+      <h1 class="acerlogo"><strong>OJT - ACER</strong></h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
@@ -190,65 +150,54 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </aside>
 
-  <!-- Main Content -->
   <div class="content">
-    <div class="topbar">Attendance Records</div>
+    <div class="topbar">Manage Users</div>
     <div class="main">
       <div class="table-container">
-        <h3 class="text-center text-success mb-4"><i class="bi bi-table"></i> Attendance Records</h3>
+        <h3 class="text-center text-success mb-4"><i class="bi bi-people"></i> User Accounts</h3>
 
-        <div class="mb-3 text-end">
-          <a href="export_csv.php" class="btn btn-success btn-sm">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Export as CSV
-          </a>
-        </div>
-
-        <?php if ($records): ?>
+        <?php if ($users): ?>
         <div class="table-responsive">
           <table class="table table-bordered table-striped">
             <thead class="table-success">
               <tr>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Time In</th>
-                <th>Time Out</th>
-                <th>Hours</th>
-                <th>Work Description</th>
-                <th>Signature</th>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Position</th>
+                <th>Company</th>
+                <th>Address</th>
+                <th>Course/Year</th>
+                <th>Supervisor</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-            <?php foreach ($records as $row): ?>
+              <?php foreach ($users as $user): ?>
               <tr>
-                <td><?= htmlspecialchars($row['full_name']) ?></td>
-                <td><?= htmlspecialchars($row['date']) ?></td>
-                <td><?= htmlspecialchars($row['time_in']) ?></td>
-                <td><?= htmlspecialchars($row['time_out']) ?></td>
-                <td><?= htmlspecialchars($row['hours']) ?></td>
-                <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
+                <td><?= htmlspecialchars($user['id']) ?></td>
+                <td><?= htmlspecialchars($user['full_name']) ?></td>
+                <td><?= htmlspecialchars($user['username']) ?></td>
+                <td><?= htmlspecialchars($user['position']) ?></td>
+                <td><?= htmlspecialchars($user['training_company']) ?></td>
+                <td><?= htmlspecialchars($user['address']) ?></td>
+                <td><?= htmlspecialchars($user['course_year']) ?></td>
+                <td><?= htmlspecialchars($user['owner_manager']) ?></td>
                 <td>
-                  <?php if (!empty($row['signature'])): ?>
-                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" />
-                  <?php else: ?>
-                    <span class="text-muted">No signature</span>
-                  <?php endif; ?>
-                </td>
-                <td>
-                  <a href="edit_attendancev2.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary" title="Edit">
+                  <a href="edit_usersv2.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_attendancev2.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+                  <a href="delete_usersv2.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>
               </tr>
-            <?php endforeach; ?>
+              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
         <?php else: ?>
-          <p class="text-center">No attendance records found.</p>
+          <p class="text-center">No users found.</p>
         <?php endif; ?>
       </div>
     </div>

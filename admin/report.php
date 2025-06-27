@@ -28,6 +28,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     .container {
       display: flex;
       height: 100vh;
+      
     }
 
     .sidebar {
@@ -101,6 +102,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
       align-items: center;
       padding: 50px;
       background-image: linear-gradient(to top left, #f0f2f5, #ffffff);
+      
     }
 
     .report-box {
@@ -112,6 +114,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
       text-align: center;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
       animation: fadeIn 0.5s ease-in-out;
+      max-width: 100%;
   
     }
 
@@ -248,7 +251,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
           <i class="bi bi-calendar-check-fill"></i> View Attendance Records
         </a>
 
-        <a href="manage_users.php" class="report-btn btn-blue">
+        <a href="manage_usersv2.php" class="report-btn btn-blue">
           <i class="bi bi-people-fill"></i> Manage Users
         </a>
       </div>
