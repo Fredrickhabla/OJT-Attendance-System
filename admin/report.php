@@ -195,6 +195,23 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     .bi {
       margin-right: 6px;
     }
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid white;
+  padding-bottom: 10px;
+  color: white;
+}
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
   </style>
 </head>
@@ -204,7 +221,10 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <h1>OJT - ACER</h1>
+          <h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
+  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img">
+  OJT ACER
+</h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
