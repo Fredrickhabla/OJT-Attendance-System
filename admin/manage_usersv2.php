@@ -107,6 +107,21 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,.1);
     }
+.sidebar {
+      width: 300px;
+      background-color: #44830f;
+      color: white;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
   </style>
 </head>
 <body>
@@ -114,7 +129,11 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="layout">
   <aside class="sidebar">
     <div>
-      <h1 class="acerlogo"><strong>OJT - ACER</strong></h1>
+<h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
+  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img">
+  <strong>OJT - ACER</strong>
+</h1>
+
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
