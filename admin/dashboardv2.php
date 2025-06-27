@@ -6,7 +6,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-   * {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -32,10 +32,21 @@
       flex-direction: column;
     }
 
-    .sidebar h1 {
-      font-size: 22px;
-      margin-bottom: 40px;
-      text-align: center;
+    .logo-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid white;
+      padding-bottom: 10px;
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
     }
 
     .menu-label {
@@ -92,14 +103,13 @@
       margin-right: 6px;
     }
 
-    /* Main */
     .main {
       flex: 1;
       padding: 28px;
       overflow-y: auto;
       margin-left: 30px;
       margin-right: 30px;
-      margin-top:10px;
+      margin-top: 10px;
     }
 
     .cards {
@@ -108,7 +118,6 @@
       gap: 24px;
       margin-bottom: 30px;
       height: 200px;
-
     }
 
     .card {
@@ -130,44 +139,37 @@
       font-size: 16px;
       font-weight: bold;
       color: #166534;
-      margin-right : 10px;
+      margin-right: 10px;
       padding: 10px;
     }
 
     .card .value {
       font-size: 32px;
       font-weight: bold;
-      margin-right : 10px;
+      margin-right: 10px;
       padding: 10px;
     }
 
     .cardlogo {
-        width: 80px;
-        height: 80px;
-        margin-left: 15px;
+      width: 80px;
+      height: 80px;
+      margin-left: 15px;
     }
 
     .cardlogo1 {
-        width: 90px;
-        height: 90px;
-        margin-left: 15px;
+      width: 90px;
+      height: 90px;
+      margin-left: 15px;
     }
 
     .chart-container {
-        background: white;
-        border: 2px solid #166534;
-        border-radius: 8px;
-        padding: 20px;
-        height: 67%;
-        margin-left: 10px;
-        margin-right: 10px;
-        
-        
-    }
-
-    .acerlogo {
-        text-align: center;
-        font-size: 20px;
+      background: white;
+      border: 2px solid #166534;
+      border-radius: 8px;
+      padding: 20px;
+      height: 67%;
+      margin-left: 10px;
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -176,7 +178,13 @@
 <div class="container">
   <!-- Sidebar -->
   <aside class="sidebar">
-    <h1 class="acerlogo">OJT - ACER</h1>
+
+    <!-- Sidebar Header with Logo and Text -->
+    <h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
+  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img">
+  OJT ACER
+</h1>
+
     <div class="menu-label">Menu</div>
     <nav class="nav">
       <a href="dashboardv2.php">
@@ -207,14 +215,13 @@
 
     <div class="logout">
       <a href="logout.php">
-        <i class="bi bi-box-arrow-right"></i>   Logout
+        <i class="bi bi-box-arrow-right"></i> Logout
       </a>
     </div>
   </aside>
 
   <!-- Main Content -->
   <main class="main">
-
     <!-- Cards -->
     <div class="cards">
       <div class="card">
@@ -226,7 +233,7 @@
       </div>
 
       <div class="card">
-        <img class="cardlogo1" src="/ojtform/images/multiple_user.png" alt="Trainee Icon">
+        <img class="cardlogo1" src="/ojtform/images/multiple_user.png" alt="Coordinator Icon">
         <div class="info">
           <div class="title">COORDINATOR</div>
           <div class="value">100</div>
@@ -282,7 +289,6 @@
         }
       });
     </script>
-
   </main>
 </div>
 
