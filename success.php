@@ -1,167 +1,179 @@
 <?php
 session_start();
-
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit;
+    header("Location: indexv2.php");
+    exit();
 }
 
-/* ── DB connection ────────────────────────── */
-$host = "localhost";
-$dbname = "ojtform";
-$user  = "root";
-$pass  = "";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
+// Database connection
+$conn = new mysqli("localhost", "root", "", "ojtform");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 $user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("
-    SELECT * FROM attendance_records
-    WHERE user_id = ?
-    ORDER BY created_at DESC
-    LIMIT 1
-");
+$record = null;
+
+// Fetch latest attendance record
+$stmt = $conn->prepare("SELECT * FROM attendance_records WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$record = $stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $record = $result->fetch_assoc();
+}
 $stmt->close();
 $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Submission Successful</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Submitted</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     body {
-      background: url('images/cover.jpg') no-repeat center/cover fixed;
-      font-family: Arial, sans-serif;
-      padding-top: 70px;
-    }
-    .navbar-glass {
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 2px 6px rgba(0,0,0,.1);
-    }
-    .card {
-      max-width: 750px;
-      margin: 30px auto;
+      background: linear-gradient(135deg, #00bf63, #009f9d);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 20px;
-      border: 1px solid #d4edda;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,.05);
+      color: #333;
+    }
+    .container {
       background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 700px;
+      width: 100%;
+      padding: 40px;
+      animation: fadeIn 0.7s ease;
     }
-    .label {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .header img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    h1 {
+      font-size: 32px;
+      color: #00bf63;
+    }
+    p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .details {
+      background: #f8f8f8;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    .details label {
       font-weight: bold;
-    }
-    .signature-img {
-      max-width: 250px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      color: #333;
+      display: block;
       margin-top: 10px;
-      cursor: pointer;
+    }
+    .details .value {
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 30px;
+      background: #00bf63;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 999px;
+      font-size: 18px;
+      transition: background 0.3s;
+      text-align: center;
+    }
+    .btn:hover {
+      background: #008f4f;
+    }
+    .logout {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #00bf63;
+      font-weight: bold;
+      transition: color 0.3s;
+      text-align: center;
+    }
+    .logout:hover {
+      color: #008f4f;
+    }
+    img.signature {
+      width: 200px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE SYSTEM</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navLinks">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link text-success fw-semibold" href="logout.php">
-            <i class="bi bi-box-arrow-right"></i> Logout
-          </a>
-        </li>
-      </ul>
+    <div class="header">
+      <img src="images/ojtlogo.png" alt="Logo" />
+      <h1>Success!</h1>
     </div>
-  </div>
-</nav>
-
-<!-- Success + summary -->
-<div class="container">
-  <div class="card">
-    <div class="alert alert-success text-center">
-      <h4 class="alert-heading mb-1">
-        <i class="bi bi-check-circle-fill text-success"></i> Thank you!
-      </h4>
-      <p class="mb-0">Your attendance has been successfully submitted.</p>
-    </div>
+    <p>Thank you, <strong><?= htmlspecialchars($_SESSION['full_name']) ?></strong>. Your attendance has been recorded.</p>
 
     <?php if ($record): ?>
-      <h5 class="text-success mb-4 text-center">
-        <i class="bi bi-journal-text"></i> Attendance Summary
-      </h5>
-      <p><span class="label"><i class="bi bi-calendar-event"></i> Date:</span>
-         <?= htmlspecialchars($record['date']) ?></p>
-      <p><span class="label"><i class="bi bi-brightness-high"></i> Scheduled Time:</span>
-         <?= date("g:i A", strtotime($record['time_in'])) ?> – <?= date("g:i A", strtotime($record['time_out'])) ?></p>
-      <p><span class="label"><i class="bi bi-hourglass-split"></i> No.&nbsp;of&nbsp;Hours:</span>
-         <?= htmlspecialchars($record['hours']) ?></p>
-      <p><span class="label"><i class="bi bi-pencil-square"></i> Work Description:</span>
-         <?= htmlspecialchars($record['work_description']) ?></p>
-      <p><span class="label"><i class="bi bi-pen-fill"></i> E‑Signature:</span><br>
-        <?php if (!empty($record['signature']) && file_exists($record['signature'])): ?>
-          <img src="<?= htmlspecialchars($record['signature']) ?>"
-               class="signature-img"
-               alt="Signature"
-               data-bs-toggle="modal"
-               data-bs-target="#signatureModal"><br>
-          <a href="<?= htmlspecialchars($record['signature']) ?>" download class="btn btn-outline-success mt-2">
-            <i class="bi bi-download"></i> Download Signature
-          </a>
-        <?php else: ?>
-          <em>No signature uploaded.</em>
-        <?php endif; ?>
-      </p>
-    <?php else: ?>
-      <div class="alert alert-warning text-center">
-        <i class="bi bi-exclamation-triangle-fill"></i> No attendance record found.
-      </div>
-    <?php endif; ?>
+    <div class="details">
+      <label>Date:</label>
+      <div class="value"><?= htmlspecialchars($record['date']) ?></div>
 
-    <!-- Buttons -->
-    <div class="text-center mt-4">
-      <a href="attendance_form.php" class="btn btn-primary me-2">
-        <i class="bi bi-arrow-left-circle"></i> Submit Another Attendance
-      </a>
-      <?php if ($record): ?>
-        <a href="edit_attendance.php?id=<?= $record['id'] ?>" class="btn btn-warning">
-          <i class="bi bi-pencil-fill"></i> Edit Attendance
-        </a>
+      <label>Time In:</label>
+      <div class="value"><?= date("g:i A", strtotime($record['time_in'])) ?></div>
+
+      <label>Time Out:</label>
+      <div class="value"><?= date("g:i A", strtotime($record['time_out'])) ?></div>
+
+      <label>No. of Hours:</label>
+      <div class="value"><?= htmlspecialchars($record['hours']) ?></div>
+
+      <label>Work Description:</label>
+      <div class="value"><?= nl2br(htmlspecialchars($record['work_description'])) ?></div>
+
+      <label>E-Signature Image:</label><br>
+      <?php if (!empty($record['signature']) && file_exists($record['signature'])): ?>
+        <img src="<?= htmlspecialchars($record['signature']) ?>" alt="Signature" class="signature">
+      <?php else: ?>
+        <div class="value">No signature uploaded.</div>
       <?php endif; ?>
     </div>
-  </div>
-</div>
+    <?php else: ?>
+      <p>No attendance record found.</p>
+    <?php endif; ?>
 
-<!-- Signature Modal -->
-<?php if ($record && !empty($record['signature']) && file_exists($record['signature'])): ?>
-<div class="modal fade" id="signatureModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">E‑Signature Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="<?= htmlspecialchars($record['signature']) ?>" class="img-fluid" alt="Signature Full Size">
-      </div>
+    <div style="text-align: center;">
+      <a href="attendance_form.php" class="btn">Submit Another Attendance</a><br>
+      <a class="logout" href="logout.php">Log out</a>
     </div>
   </div>
-</div>
-<?php endif; ?>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
