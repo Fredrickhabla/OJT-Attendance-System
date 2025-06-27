@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
