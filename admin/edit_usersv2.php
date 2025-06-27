@@ -17,10 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $full_name  = trim($_POST['full_name'] ?? '');
     $username   = trim($_POST['username'] ?? '');
     $position   = trim($_POST['position'] ?? '');
-    $company    = trim($_POST['company'] ?? '');
+    $training_company    = trim($_POST['training_company'] ?? '');
     $address    = trim($_POST['address'] ?? '');
-    $course     = trim($_POST['course'] ?? '');
-    $supervisor = trim($_POST['supervisor'] ?? '');
+    $course_year     = trim($_POST['course_year'] ?? '');
+    $owner_manager = trim($_POST['owner_manager'] ?? '');
 
     if (empty($full_name) || empty($username)) {
         $error = "Full Name and Username are required.";
