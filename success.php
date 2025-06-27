@@ -73,7 +73,7 @@ $conn->close();
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE MONITOR SYSTEM</a>
+    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE SYSTEM</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
       <span class="navbar-toggler-icon"></span>
     </button>
