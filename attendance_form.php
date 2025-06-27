@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: indexv2.php");
     exit();
 }
 ?>
@@ -147,7 +147,6 @@ if (!isset($_SESSION['user_id'])) {
 
       <button type="submit">Submit Attendance</button>
     </form>
-    <a class="logout" href="logout.php">Log out</a>
   </div>
 
   <script>
