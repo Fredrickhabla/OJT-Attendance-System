@@ -21,10 +21,9 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-    opacity: 1;
+  opacity: 1;
   transition: opacity 0.6s ease;
 }
-
 body.fade-out {
   opacity: 0;
 }
@@ -32,7 +31,6 @@ body.fade-out {
 .wrapper {
   padding: 20px;
 }
-
 /* Main Card */
 .card {
   display: flex;
@@ -43,12 +41,8 @@ body.fade-out {
   box-shadow:
     0 30px 40px rgba(0, 0, 0, 0.35),
     0 15px 20px rgba(0, 0, 0, 0.2);
-background: #00bf63;
-
-
-
+  background: #00bf63;
 }
-
 /* Left Panel */
 .left-panel {
   background: #00bf63;
@@ -60,31 +54,27 @@ background: #00bf63;
   align-items: center;
   flex-direction: column;
   text-align: center;
-
 }
-
 .welcome-content {
   display: flex;
   flex-direction: column;
   align-items: center;
- 
 }
-
 .welcome-content h2 {
-   font-size: 60px;
+  font-size: 60px;
   font-weight: 400;
   line-height: 0.8;
   font-family: "Canva Sans";
 }
 .welcome-content h1 {
-    font-size: 74px;
+  font-size: 74px;
   font-weight: 900;
   margin: 10px 0;
   line-height: 0.6;
   font-family: "Racing Sans One";
 }
 .welcome-content p {
-   font-size: 22px;
+  font-size: 22px;
   margin-top: 10px;
 }
 .btn-outline {
@@ -102,13 +92,11 @@ background: #00bf63;
   background: white;
   color: #10b981;
 }
-
 .logo-img1 {
   margin-bottom: 60px;
   margin-top: 60px;
   width: 140px;
 }
-
 /* Right Panel */
 .right-panel {
   background: white;
@@ -117,8 +105,6 @@ background: #00bf63;
   color: #065f46;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
-
-  
 }
 .right-panel h2 {
   font-size: 36px;
@@ -127,13 +113,12 @@ background: #00bf63;
 form .grid-2 {
   display: flex;
   gap: 20px;
-
 }
 .field {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
-    width: 100%;
+  width: 100%;
 }
 .field label {
   margin-bottom: 6px;
@@ -145,6 +130,7 @@ form .grid-2 {
   border-radius: 999px;
   background-color: #ecfdf5;
   font-size: 16px;
+  width: 100%;
 }
 .checkbox-field {
   display: flex;
@@ -171,7 +157,6 @@ form .grid-2 {
 .btn-solid:hover {
   background: #047857;
 }
-
 .signuph2 {
   font-size: 36px;
   font-weight: 600;
@@ -179,17 +164,22 @@ form .grid-2 {
   margin-bottom: 24px;
   margin-top: 10px;
 }
-
-.field input {
-  width: 100%; /* Add this line */
-}
-
 .namelabel {
-    width: 500px;
+  width: 500px;
 }
-
-
+.eye-icon {
+  position: absolute;
+  right: 20px;
+  top: 38px;
+  cursor: pointer;
+  font-size: 18px;
+  color: gray;
+}
+.password-wrapper {
+  position: relative;
+}
 </style>
+
 <body>
   <div class="wrapper">
     <div class="card">
@@ -222,9 +212,10 @@ form .grid-2 {
             <label for="email">Email</label>
             <input type="email" id="email" required/>
           </div>
-          <div class="field">
+          <div class="field password-wrapper">
             <label for="password">Password</label>
             <input type="password" id="password" required/>
+            <span class="eye-icon" onclick="togglePassword()">👁️</span>
           </div>
           <div class="checkbox-field">
             <input type="checkbox" id="terms"/>
@@ -237,37 +228,30 @@ form .grid-2 {
       </div>
     </div>
   </div>
-  <script >
 
-     document.querySelectorAll('a.transition, button.transition').forEach(el => {
-    el.addEventListener('click', function (e) {
-      e.preventDefault();
-      const href = el.getAttribute('href') || el.dataset.href;
-      document.body.classList.add('fade-out');
-      setTimeout(() => {
-        window.location.href = href;
-      }, 600); // must match CSS transition duration
+  <script>
+    document.querySelectorAll('a.transition, button.transition').forEach(el => {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        const href = el.getAttribute('href') || el.dataset.href;
+        document.body.classList.add('fade-out');
+        setTimeout(() => {
+          window.location.href = href;
+        }, 600);
+      });
     });
-  });
-    
-  document.getElementById('signup-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = this.name.value;
-  const username = this.username.value;
-  alert(`Welcome ${name} (${username})! Your sign-up form was submitted.`);
-});
 
-document.querySelectorAll('a.transition, button.transition').forEach(el => {
-  el.addEventListener('click', function (e) {
-    e.preventDefault();
-    const href = el.getAttribute('href') || el.dataset.href;
-    document.body.classList.add('fade-out');
-    setTimeout(() => {
-      window.location.href = href;
-    }, 600); // match with CSS duration
-  });
-});
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value;
+      const username = this.username.value;
+      alert(`Welcome ${name} (${username})! Your sign-up form was submitted.`);
+    });
 
-</script>
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  </script>
 </body>
 </html>
