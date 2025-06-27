@@ -223,7 +223,7 @@ if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     <div>
           <h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
   <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img">
-  OJT ACER
+  OJT - ACER
 </h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
