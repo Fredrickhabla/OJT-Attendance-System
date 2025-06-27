@@ -138,13 +138,32 @@ if (!$user) {
       max-width: 700px;
       margin: auto;
     }
+.sidebar {
+      width: 300px;
+      background-color: #44830f;
+      color: white;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
   </style>
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar">
     <div>
-      <h1 class="acerlogo"><strong>OJT - ACER</strong></h1>
+<h1 style="display: flex; align-items: center; gap: 12px; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid white; padding-bottom: 10px;">
+  <img src="/ojtform/images/ojtlogo.png" alt="OJT Logo" class="logo-img">
+  <strong>OJT - ACER</strong>
+</h1>
+
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
