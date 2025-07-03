@@ -3,7 +3,7 @@ session_start();
 include('connection.php');
 
 if (!isset($_SESSION['ValidAdmin'])) {
-    header("Location: /ojtform/index.php");
+    header("Location: /ojtform/indexv2.php");
     exit;
 }
 

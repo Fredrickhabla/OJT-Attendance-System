@@ -2,37 +2,36 @@
 session_start();
 include('connection.php');
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: /ojtform/indexv3.php");
+if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
+    header("Location: /ojtform/indexv2.php");
     exit;
 }
 
-if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
+if (!isset($_GET['id']) || empty($_GET['id'])) {
     die("No user ID provided.");
 }
 
-$user_id = intval($_GET['user_id']);
+$user_id = intval($_GET['id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name  = trim($_POST['name'] ?? '');
     $username   = trim($_POST['username'] ?? '');
-    $role   = trim($_POST['role'] ?? '');
+    $password_hashed   = trim($_POST['password_hashed'] ?? '');
+    $role    = trim($_POST['role'] ?? '');
     $email    = trim($_POST['email'] ?? '');
-    $created_at   = trim($_POST['created_at'] ?? '');
-  
+    $created_at     = trim($_POST['created_at'] ?? '');
 
- 
     if (empty($name) || empty($username)) {
-        $error = "Full Name and Username are required.";
+        $error = "Name and Username are required.";
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, role = ?, email = ?, created_at = ?, course_year = ?, owner_manager = ? WHERE user_id = ?");
-        $stmt->execute([$name, $username, $role, $email, $created_at, $user_id]);
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ? WHERE id = ?");
+        $stmt->execute([$name, $username, $password_hashed, $role, $email, $created_at, $user_id]);
         header("Location: manage_usersv2.php");
         exit;
     }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -189,26 +188,29 @@ if (!$user) {
         <?php endif; ?>
         <form method="POST">
           <div class="mb-3">
-            <label for="full_name" class="form-label">Full Name</label>
-            <input type="text" name="full_name" id="full_name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>
+            <label for="name" class="form-label">Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>
           </div>
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" name="username" id="username" class="form-control" value="<?= htmlspecialchars($user['username']) ?>" required>
           </div>
           <div class="mb-3">
-            <label for="position" class="form-label">Position</label>
-            <input type="text" name="position" id="position" class="form-control" value="<?= htmlspecialchars($user['role']) ?>">
+            <label for="password_hashed" class="form-label">Password</label>
+            <input type="password" name="password_hashed" id="password_hashed" class="form-control" value="<?= htmlspecialchars($user['password_hashed']) ?>">
           </div>
           <div class="mb-3">
-            <label for="training_company" class="form-label">Company</label>
-            <input type="text" name="training_company" id="training_company" class="form-control" value="<?= htmlspecialchars($user['email']) ?>">
+            <label for="role" class="form-label">Role</label>
+            <input type="text" name="role" id="role" class="form-control" value="<?= htmlspecialchars($user['role']) ?>">
           </div>
           <div class="mb-3">
-            <label for="address" class="form-label">Created_at</label>
-            <input type="text" name="address" id="address" class="form-control" value="<?= htmlspecialchars($user['created_at']) ?>">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>">
           </div>
-      
+          <div class="mb-3">
+            <label for="created_at" class="form-label">Created At</label>
+            <input type="text" name="created_at" id="created_at" class="form-control" value="<?= htmlspecialchars($user['created_at']) ?>">
+          </div>
           <div class="d-grid gap-2">
             <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
             <a href="manage_usersv2.php" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Back</a>

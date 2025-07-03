@@ -3,7 +3,7 @@
 	$Local = 'localhost';
 	$Username = "root";
 	$Password = "";		
-	$DBname = "ojtform";		
+	$DBname = "ojtformv3";		
  	/*   
 	$Local = 'fdb1034.awardspace.net';
 	$Username = "4470838_ojt";
