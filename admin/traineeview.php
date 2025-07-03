@@ -449,7 +449,7 @@ $percentage = round(($completedHours / $requiredHours) * 100);
 
         <div class="btn-group">
           <button class="action-btn" id="editBtn">Edit Profile</button>
-          <button class="action-btn">Delete Profile</button>
+          <button class="action-btn" id="deleteBtn">Delete Profile</button>
           <a href="trainee.php"><button class="action-btn">Return</button></a>
         </div>
 
