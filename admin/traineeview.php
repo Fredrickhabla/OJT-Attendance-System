@@ -487,7 +487,7 @@ $percentage = round(($completedHours / $requiredHours) * 100);
       <input type="time" name="schedule_end" value="<?= htmlspecialchars($row["schedule_end"]) ?>" required>
 
       <br><br>
-      <button type="submit">Save Changes</button>
+      <button type="submit" style="display: block; margin: 0 auto;">Save Changes</button>
     </form>
   </div>
 </div>
