@@ -30,8 +30,8 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
-  background: #3b7c1b;
+  width: 300px;
+  background: #44830f;
   color: white;
   display: flex;
   flex-direction: column;
@@ -231,7 +231,37 @@ body {
 
 .fc {
   font-size: 0.75rem; /* Smaller text in calendar */
+  color: blie;
 }
+  .fc .fc-button {
+    background-color: #3b7c1b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+
+  /* Specific style for prev button */
+  .fc .fc-prev-button {
+    background-color: #3b7c1b;
+  }
+
+  /* Specific style for next button */
+  .fc .fc-next-button {
+    background-color: #3b7c1b;
+  }
+
+   /* Hover effect */
+  .fc .fc-button:hover {
+    background-color: #2e5e14;
+  }
+
+  /* Disabled buttons */
+  .fc .fc-button:disabled {
+    background-color: #ccc;
+    color: #666;
+  }
 
 canvas {
   display: block;
@@ -275,7 +305,7 @@ canvas {
       <nav class="nav-menu">
   <ul>
     <li>
-      <a href="#">
+      <a href="dashboardv2.php">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -285,7 +315,7 @@ canvas {
       </a>
     </li>
     <li>
-      <a href="#">
+      <a href="attendance_formv2.php">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M4 4h16v16H4z"/>
@@ -406,7 +436,7 @@ canvas {
       headerToolbar: {
         left: 'prev,next',
         center: 'title',
-        right: ''
+        right: '',
       }
     }).render();
   });
