@@ -180,10 +180,10 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= htmlspecialchars($user['email']) ?></td>
                 <td><?= htmlspecialchars($user['created_at']) ?></td>
                 <td>
-                  <a href="edit_usersv2.php?id=<?= $user['user_id'] ?>" class="btn btn-sm btn-primary">
+                  <a href="edit_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_usersv2.php?id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
+                  <a href="delete_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>

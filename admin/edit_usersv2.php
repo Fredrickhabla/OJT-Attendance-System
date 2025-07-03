@@ -2,16 +2,25 @@
 session_start();
 include('connection.php');
 
-if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
 
-if (!isset($_GET['id']) || empty($_GET['id'])) {
+if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
     die("No user ID provided.");
 }
 
-$user_id = intval($_GET['id']);
+$user_id = trim($_GET['user_id']); // IMPORTANT: do NOT use intval()
+
+$stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$user) {
+    die("User not found.");
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name  = trim($_POST['name'] ?? '');
@@ -24,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name) || empty($username)) {
         $error = "Name and Username are required.";
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ? WHERE user_id = ?");
         $stmt->execute([$name, $username, $password_hashed, $role, $email, $created_at, $user_id]);
         header("Location: manage_usersv2.php");
         exit;
