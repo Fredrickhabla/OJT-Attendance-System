@@ -272,8 +272,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label class="form-label">Upload New Signature (optional)</label>
             <input type="file" name="signature" class="form-control">
           </div>
+          <div style="text-align: center;">
           <button type="submit" class="btn btn-success">Update Record</button>
           <a href="view_attendancev2.php" class="btn btn-secondary">Back to Records</a>
+          </div>
         </form>
       </div>
     </div>
