@@ -2,36 +2,42 @@
 session_start();
 include('connection.php');
 
-if (!isset($_SESSION['ValidAdmin'])) {
+// Check if the admin is logged in
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    header("Location: view_attendancev2.php");
+// Get the user_id from the query string
+$user_id = $_GET['user_id'] ?? null;
+if (!$user_id) {
+    header("Location: manage_usersv2.php");
     exit;
 }
 
-// Fetch the record to get the signature file path
-$stmt = $pdo->prepare("SELECT signature FROM attendance_records WHERE id = ?");
-$stmt->execute([$id]);
-$record = $stmt->fetch();
+// Check if the user exists
+$stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch();
 
-if (!$record) {
-    echo "Attendance record not found.";
+if (!$user) {
+    echo "User not found.";
     exit;
 }
 
-// Delete the signature file if it exists
-if (!empty($record['signature']) && file_exists($record['signature'])) {
-    unlink($record['signature']);
+// If you store a profile picture or other file, delete it here
+// (Remove this part if you don't have a file to delete)
+/*
+if (!empty($user['profile_picture']) && file_exists($user['profile_picture'])) {
+    unlink($user['profile_picture']);
 }
+*/
 
-// Delete the attendance record
-$delete = $pdo->prepare("DELETE FROM attendance_records WHERE id = ?");
-$delete->execute([$id]);
+// Delete the user
+$delete = $pdo->prepare("DELETE FROM users WHERE user_id = ?");
+$delete->execute([$user_id]);
 
-header("Location: view_attendancev2.php");
+// Redirect back to the user management page
+header("Location: manage_usersv2.php");
 exit;
 ?>
