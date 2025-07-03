@@ -1,3 +1,27 @@
+<?php
+$host = "localhost";
+$dbname = "ojtformv3";
+$username = "root";
+$password = "";
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Count trainees
+    $stmtTrainee = $conn->query("SELECT COUNT(*) FROM trainee");
+    $traineeCount = $stmtTrainee->fetchColumn();
+
+    // Count coordinators
+    $stmtCoordinator = $conn->query("SELECT COUNT(*) FROM coordinator");
+    $coordinatorCount = $stmtCoordinator->fetchColumn();
+
+} catch (PDOException $e) {
+    die("DB Error: " . $e->getMessage());
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -221,7 +245,7 @@
         <img class="cardlogo" src="/ojtform/images/user.png" alt="Trainee Icon">
         <div class="info">
           <div class="title">TRAINEE</div>
-          <div class="value">40</div>
+          <div class="value"><?php echo $traineeCount; ?></div>
         </div>
       </div>
 
@@ -229,7 +253,7 @@
         <img class="cardlogo1" src="/ojtform/images/multiple_user.png" alt="Trainee Icon">
         <div class="info">
           <div class="title">COORDINATOR</div>
-          <div class="value">100</div>
+          <div class="value"><?php echo $coordinatorCount; ?></div>
         </div>
       </div>
     </div>
@@ -240,6 +264,9 @@
     </div>
 
     <script>
+
+      const traineeCount = <?php echo $traineeCount; ?>;
+  const coordinatorCount = <?php echo $coordinatorCount; ?>;
       const ctx = document.getElementById('barChart').getContext('2d');
       new Chart(ctx, {
         type: 'bar',
@@ -247,7 +274,7 @@
           labels: ['TRAINEE', 'COORDINATOR'],
           datasets: [{
             label: 'OJT Count',
-            data: [40, 100],
+            data: [traineeCount, coordinatorCount],
             backgroundColor: ['#44830f', '#14532d'],
             borderRadius: 10,
             barThickness: 400
@@ -259,9 +286,9 @@
           scales: {
             y: {
               beginAtZero: true,
-              max: 120,
+              max: 20,
               ticks: {
-                stepSize: 20,
+                stepSize: 5,
                 callback: value => value + '%'
               },
               grid: {

@@ -7,7 +7,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     exit;
 }
 
-$stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
+$stmt = $pdo->query("SELECT * FROM users ORDER BY user_id DESC");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -162,32 +162,28 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <thead class="table-success">
               <tr>
                 <th>ID</th>
-                <th>Full Name</th>
+                <th>Name</th>
                 <th>Username</th>
-                <th>Position</th>
-                <th>Company</th>
-                <th>Address</th>
-                <th>Course/Year</th>
-                <th>Supervisor</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Creation</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <?php foreach ($users as $user): ?>
               <tr>
-                <td><?= htmlspecialchars($user['id']) ?></td>
-                <td><?= htmlspecialchars($user['full_name']) ?></td>
+                <td><?= htmlspecialchars($user['user_id']) ?></td>
+                <td><?= htmlspecialchars($user['name']) ?></td>
                 <td><?= htmlspecialchars($user['username']) ?></td>
-                <td><?= htmlspecialchars($user['position']) ?></td>
-                <td><?= htmlspecialchars($user['training_company']) ?></td>
-                <td><?= htmlspecialchars($user['address']) ?></td>
-                <td><?= htmlspecialchars($user['course_year']) ?></td>
-                <td><?= htmlspecialchars($user['owner_manager']) ?></td>
+                <td><?= htmlspecialchars($user['role']) ?></td>
+                <td><?= htmlspecialchars($user['email']) ?></td>
+                <td><?= htmlspecialchars($user['created_at']) ?></td>
                 <td>
-                  <a href="edit_usersv2.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-primary">
+                  <a href="edit_usersv2.php?id=<?= $user['user_id'] ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_usersv2.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
+                  <a href="delete_usersv2.php?id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>

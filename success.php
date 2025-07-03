@@ -1,167 +1,205 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
+// Redirect if not logged in
+if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
-    exit;
+    exit();
 }
 
-/* ── DB connection ────────────────────────── */
-$host = "localhost";
-$dbname = "ojtform";
-$user  = "root";
-$pass  = "";
+// Connect to database
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
+$success = "";
+$error = "";
+$attendance = null;
 
-$user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("
-    SELECT * FROM attendance_records
-    WHERE user_id = ?
-    ORDER BY created_at DESC
-    LIMIT 1
-");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$record = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+// Handle data and save
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = $_SESSION["user_id"];
+    $date = $_POST["date"];
+    $time_in = $_POST["time_in"];
+    $time_out = $_POST["time_out"];
+    $hours = $_POST["hours"];
+    $work_description = trim($_POST["work_description"]);
+
+    // Fetch trainee_id using user_id
+$trainee_stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+$trainee_stmt->bind_param("s", $user_id);
+$trainee_stmt->execute();
+$trainee_stmt->store_result();
+
+if ($trainee_stmt->num_rows === 1) {
+    $trainee_stmt->bind_result($trainee_id);
+    $trainee_stmt->fetch();
+    $trainee_stmt->close();
+
+    // Proceed with form data
+    $date = $_POST["date"];
+    $time_in = $_POST["time_in"];
+    $time_out = $_POST["time_out"];
+    $hours = $_POST["hours"];
+    $work_description = trim($_POST["work_description"]);
+
+    // Handle file upload
+    $signature_path = "";
+    if (!empty($_FILES["signature"]["name"])) {
+        $upload_dir = "uploads/";
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $filename = basename($_FILES["signature"]["name"]);
+        $target_file = $upload_dir . uniqid() . "_" . $filename;
+        if (move_uploaded_file($_FILES["signature"]["tmp_name"], $target_file)) {
+            $signature_path = $target_file;
+        } else {
+            $error = "Failed to upload signature image.";
+        }
+    }
+
+    if (empty($error)) {
+        $record_id = uniqid();
+        $stmt = $conn->prepare("INSERT INTO attendance_record(attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssiss", $record_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
+
+        if ($stmt->execute()) {
+            $success = "Attendance submitted successfully.";
+            $attendance = [
+                "date" => $date,
+                "time_in" => $time_in,
+                "time_out" => $time_out,
+                "hours" => $hours,
+                "description" => $work_description,
+                "signature_image" => $signature_path
+            ];
+        } else {
+            $error = "Database error: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+
+} else {
+    $error = "Trainee record not found for this user.";
+    $trainee_stmt->close();
+}
+}
+
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Submission Successful</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Success</title>
   <style>
     body {
-      background: url('images/cover.jpg') no-repeat center/cover fixed;
-      font-family: Arial, sans-serif;
-      padding-top: 70px;
+      margin: 0;
+      padding: 0;
+      background: #00bf63;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 0;
     }
-    .navbar-glass {
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    .container {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      width: 90%;
+      max-width: 550px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
     }
-    .card {
-      max-width: 750px;
-      margin: 30px auto;
-      padding: 20px;
-      border: 1px solid #d4edda;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,.05);
-      background: #fff;
+    .header img {
+      width: 80px;
+      margin-bottom: 10px;
     }
-    .label {
+    .header h1 {
+      color: #00bf63;
+      font-size: 28px;
+      margin: 10px 0 0 0;
+    }
+    .header p {
+      margin: 4px 0 20px;
+      font-size: 16px;
+      color: #555;
+    }
+    .logout-button {
+      display: inline-block;
+      background: #b30000;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 999px;
       font-weight: bold;
+      text-decoration: none;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      transition: background 0.3s;
+    }
+    .logout-button:hover {
+      background: #800000;
+    }
+    .success-box {
+      background: #e6f9ed;
+      color: #007a3d;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .info-list {
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .info-list strong {
+      color: #00bf63;
     }
     .signature-img {
-      max-width: 250px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin-top: 10px;
-      cursor: pointer;
+      margin-top: 20px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 2px solid #00bf63;
     }
   </style>
 </head>
 <body>
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE MONITOR SYSTEM</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navLinks">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link text-success fw-semibold" href="logout.php">
-            <i class="bi bi-box-arrow-right"></i> Logout
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- Success + summary -->
-<div class="container">
-  <div class="card">
-    <div class="alert alert-success text-center">
-      <h4 class="alert-heading mb-1">
-        <i class="bi bi-check-circle-fill text-success"></i> Thank you!
-      </h4>
-      <p class="mb-0">Your attendance has been successfully submitted.</p>
+    <a href="logout.php" class="logout-button">Logout</a>
+    <div class="header">
+      <img src="images/ojtlogo.png" alt="AcerOJT Logo" />
+      <h1>Attendance Submitted</h1>
+      <p>Hello, <strong><?= htmlspecialchars($_SESSION["user_id"]) ?></strong></p>
     </div>
 
-    <?php if ($record): ?>
-      <h5 class="text-success mb-4 text-center">
-        <i class="bi bi-journal-text"></i> Attendance Summary
-      </h5>
-      <p><span class="label"><i class="bi bi-calendar-event"></i> Date:</span>
-         <?= htmlspecialchars($record['date']) ?></p>
-      <p><span class="label"><i class="bi bi-brightness-high"></i> Scheduled Time:</span>
-         <?= date("g:i A", strtotime($record['time_in'])) ?> – <?= date("g:i A", strtotime($record['time_out'])) ?></p>
-      <p><span class="label"><i class="bi bi-hourglass-split"></i> No.&nbsp;of&nbsp;Hours:</span>
-         <?= htmlspecialchars($record['hours']) ?></p>
-      <p><span class="label"><i class="bi bi-pencil-square"></i> Work Description:</span>
-         <?= htmlspecialchars($record['work_description']) ?></p>
-      <p><span class="label"><i class="bi bi-pen-fill"></i> E‑Signature:</span><br>
-        <?php if (!empty($record['signature']) && file_exists($record['signature'])): ?>
-          <img src="<?= htmlspecialchars($record['signature']) ?>"
-               class="signature-img"
-               alt="Signature"
-               data-bs-toggle="modal"
-               data-bs-target="#signatureModal"><br>
-          <a href="<?= htmlspecialchars($record['signature']) ?>" download class="btn btn-outline-success mt-2">
-            <i class="bi bi-download"></i> Download Signature
-          </a>
-        <?php else: ?>
-          <em>No signature uploaded.</em>
+    <?php if (!empty($error)): ?>
+      <div class="success-box" style="background:#ffe6e6; color:#b30000;"><?= htmlspecialchars($error) ?></div>
+    <?php elseif ($attendance): ?>
+      <div class="success-box"><?= $success ?></div>
+
+      <div class="info-list">
+        <p><strong>Date:</strong> <?= htmlspecialchars($attendance["date"]) ?></p>
+        <p><strong>Time In:</strong> <?= htmlspecialchars($attendance["time_in"]) ?></p>
+        <p><strong>Time Out:</strong> <?= htmlspecialchars($attendance["time_out"]) ?></p>
+        <p><strong>No. of Hours:</strong> <?= htmlspecialchars($attendance["hours"]) ?></p>
+        <p><strong>Work Description:</strong><br><?= nl2br(htmlspecialchars($attendance["description"])) ?></p>
+
+        <?php if (!empty($attendance["signature_image"])): ?>
+          <p><strong>Signature Image:</strong></p>
+          <img class="signature-img" src="<?= htmlspecialchars($attendance["signature_image"]) ?>" alt="Signature Image" />
         <?php endif; ?>
-      </p>
-    <?php else: ?>
-      <div class="alert alert-warning text-center">
-        <i class="bi bi-exclamation-triangle-fill"></i> No attendance record found.
       </div>
     <?php endif; ?>
-
-    <!-- Buttons -->
-    <div class="text-center mt-4">
-      <a href="attendance_form.php" class="btn btn-primary me-2">
-        <i class="bi bi-arrow-left-circle"></i> Submit Another Attendance
-      </a>
-      <?php if ($record): ?>
-        <a href="edit_attendance.php?id=<?= $record['id'] ?>" class="btn btn-warning">
-          <i class="bi bi-pencil-fill"></i> Edit Attendance
-        </a>
-      <?php endif; ?>
-    </div>
   </div>
-</div>
-
-<!-- Signature Modal -->
-<?php if ($record && !empty($record['signature']) && file_exists($record['signature'])): ?>
-<div class="modal fade" id="signatureModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">E‑Signature Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="<?= htmlspecialchars($record['signature']) ?>" class="img-fluid" alt="Signature Full Size">
-      </div>
-    </div>
-  </div>
-</div>
-<?php endif; ?>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

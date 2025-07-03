@@ -1,7 +1,8 @@
 <?php
 session_start();
 
-$conn = new mysqli("localhost", "root", "", "ojtform");
+// Connect to database
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -12,44 +13,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
+    // Admin hardcoded check
     if ($username === "admin" && $password === "admin2314") {
-        $_SESSION['user_id'] = 0;
+        $_SESSION['user_id'] = "admin";
         $_SESSION['full_name'] = "Admin";
-        $_SESSION['ValidAdmin'] = true;  
+        $_SESSION['role'] = "admin";
         header("Location: admin/dashboardv2.php");
         exit();
     }
 
-    $stmt = $conn->prepare("SELECT id, password, full_name FROM users WHERE username = ?");
-    if ($stmt) {
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $stmt->store_result();
+    // Check if user exists in `users` table
+    $stmt = $conn->prepare("SELECT user_id, password_hashed FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->store_result();
 
-        if ($stmt->num_rows === 1) {
-            $stmt->bind_result($id, $hashed_password, $full_name);
-            $stmt->fetch();
+    if ($stmt->num_rows === 1) {
+        $stmt->bind_result($user_id, $hashed_password);
+        $stmt->fetch();
 
-            if (password_verify($password, $hashed_password)) {
-                $_SESSION['user_id'] = $id;
-                $_SESSION['full_name'] = $full_name;
+        if (password_verify($password, $hashed_password)) {
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['username'] = $username;
+            $_SESSION['role'] = "student";
+
+            // Now check if this user exists in the trainee table
+            $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+            $checkTrainee->bind_param("s", $user_id);
+            $checkTrainee->execute();
+            $checkTrainee->store_result();
+
+            if ($checkTrainee->num_rows > 0) {
+                // Found in trainee table → redirect to attendance_form
                 header("Location: attendance_form.php");
-                exit();
             } else {
-                $error = "Invalid username or password.";
+                // Not found in trainee table → redirect to profile
+                header("Location: profile.php");
             }
+
+            $checkTrainee->close();
+            exit();
         } else {
             $error = "Invalid username or password.";
         }
-
-        $stmt->close();
     } else {
-        $error = "Database error.";
+        $error = "Invalid username or password.";
     }
+
+    $stmt->close();
 }
 
 $conn->close();
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -253,7 +271,10 @@ h1.acerojt {
         <label for="password">Password</label>
         <div style="position: relative;">
           <input type="password" id="password" name="password" required style="padding-right: 40px;" />
-          <span class="eye-toggle" onclick="togglePassword()">👁️</span>
+          <span class="eye-toggle" onclick="togglePassword()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+  <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+</svg></span>
         </div>
 
         <div class="remember">
@@ -284,11 +305,7 @@ h1.acerojt {
       });
     });
 
-    document.querySelectorAll('button[data-href]').forEach(button => {
-      button.addEventListener('click', () => {
-        window.location.href = button.getAttribute('data-href');
-      });
-    });
+    
   </script>
 </body>
 </html>

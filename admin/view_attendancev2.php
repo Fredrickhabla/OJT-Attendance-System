@@ -8,10 +8,12 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
 }
 
 // Fetch attendance records joined with user full name
+
+
 $stmt = $pdo->query("
-    SELECT ar.*, u.full_name 
-    FROM attendance_records ar
-    LEFT JOIN users u ON ar.user_id = u.id
+    SELECT ar.*, CONCAT(u.first_name, ' ', u.surname) AS full_name
+    FROM attendance_record ar
+    LEFT JOIN trainee u ON ar.trainee_id = u.trainee_id
     ORDER BY ar.date DESC
 ");
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -235,12 +237,13 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   <?php endif; ?>
                 </td>
                 <td>
-                  <a href="edit_attendancev2.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary" title="Edit">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                  <a href="delete_attendancev2.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
-                    <i class="bi bi-trash"></i>
-                  </a>
+                  <a href="edit_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-primary" title="Edit">
+  <i class="bi bi-pencil"></i>
+</a>
+<a href="delete_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+  <i class="bi bi-trash"></i>
+</a>
+
                 </td>
               </tr>
             <?php endforeach; ?>

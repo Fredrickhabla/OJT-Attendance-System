@@ -1,3 +1,45 @@
+<?php
+$host = "localhost";
+$dbname = "ojtformv3";
+$username = "root";
+$password = "";
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("DB connection failed: " . $e->getMessage());
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'] ?? '';
+    $username = $_POST['username'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $pass = $_POST['password'] ?? '';
+
+    if ($name && $username && $email && $pass) {
+        try {
+            $user_id = uniqid("user_");
+            $hashedPassword = password_hash($pass, PASSWORD_DEFAULT);
+
+            $stmt = $pdo->prepare("
+                INSERT INTO users (user_id, name, username, password_hashed, role, email, created_at)
+                VALUES (?, ?, ?, ?, 'student', ?, CURDATE())
+            ");
+            $stmt->execute([$user_id, $name, $username, $hashedPassword, $email]);
+
+            echo "<script>alert('Signup successful!'); window.location.href='indexv2.php';</script>";
+        } catch (PDOException $e) {
+            echo "<script>alert('Signup failed: " . $e->getMessage() . "'); history.back();</script>";
+        }
+    } else {
+        echo "<script>alert('Missing required fields.'); history.back();</script>";
+    }
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,7 +147,7 @@ background: #00bf63;
 
 .logo-img1 {
   margin-bottom: 60px;
-  margin-top: 60px;
+  margin-top:60px;
   width: 140px;
 }
 
@@ -199,7 +241,7 @@ form .grid-2 {
           <h2>Welcome to</h2>
           <h1>Acer OJT</h1>
           <p>Proud to serve, proud of Acer</p>
-          <img src="images/ojtlogo.png" alt="OJT Logo" class="logo-img1">
+          <img src="images/finalwhitelogo.png" alt="OJT Logo" class="logo-img1">
           <button class="btn-outline transition" data-href="indexv2.php">Sign in</button>
         </div>
       </div>
@@ -207,33 +249,34 @@ form .grid-2 {
       <!-- Right: White Signup Form -->
       <div class="right-panel">
         <h2 class="signuph2">Sign up to Acer OJT</h2>
-        <form id="signup-form">
-          <div class="grid-2">
-            <div class="field">
-              <label for="name">Name</label>
-              <input class="namelabel" type="text" id="name" required/>
-            </div>
-            <div class="field">
-              <label for="username">Username</label>
-              <input type="text" id="username" required/>
-            </div>
-          </div>
-          <div class="field">
-            <label for="email">Email</label>
-            <input type="email" id="email" required/>
-          </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" required/>
-          </div>
-          <div class="checkbox-field">
-            <input type="checkbox" id="terms"/>
-            <label for="terms">By creating an account, you agree to our Terms of Service, Privacy Policy, and default notification settings related to your OJT attendance.</label>
-          </div>
-          <div class="submit-wrap">
-            <button type="submit" class="btn-solid">Sign up</button>
-          </div>
-        </form>
+        <form id="signup-form" method="POST" action="signup.php">
+  <div class="grid-2">
+    <div class="field">
+      <label for="name">Name</label>
+      <input class="namelabel" type="text" id="name" name="name" required/>
+    </div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required/>
+    </div>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required/>
+  </div>
+  <div class="field">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required/>
+  </div>
+  <div class="checkbox-field">
+    <input type="checkbox" id="terms" required/>
+    <label for="terms">By creating an account, you agree to our Terms.</label>
+  </div>
+  <div class="submit-wrap">
+    <button type="submit" class="btn-solid">Sign up</button>
+  </div>
+</form>
+
       </div>
     </div>
   </div>
@@ -250,12 +293,12 @@ form .grid-2 {
     });
   });
     
-  document.getElementById('signup-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = this.name.value;
-  const username = this.username.value;
-  alert(`Welcome ${name} (${username})! Your sign-up form was submitted.`);
-});
+//   document.getElementById('signup-form').addEventListener('submit', function(e) {
+//   e.preventDefault();
+//   const name = this.name.value;
+//   const username = this.username.value;
+//   alert(`Welcome ${name} (${username})! Your sign-up form was submitted.`);
+// });
 
 document.querySelectorAll('a.transition, button.transition').forEach(el => {
   el.addEventListener('click', function (e) {

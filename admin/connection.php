@@ -1,7 +1,7 @@
 <?php
 /* connection.php — MUST return a $pdo object */
 $host     = 'localhost';
-$dbname   = 'ojtform';   // ⬅ change to your DB name
+$dbname   = 'ojtformv3';   // ⬅ change to your DB name
 $username = 'root';           // ⬅ DB user
 $password = '';               // ⬅ DB password
 

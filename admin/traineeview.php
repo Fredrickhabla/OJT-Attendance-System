@@ -1,85 +1,115 @@
+
+
 <?php
-// Array of trainee data
-$trainees = [
-  1 => [
-    "name" => "Juan Dela Cruz",
-    "email" => "juan.delacruz@example.com",
-    "school" => "Pamantasan ng Lungsod ng Maynila",
-    "phone" => "09212497344",
-    "address" => "Pandacan, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "M–F, 8:00 AM – 5:00 PM",
-    "required_hours" => 500,
-    "completed_hours" => 320
-    
-  ],
-  2 => [
-    "name" => "Maria Santos",
-    "email" => "maria.santos@example.com",
-    "school" => "De La Salle University",
-    "phone" => "09181234567",
-    "address" => "Makati City",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "M, W, F – 9:00 AM – 4:00 PM",
-    "required_hours" => 420,
-    "completed_hours" => 100
-  ],
-  3 => [
-    "name" => "Pedro Ramirez",
-    "email" => "pedro.ramirez@example.com",
-    "school" => "University of the Philippines",
-    "phone" => "09331234567",
-    "address" => "Quezon City",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "T, Th – 10:00 AM – 6:00 PM",
-    "required_hours" => 500,
-    "completed_hours" => 320
-  ],
-  4 => [
-    "name" => "Anna Reyes",
-    "email" => "anna.reyes@example.com",
-    "school" => "Ateneo de Manila University",
-    "phone" => "09279876543",
-    "address" => "Pasig City",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "M–F, 8:00 AM – 5:00 PM",
-    "required_hours" => 300,
-    "completed_hours" => 80
-  ],
-  5 => [
-    "name" => "Mark Villanueva",
-    "email" => "mark.villanueva@example.com",
-    "school" => "Far Eastern University",
-    "phone" => "09093456789",
-    "address" => "Taguig City",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "M, T, Th – 9:00 AM – 3:00 PM",
-    "required_hours" => 500,
-    "completed_hours" => 120
-  ],
-  6 => [
-    "name" => "Luisa Tan",
-    "email" => "luisa.tan@example.com",
-    "school" => "University of Santo Tomas",
-    "phone" => "09112223344",
-    "address" => "Caloocan City",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "schedule" => "W–F, 10:00 AM – 5:00 PM",
-    "required_hours" => 240,
-    "completed_hours" => 120
-  ],
-];
+$host = "localhost";
+$username = "root";
+$password = "";
+$database = "ojtformv3";
 
-// Get trainee ID from URL
-$id = $_GET['id'] ?? 0;
+// Create connection
+$conn = new mysqli($host, $username, $password, $database);
 
-// Validate ID
-if (!isset($trainees[$id])) {
-  echo "<h2 style='color:red;'>Trainee not found.</h2>";
-  exit;
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-$trainee = $trainees[$id];
+
+// Get trainee ID from URL
+$id = $_GET['id'] ?? '';
+$id = trim($id); // Keep it as string
+
+// Updated SQL + binding
+$sql = "SELECT t.*, u.email 
+        FROM trainee t
+        LEFT JOIN users u ON t.user_id = u.user_id
+        WHERE t.trainee_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $id);  // ← "s" for string
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    echo "<h2 style='color:red;'>Trainee not found for ID: $id</h2>";
+
+    // Debug: Check all available trainee_ids
+    $check = $conn->query("SELECT trainee_id, first_name, surname FROM trainee");
+    echo "<h3>Available IDs:</h3><ul>";
+    while ($r = $check->fetch_assoc()) {
+        echo "<li>{$r['trainee_id']}: {$r['first_name']} {$r['surname']}</li>";
+    }
+    echo "</ul>";
+
+    exit;
+}
+
+$row = $result->fetch_assoc();
+
+// Format name
+$name = ucwords(strtolower($row["first_name"] . ' ' . $row["surname"]));
+
+// Format address to show last two parts
+$addressParts = array_map('trim', explode(',', $row["address"]));
+
+if (count($addressParts) >= 2) {
+    $lastTwoParts = array_slice($addressParts, -2);
+} else {
+    $lastTwoParts = $addressParts; // fallback if not enough parts
+}
+
+$formattedAddress = implode(', ', array_map(fn($part) => ucwords(strtolower($part)), $lastTwoParts));
+
+
+// Profile picture fallback
+$image = !empty($row["profile_picture"]) ? "/ojtform/" . $row["profile_picture"] : "/ojtform/images/sampleprofile.jpg";
+
+
+if (!empty($row["schedule_days"]) && !empty($row["schedule_start"]) && !empty($row["schedule_end"])) {
+    $formattedStart = date("g:i A", strtotime($row["schedule_start"])); // e.g., 8:00 AM
+    $formattedEnd = date("g:i A", strtotime($row["schedule_end"]));     // e.g., 5:00 PM
+    $dayMap = [
+    "m" => "M",
+    "t" => "T",
+    "w" => "W",
+    "th" => "TH",
+    "f" => "F"
+];
+
+$scheduleDaysRaw = strtolower($row["schedule_days"]);
+$splitDays = array_map('trim', explode(',', $scheduleDaysRaw));
+$mappedDays = [];
+
+foreach ($splitDays as $day) {
+    $cleanDay = strtolower(trim($day));
+    if (isset($dayMap[$cleanDay])) {
+        $mappedDays[] = $dayMap[$cleanDay];
+    }
+}
+
+
+$finalDays = implode(', ', $mappedDays);
+$schedule = !empty($finalDays) ? "$finalDays ($formattedStart - $formattedEnd)" : "Not set";
+} else {
+    $schedule = "Not set";
+}
+
+// Store all needed info into $trainee (to keep rest of HTML unchanged)
+$trainee = [
+    "name" => $name,
+    "email" => $row["email"],
+    "school" => ucwords(strtolower($row["school"] ?? "Unknown")),
+    "phone" => $row["phone_number"],
+    "address" => $formattedAddress,
+    "image" => $image,
+    "schedule" => $schedule,
+    "required_hours" => (int) $row["required_hours"] ?? 0,
+   "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
+];
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -239,6 +269,83 @@ $trainee = $trainees[$id];
     .action-btn:hover {
       background-color: #059669;
     }
+
+    /* Modal backdrop */
+#editModal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal box */
+#editModal .modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px 30px;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Close button (X) */
+#editModal .close {
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+#editModal .close:hover {
+  color: #000;
+}
+
+/* Form inputs */
+#editModal form label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+#editModal form input[type="text"],
+#editModal form input[type="email"],
+#editModal form input[type="time"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Save button */
+#editModal form button[type="submit"] {
+  margin-top: 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+#editModal form button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+/* Optional animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
   </style>
 </head>
 <body>
@@ -341,7 +448,7 @@ $percentage = round(($completedHours / $requiredHours) * 100);
         </div>
 
         <div class="btn-group">
-          <button class="action-btn">Edit Profile</button>
+          <button class="action-btn" id="editBtn">Edit Profile</button>
           <button class="action-btn">Delete Profile</button>
           <a href="trainee.php"><button class="action-btn">Return</button></a>
         </div>
@@ -351,5 +458,56 @@ $percentage = round(($completedHours / $requiredHours) * 100);
   </div>
 </div>
 
+<!-- Edit Form Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; z-index:999;">
+  <div style="background:white; padding:20px; max-width:500px; margin:100px auto; border-radius:10px; position:relative;">
+    <span id="closeModal" style="position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer;">&times;</span>
+    <h3>Edit Trainee Information</h3>
+    <form method="POST" action="update_trainee.php">
+      <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($id) ?>">
+
+      <label>Full Name:</label>
+      <input type="text" name="name" value="<?= htmlspecialchars($trainee['name']) ?>" required>
+
+      <label>Email Address:</label>
+      <input type="email" name="email" value="<?= htmlspecialchars($trainee['email']) ?>" required>
+
+      <label>School:</label>
+      <input type="text" name="school" value="<?= htmlspecialchars($trainee['school']) ?>" required>
+
+      <label>Phone Number:</label>
+      <input type="text" name="phone" value="<?= htmlspecialchars($trainee['phone']) ?>" required>
+
+      <label>Address:</label>
+      <input type="text" name="address" value="<?= htmlspecialchars($row["address"]) ?>" required>
+
+      <label>Schedule:</label>
+      <input type="text" name="schedule_days" value="<?= htmlspecialchars($row["schedule_days"]) ?>" placeholder="e.g., M, T, W" required>
+      <input type="time" name="schedule_start" value="<?= htmlspecialchars($row["schedule_start"]) ?>" required>
+      <input type="time" name="schedule_end" value="<?= htmlspecialchars($row["schedule_end"]) ?>" required>
+
+      <br><br>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+
 </body>
+<script>
+document.getElementById('editBtn').addEventListener('click', function () {
+  document.getElementById('editModal').style.display = 'block';
+});
+
+document.getElementById('closeModal').addEventListener('click', function () {
+  document.getElementById('editModal').style.display = 'none';
+});
+
+window.onclick = function(event) {
+  if (event.target == document.getElementById('editModal')) {
+    document.getElementById('editModal').style.display = "none";
+  }
+};
+</script>
+
 </html>

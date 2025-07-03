@@ -1,46 +1,53 @@
 <?php
-$coordinators = [
+$host = "localhost";
+$username = "root";
+$password = "";
+$database = "ojtformv3";
 
-  [
-    "name" => "Dr. Raymond Dioses Santiago",
-    "position" => "School Coordinator - Polytechnic University of the Philippines",
-    "email" => "raymond.santiago@pup.edu.ph",
-    "phone" => "09175551234",
-    "address" => "College of Engineering, PUP Sta. Mesa, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "trainees" => ["Juan Dela Cruz", "Anna Reyes"]
-  ],
-  [
-    "name" => "Mr. Richard Regala",
-    "position" => "School Coordinator - Pamantasan ng Lungsod ng Maynila",
-    "email" => "richard.regala@plm.edu.ph",
-    "phone" => "09287773322",
-    "address" => "PLM Campus, Intramuros, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "trainees" => ["Maria Santos", "Luisa Tan"]
-  ],
+$conn = new mysqli($host, $username, $password, $database);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-  [
-    "name" => "Mr. Richard Regala",
-    "position" => "School Coordinator - Pamantasan ng Lungsod ng Maynila",
-    "email" => "richard.regala@plm.edu.ph",
-    "phone" => "09287773322",
-    "address" => "PLM Campus, Intramuros, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "trainees" => ["Maria Santos", "Luisa Tan"]
-  ],
+$coordinatorQuery = "SELECT * FROM coordinator";
+$coordinatorResult = $conn->query($coordinatorQuery);
 
-  [
-    "name" => "Mr. Richard Regala",
-    "position" => "School Coordinator - Pamantasan ng Lungsod ng Maynila",
-    "email" => "richard.regala@plm.edu.ph",
-    "phone" => "09287773322",
-    "address" => "PLM Campus, Intramuros, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg",
-    "trainees" => ["Maria Santos", "Luisa Tan"]
-  ],
-];
+$coordinators = [];
+
+if ($coordinatorResult->num_rows > 0) {
+    while ($coor = $coordinatorResult->fetch_assoc()) {
+        $coordinator_id = $coor['coordinator_id'];
+
+        // Get trainees under this coordinator
+        $traineeQuery = "SELECT CONCAT(first_name, ' ', surname) AS name, school
+                         FROM trainee WHERE coordinator_id = '$coordinator_id'";
+        $traineeResult = $conn->query($traineeQuery);
+
+        $trainees = [];
+        $address = "N/A";
+
+        while ($trainee = $traineeResult->fetch_assoc()) {
+            $trainees[] = $trainee['name'];
+            if ($address === "N/A" && !empty($trainee['school'])) {
+                $address = $trainee['school'];
+            }
+        }
+
+        $coordinators[] = [
+           "id" => $coordinator_id,
+            "name" => $coor['name'],
+            "position" => $coor['position'],
+            "email" => $coor['email'],
+            "phone" => $coor['phone'],
+            "address" => $address,
+            "image" => !empty($coor['profile_picture']) ? "/ojtform/" . $coor['profile_picture'] : "/ojtform/images/sampleprofile.jpg",
+            "trainees" => $trainees
+        ];
+    }
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -220,10 +227,11 @@ $coordinators = [
 }
 
 .trainees {
-  flex: 1;
+  flex: 1.1;
   background-color: #f8f8f8;
   border-radius: 8px;
   padding: 12px 16px;
+
 }
 
 .trainees .trainee-label {
@@ -231,15 +239,6 @@ $coordinators = [
   display: block;
   margin-bottom: 6px;
   color: #14532d;
-}
-
-.trainees ul {
-  padding-left: 20px;
-  margin: 0;
-}
-
-.trainees li {
-  margin-bottom: 4px;
 }
 
 #searchInput:focus {
@@ -271,6 +270,108 @@ $coordinators = [
   height: 18px;
   color: #888;
 }
+.trainee-label{
+  font-size: 16px;
+}
+.trainee-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 4px 20px; /* Adjust vertical/horizontal spacing */
+  margin-top: 5px;
+}
+
+.trainee-item {
+  position: relative;
+  padding-left: 10px;
+  font-size: 16px;
+}
+
+.trainee-item::before {
+  content: "•"; /* Bullet symbol */
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: black;
+}
+
+/* Modal overlay */
+#editModal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* dark transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal content box */
+#editModal > div {
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+/* Close button (X) */
+#editModal span {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Form labels and inputs */
+#editModal form div {
+  margin-bottom: 15px;
+}
+
+#editModal label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+#editModal input[type="text"],
+#editModal input[type="email"],
+#editModal input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Save button */
+#editModal button[type="submit"] {
+  width: 100%;
+  padding: 10px 0;
+  background-color: #44830f;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+#editModal button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
 
   </style>
 </head>
@@ -331,7 +432,16 @@ $coordinators = [
 
     <main class="main">
       <?php foreach ($coordinators as $coor): ?>
-  <div class="coordinator-card">
+  <div class="coordinator-card"
+     onclick='openEditModal(
+       "<?= $coor['id'] ?>",
+       "<?= htmlspecialchars($coor['name'], ENT_QUOTES) ?>",
+       "<?= htmlspecialchars($coor['position'], ENT_QUOTES) ?>",
+       "<?= htmlspecialchars($coor['email'], ENT_QUOTES) ?>",
+       "<?= htmlspecialchars($coor['phone'], ENT_QUOTES) ?>",
+       "<?= htmlspecialchars($coor['address'], ENT_QUOTES) ?>",
+       "<?= $coor['image'] ?>"
+     )'>
     <img src="<?= $coor['image'] ?>" alt="Profile">
     
     <div class="coordinator-details">
@@ -344,11 +454,11 @@ $coordinators = [
 
     <div class="trainees">
       <span class="trainee-label">Trainees:</span>
-      <ul>
-        <?php foreach ($coor['trainees'] as $trainee): ?>
-          <li><?= $trainee ?></li>
-        <?php endforeach; ?>
-      </ul>
+      <div class="trainee-grid">
+    <?php foreach ($coor['trainees'] as $trainee): ?>
+      <div class="trainee-item"><?= htmlspecialchars($trainee) ?></div>
+    <?php endforeach; ?>
+  </div>
     </div>
   </div>
 <?php endforeach; ?>
@@ -356,6 +466,38 @@ $coordinators = [
     </main>
   </div>
 </div>
+
+<div id="editModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:white; padding:20px; border-radius:8px; width:400px; position:relative;">
+    <span onclick="closeModal()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold">&times;</span>
+    <form action="update_coordinator.php" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="coordinator_id" id="edit_coordinator_id">
+      <div>
+        <label>Photo:</label>
+        <input type="file" name="profile_picture">
+      </div>
+      <div>
+        <label>Position:</label>
+        <input type="text" name="position" id="edit_position">
+      </div>
+      <div>
+        <label>Email:</label>
+        <input type="email" name="email" id="edit_email">
+      </div>
+      <div>
+        <label>Phone:</label>
+        <input type="text" name="phone" id="edit_phone">
+      </div>
+      <div>
+        <label>Address:</label>
+        <input type="text" name="address" id="edit_address" disabled>
+      </div>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+</body>
 
 <script>
   const searchInput = document.getElementById('searchInput');
@@ -369,7 +511,19 @@ $coordinators = [
       card.style.display = name.includes(query) ? 'flex' : 'none';
     });
   });
+
+  function openEditModal(id, name, position, email, phone, address, image) {
+  document.getElementById('editModal').style.display = 'flex';
+  document.getElementById('edit_position').value = position;
+  document.getElementById('edit_email').value = email;
+  document.getElementById('edit_phone').value = phone;
+  document.getElementById('edit_address').value = address;
+  document.getElementById('edit_coordinator_id').value = id;
+}
+
+function closeModal() {
+  document.getElementById('editModal').style.display = 'none';
+}
 </script>
-</body>
 </html>
 

@@ -1,145 +1,245 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
+
+// Redirect if not logged in
+if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
-    exit;
+    exit();
 }
+
+// Optional fallback for full_name
+$full_name = isset($_SESSION["full_name"]) ? $_SESSION["full_name"] : "User";
+
+// Connect to database
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$success = "";
+$error = "";
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = $_SESSION["user_id"];
+    $date = $_POST["date"];
+    $time_in = $_POST["time_in"];
+    $time_out = $_POST["time_out"];
+    $hours = $_POST["hours"];
+    $work_description = trim($_POST["work_description"]);
+
+    // Handle file upload
+    $signature_path = "";
+    if (!empty($_FILES["signature"]["name"])) {
+        $upload_dir = "uploads/";
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $filename = basename($_FILES["signature"]["name"]);
+        $target_file = $upload_dir . uniqid() . "_" . $filename;
+        if (move_uploaded_file($_FILES["signature"]["tmp_name"], $target_file)) {
+            $signature_path = $target_file;
+        } else {
+            $error = "Failed to upload signature image.";
+        }
+    }
+
+    if (empty($error)) {
+        // Use the correct table name
+        $stmt = $conn->prepare("INSERT INTO attendance_records (user_id, date, time_in, time_out, hours, work_description, signature_image) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssiss", $user_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
+
+        if ($stmt->execute()) {
+            $success = "Attendance submitted successfully.";
+        } else {
+            $error = "Error saving attendance: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+}
+
+$conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OJT Attendance Sheet</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Form</title>
   <style>
-  body {
-    background: url('images/cover.jpg') no-repeat center/cover fixed;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding-top: 70px;
-  }
-  .navbar-glass {
-    background: rgba(255, 255, 255, .85);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
-  }
-  .container-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 70px);
-  }
-  .attendance-card {
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
-    width: 100%;
-    max-width: 1000px;
-    padding: 30px;
-    overflow: auto;
-  }
-  h2 {
-    color: #2e7d32;
-    text-align: center;
-    margin-bottom: 30px;
-    font-weight: bold;
-  }
-  table th, table td {
-    vertical-align: middle !important;
-  }
-  th {
-    background: #e8f5e9 !important;
-    color: #2e7d32;
-  }
-  .form-control {
-    border-radius: 8px;
-  }
-  .btn-success {
-    background: #2e7d32;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 8px;
-    font-size: 16px;
-  }
-  .btn-success:hover {
-    background: #1b5e20;
-  }
-  .file-label {
-    font-weight: 500;
-    color: #2e7d32;
-  }
-  @media (max-width: 768px) {
-    .attendance-card {
-      padding: 20px;
+    body {
+      margin: 0;
+      padding: 0;
+      background: #00bf63;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 0;
     }
-    th, td {
-      font-size: 12px;
+
+    .container {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-align: center;
     }
-  }
+
+    .header img {
+      width: 80px;
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      color: #00bf63;
+      margin: 10px 0 0 0;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin: 4px 0 20px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    form {
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      border: 2px solid #00bf63;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 5px;
+      transition: border 0.3s;
+    }
+
+    input[readonly] {
+      background: #f5f5f5;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #00994d;
+      outline: none;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background: #00bf63;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 999px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #00994d;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .message.success {
+      background: #e6f9ed;
+      color: #007a3d;
+    }
+
+    .message.error {
+      background: #ffe6e6;
+      color: #b30000;
+    }
   </style>
 </head>
 <body>
-
-<nav class="navbar navbar-expand-lg navbar-glass fixed-top">
   <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="#">OJT ATTENDANCE SYSTEM</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navLinks">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link text-success fw-semibold" href="logout.php">Logout</a>
-        </li>
-      </ul>
+    <div class="header">
+      <img src="images/ojtlogo.png" alt="AcerOJT Logo" />
+      <h1>Attendance Form</h1>
+      <p>Welcome, <strong><?= htmlspecialchars($full_name) ?></strong></p>
     </div>
-  </div>
-</nav>
 
-<div class="container-wrapper">
-  <div class="attendance-card">
-    <h2>OJT Attendance System</h2>
+    <?php if (!empty($success)): ?>
+      <div class="message success"><?= htmlspecialchars($success) ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+      <div class="message error"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
 
-    <form action="save_attendance.php" method="POST" enctype="multipart/form-data">
-      <input type="hidden" name="user_id" value="<?= $_SESSION['user_id'] ?>">
+    <form method="POST" action="success.php" enctype="multipart/form-data">
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required />
 
-      <div class="table-responsive mb-4">
-        <table class="table table-bordered text-center mb-0">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time In</th>
-              <th>Time Out</th>
-              <th>No. of Hours</th>
-              <th>Work Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="date" name="date" class="form-control" required></td>
-              <td><input type="time" name="time_in" class="form-control" required></td>
-              <td><input type="time" name="time_out" class="form-control" required></td>
-              <td><input type="number" name="hours" step="0.1" class="form-control" required></td>
-              <td><input type="text" name="work_description" class="form-control" required></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <label for="time_in">Time In</label>
+      <input type="time" id="time_in" name="time_in" required onchange="calculateHours()" />
 
-      <div class="mb-4">
-        <label for="signature" class="form-label file-label"><strong>E-Signature Image</strong></label>
-        <input type="file" class="form-control" name="signature" id="signature" accept="image/*" required>
-      </div>
+      <label for="time_out">Time Out</label>
+      <input type="time" id="time_out" name="time_out" required onchange="calculateHours()" />
 
-      <div class="text-center">
-        <button type="submit" class="btn btn-success">Submit Attendance</button>
-      </div>
+      <label for="hours">No. of Hours</label>
+      <input type="number" id="hours" name="hours" readonly />
+
+      <label for="work_description">Work Description</label>
+      <textarea id="work_description" name="work_description" rows="3" placeholder="Describe your work today" required></textarea>
+
+      <label for="signature">E-Signature Image</label>
+      <input type="file" id="signature" name="signature" accept="image/*" />
+
+      <button type="submit">Submit Attendance</button>
     </form>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function calculateHours() {
+      const timeIn = document.getElementById('time_in').value;
+      const timeOut = document.getElementById('time_out').value;
+
+      if (timeIn && timeOut) {
+        const [inHour, inMinute] = timeIn.split(':').map(Number);
+        const [outHour, outMinute] = timeOut.split(':').map(Number);
+
+        let inTotal = inHour * 60 + inMinute;
+        let outTotal = outHour * 60 + outMinute;
+
+        let diffMinutes = outTotal - inTotal;
+
+        if (diffMinutes < 0) {
+          diffMinutes += 24 * 60; // Handle overnight
+        }
+
+        const hours = Math.round(diffMinutes / 60);
+        document.getElementById('hours').value = hours;
+      } else {
+        document.getElementById('hours').value = "";
+      }
+    }
+  </script>
 </body>
 </html>

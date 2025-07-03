@@ -108,13 +108,18 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     .report-box {
       background: #ffffff;
       border-radius: 16px;
-      padding: 40px;
+      padding: 100px;
       width: 100%;
-      max-width: 550px;
+      
       text-align: center;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
       animation: fadeIn 0.5s ease-in-out;
-      max-width: 100%;
+      max-width: 70%;
+      
+      justify-content: center;
+      align-items: center;
+      display: flex;
+flex-direction: column;
   
     }
 
@@ -133,6 +138,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
       font-size: 28px;
       margin-bottom: 30px;
       color: #2e7d32;
+      
     }
 
     .report-btn {

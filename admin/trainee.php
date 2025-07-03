@@ -1,71 +1,58 @@
 <?php
-$trainees = [
-  1 => [
-    "name" => "Juan Dela Cruz",
-    "email" => "juan.delacruz@example.com",
-    "phone" => "09212497344",
-    "address" => "Pandacan, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  2 => [
-    "name" => "Maria Santos",
-    "email" => "maria.santos@example.com",
-    "phone" => "09181234567",
-    "address" => "Malate, Manila",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  3 => [
-    "name" => "Pedro Ramirez",
-    "email" => "pedro.ramirez@example.com",
-    "phone" => "09331234567",
-    "address" => "Diliman, Quezon City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  4 => [
-    "name" => "Anna Reyes",
-    "email" => "anna.reyes@example.com",
-    "phone" => "09279876543",
-    "address" => "Rosario, Pasig City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  5 => [
-    "name" => "Mark Villanueva",
-    "email" => "mark.villanueva@example.com",
-    "phone" => "09093456789",
-    "address" => "Brgy. Ususan, Taguig City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  6 => [
-    "name" => "Luisa Tan",
-    "email" => "luisa.tan@example.com",
-    "phone" => "09112223344",
-    "address" => "Park West, Caloocan City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
 
-  7 => [
-    "name" => "Luisa Tan",
-    "email" => "luisa.tan@example.com",
-    "phone" => "09112223344",
-    "address" => "Park West, Caloocan City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  8 => [
-    "name" => "Luisa Tan",
-    "email" => "luisa.tan@example.com",
-    "phone" => "09112223344",
-    "address" => "Park West, Caloocan City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-  9 => [
-    "name" => "Luisa Tan",
-    "email" => "luisa.tan@example.com",
-    "phone" => "09112223344",
-    "address" => "Park West, Caloocan City",
-    "image" => "/ojtform/images/sampleprofile.jpg"
-  ],
-];
+$host = "localhost";
+$username = "root";
+$password = "";
+$database = "ojtformv3";
+
+// Create connection
+$conn = new mysqli($host, $username, $password, $database);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch trainees from database
+$sql = "SELECT t.*, u.email 
+        FROM trainee t
+        LEFT JOIN users u ON t.user_id = u.user_id";
+$result = $conn->query($sql);
+
+$trainees = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        // Normalize full name
+        $fullName = ucwords(strtolower($row["first_name"] . ' ' . $row["surname"]));
+
+        // Normalize address
+        $fullAddress = $row["address"];
+
+        // Match the last 2 word groups in the address
+        if (preg_match('/(?:\b|^)([\w\s]+),?\s+([\w\s]+)$/', $fullAddress, $matches)) {
+            $district = ucwords(strtolower(trim($matches[1])));
+            $city = ucwords(strtolower(trim($matches[2])));
+            $shortAddress = "$district, $city";
+        } else {
+            $shortAddress = ucwords(strtolower($fullAddress)); // fallback
+        }
+
+        $trainees[] = [
+            "trainee_id" => $row["trainee_id"], 
+            "name" => $fullName,
+            "email" => $row["email"],
+            "phone" => $row["phone_number"],
+            "address" => $shortAddress,
+            "image" => !empty($row["profile_picture"]) ? "/ojtform/" . $row["profile_picture"] : "/ojtform/images/sampleprofile.jpg"
+        ];
+    }
+}
+
+
+
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -366,13 +353,14 @@ $trainees = [
         </div>
     <main class="main">
       <div class="trainee-grid">
+       
         <?php foreach ($trainees as $id => $trainee): ?>
           <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
 
             <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
             <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
             <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
-            <a href="traineeview.php?id=<?= $id ?>"><button class="trainee-btn">View Profile</button></a>
+            <a href="traineeview.php?id=<?= urlencode($trainee['trainee_id']) ?>"><button class="trainee-btn">View Profile</button></a>
             <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
           </div>
         <?php endforeach; ?>
