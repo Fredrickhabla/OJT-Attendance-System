@@ -2,37 +2,42 @@
 session_start();
 include('connection.php');
 
+// Only admin can delete
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
 
-// Check if ID is provided
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("Invalid attendance ID.");
+// Validate parameter
+if (!isset($_GET['attendance_id']) || empty($_GET['attendance_id'])) {
+    die("No attendance ID provided.");
 }
 
-$id = $_GET['id'];
+$attendance_id = trim($_GET['attendance_id']); // e.g., attendance_20250624_5
 
-// Optional: fetch the signature filename to delete the image file too
-$stmt = $pdo->prepare("SELECT signature_image FROM attendance_records WHERE id = ?");
-$stmt->execute([$id]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+// Use the correct table name here (e.g., `attendance`)
+$stmt = $pdo->prepare("SELECT signature FROM attendance_record WHERE attendance_id = ?");
+$stmt->execute([$attendance_id]);
+$record = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($row) {
-    // Delete the signature file if it exists
-    if (!empty($row['signature']) && file_exists(__DIR__ . "/{$row['signature']}")) {
-        unlink(__DIR__ . "/{$row['signature']}");
-    }
-
-    // Delete the attendance record
-    $delete = $pdo->prepare("DELETE FROM attendance_records WHERE id = ?");
-    $delete->execute([$id]);
-
-    // Redirect back to view page
-    header("Location: view_attendancev2.php");
-    exit;
-} else {
+if (!$record) {
     echo "Attendance record not found.";
+    exit;
 }
+
+// Optionally delete the signature file if it exists
+if (!empty($record['signature'])) {
+    $signatureFile = __DIR__ . "/" . $record['signature'];
+    if (file_exists($signatureFile)) {
+        unlink($signatureFile);
+    }
+}
+
+// Delete the attendance record
+$delete = $pdo->prepare("DELETE FROM attendance_record WHERE attendance_id = ?");
+$delete->execute([$attendance_id]);
+
+// Redirect back to the attendance view
+header("Location: view_attendancev2.php");
+exit;
 ?>
