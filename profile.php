@@ -151,7 +151,7 @@ if (!empty($selectedCoordinatorId)) {
 // Final message and redirect
 echo "<script>
     alert('Profile saved successfully.');
-    window.location.href = 'attendance_form.php';
+    window.location.href = 'dashboardv2.php';
 </script>";
 exit();
 }

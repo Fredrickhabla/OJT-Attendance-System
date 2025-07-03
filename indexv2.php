@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($checkTrainee->num_rows > 0) {
                 // Found in trainee table → redirect to attendance_form
-                header("Location: attendance_form.php");
+                header("Location: dashboardv2.php");
             } else {
                 // Not found in trainee table → redirect to profile
                 header("Location: profile.php");
