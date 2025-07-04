@@ -8,8 +8,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
 }
 
 // Fetch attendance records joined with user full name
-
-
 $stmt = $pdo->query("
     SELECT ar.*, CONCAT(u.first_name, ' ', u.surname) AS full_name
     FROM attendance_record ar
@@ -225,8 +223,22 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <tr>
                 <td><?= htmlspecialchars($row['full_name']) ?></td>
                 <td><?= htmlspecialchars($row['date']) ?></td>
-                <td><?= htmlspecialchars($row['time_in']) ?></td>
-                <td><?= htmlspecialchars($row['time_out']) ?></td>
+                <td>
+                  <?php
+                    if (!empty($row['time_in'])) {
+                      $timeIn = DateTime::createFromFormat('H:i:s', $row['time_in']);
+                      echo $timeIn ? $timeIn->format('g:i A') : htmlspecialchars($row['time_in']);
+                    }
+                  ?>
+                </td>
+                <td>
+                  <?php
+                    if (!empty($row['time_out'])) {
+                      $timeOut = DateTime::createFromFormat('H:i:s', $row['time_out']);
+                      echo $timeOut ? $timeOut->format('g:i A') : htmlspecialchars($row['time_out']);
+                    }
+                  ?>
+                </td>
                 <td><?= htmlspecialchars($row['hours']) ?></td>
                 <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
                 <td>
@@ -238,12 +250,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </td>
                 <td>
                   <a href="edit_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-primary" title="Edit">
-  <i class="bi bi-pencil"></i>
-</a>
-<a href="delete_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
-  <i class="bi bi-trash"></i>
-</a>
-
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="delete_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </a>
                 </td>
               </tr>
             <?php endforeach; ?>
