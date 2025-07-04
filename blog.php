@@ -15,8 +15,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get trainee_id for current user
-$stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+// Get trainee's full info (trainee_id, name, email) using user_id
+$stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -26,6 +26,11 @@ if (!$trainee) {
     echo "Trainee not found.";
     exit();
 }
+
+$trainee_id = $trainee['trainee_id'];
+$full_name = $trainee['first_name'] . ' ' . $trainee['surname'];
+$email = $trainee['email'];
+
 
 $trainee_id = $trainee["trainee_id"];
 
@@ -430,8 +435,8 @@ body {
     <aside class="sidebar">
       <div class="profile-section">
         <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Raymond Dioses</h2>
-        <p>raymond.dioses@gmail.com</p>
+        <h2><?= htmlspecialchars($full_name) ?></h2>
+  <p><?= htmlspecialchars($email) ?></p>
       </div>
       <hr class="separator" />
       <nav class="nav-menu">

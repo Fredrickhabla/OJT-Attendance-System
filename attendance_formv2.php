@@ -7,8 +7,8 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-// Optional fallback for full_name
-$full_name = isset($_SESSION["full_name"]) ? $_SESSION["full_name"] : "User";
+// Get user_id from session
+$user_id = $_SESSION["user_id"];
 
 // Connect to database
 $conn = new mysqli("localhost", "root", "", "ojtformv3");
@@ -16,11 +16,28 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fetch trainee's name and email using user_id
+$full_name = "User"; // Default fallback
+$email = "";
+
+$stmt = $conn->prepare("SELECT first_name, surname, email FROM trainee WHERE user_id = ?");
+$stmt->bind_param("s", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$trainee_info = $result->fetch_assoc();
+
+if ($trainee_info) {
+    $full_name = $trainee_info['first_name'] . ' ' . $trainee_info['surname'];
+    $email = $trainee_info['email'];
+} else {
+    // Optional: fallback or redirection
+    $full_name = "Unknown Trainee";
+}
+
 $success = "";
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $user_id = $_SESSION["user_id"];
     $date = $_POST["date"];
     $time_in = $_POST["time_in"];
     $time_out = $_POST["time_out"];
@@ -47,37 +64,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
+
         $filename = basename($_FILES["signature"]["name"]);
         $target_file = $upload_dir . uniqid() . "_" . $filename;
+
         if (move_uploaded_file($_FILES["signature"]["tmp_name"], $target_file)) {
             $signature_path = $target_file;
         } else {
             $error = "Failed to upload signature image.";
         }
     }
-   $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2)); // Example: attendance_1720071624a3f2
 
     // ✅ Save attendance
     if (empty($error)) {
-    // Generate unique attendance_id
-    $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
+        $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
 
-    // Prepare insert with attendance_id
-    $stmt = $conn->prepare("INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssisss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
+        $stmt = $conn->prepare("INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssisss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
 
-    if ($stmt->execute()) {
-        $success = "Attendance submitted successfully.";
-    } else {
-        $error = "Error saving attendance: " . $stmt->error;
+        if ($stmt->execute()) {
+            $success = "Attendance submitted successfully.";
+        } else {
+            $error = "Error saving attendance: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
-    $stmt->close();
-}
-
 }
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -404,8 +421,8 @@ document.addEventListener("DOMContentLoaded", function () {
     <aside class="sidebar">
       <div class="profile-section">
         <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Raymond Dioses</h2>
-        <p>raymond.dioses@gmail.com</p>
+        <h2><?= htmlspecialchars($full_name) ?></h2>
+<p><?= htmlspecialchars($email) ?></p>
       </div>
       <hr class="separator" />
       <nav class="nav-menu">
