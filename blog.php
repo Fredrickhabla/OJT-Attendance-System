@@ -15,8 +15,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get trainee_id for current user
-$stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+// Get trainee's full info (trainee_id, name, email) using user_id
+$stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -26,6 +26,11 @@ if (!$trainee) {
     echo "Trainee not found.";
     exit();
 }
+
+$trainee_id = $trainee['trainee_id'];
+$full_name = $trainee['first_name'] . ' ' . $trainee['surname'];
+$email = $trainee['email'];
+
 
 $trainee_id = $trainee["trainee_id"];
 
@@ -430,8 +435,8 @@ body {
     <aside class="sidebar">
       <div class="profile-section">
         <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Raymond Dioses</h2>
-        <p>raymond.dioses@gmail.com</p>
+        <h2><?= htmlspecialchars($full_name) ?></h2>
+  <p><?= htmlspecialchars($email) ?></p>
       </div>
       <hr class="separator" />
       <nav class="nav-menu">
@@ -507,7 +512,7 @@ body {
           <i class="fas fa-plus"></i> New Post
         </button>
         <div class="search-container">
-          <input type="text" placeholder="Search..." />
+         <input type="text" id="searchInput" placeholder="Search..." />
           <i class="fas fa-search"></i>
           <i class="fas fa-microphone"></i>
         </div>
@@ -690,27 +695,18 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
   })
   .then(response => response.json())
   .then(data => {
-  if (data.success) {
-    currentEditCard.querySelector("h3").innerText = newTitle;
-    currentEditCard.querySelector("p").innerText = "Saved · " + new Date().toLocaleDateString();
-
-    // 🆕 Set the data-post-id attribute if it was a new post
-    if (!postId || postId === "0") {
-      currentEditCard.setAttribute("data-post-id", data.post_id);
+    if (data.success) {
+      // ✅ Force a reload to reflect the new post with real post_id
+      location.reload();
+    } else {
+      alert("Failed to save: " + data.message);
     }
-
-     currentEditCard.setAttribute("data-content", JSON.stringify(content));
-
-    closeEditor();
-  } else {
-    alert("Failed to save: " + data.message);
-  }
-})
-
+  })
   .catch(error => {
     console.error("Error:", error);
   });
 }
+
 
 function deletePost(button) {
   const card = button.closest(".card");
@@ -735,7 +731,8 @@ function deletePost(button) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        card.remove(); // Remove from DOM
+        // Reload the page after deletion
+        location.reload();
       } else {
         alert("Failed to delete: " + data.message);
       }
@@ -744,6 +741,25 @@ function deletePost(button) {
       console.error("Error deleting post:", error);
     });
 }
+
+// Enable search functionality
+document.getElementById("searchInput").addEventListener("input", function () {
+  const query = this.value.toLowerCase();
+  const cards = document.querySelectorAll("#postsContainer .card");
+
+  cards.forEach(card => {
+    const title = card.querySelector("h3").innerText.toLowerCase();
+    const content = card.getAttribute("data-content").toLowerCase();
+
+    if (title.includes(query) || content.includes(query)) {
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+});
+
+
 
 </script>
 

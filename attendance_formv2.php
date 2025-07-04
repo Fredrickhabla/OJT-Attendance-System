@@ -7,8 +7,8 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-// Optional fallback for full_name
-$full_name = isset($_SESSION["full_name"]) ? $_SESSION["full_name"] : "User";
+// Get user_id from session
+$user_id = $_SESSION["user_id"];
 
 // Connect to database
 $conn = new mysqli("localhost", "root", "", "ojtformv3");
@@ -16,11 +16,28 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fetch trainee's name and email using user_id
+$full_name = "User"; // Default fallback
+$email = "";
+
+$stmt = $conn->prepare("SELECT first_name, surname, email FROM trainee WHERE user_id = ?");
+$stmt->bind_param("s", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$trainee_info = $result->fetch_assoc();
+
+if ($trainee_info) {
+    $full_name = $trainee_info['first_name'] . ' ' . $trainee_info['surname'];
+    $email = $trainee_info['email'];
+} else {
+    // Optional: fallback or redirection
+    $full_name = "Unknown Trainee";
+}
+
 $success = "";
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $user_id = $_SESSION["user_id"];
     $date = $_POST["date"];
     $time_in = $_POST["time_in"];
     $time_out = $_POST["time_out"];
@@ -47,37 +64,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
+
         $filename = basename($_FILES["signature"]["name"]);
         $target_file = $upload_dir . uniqid() . "_" . $filename;
+
         if (move_uploaded_file($_FILES["signature"]["tmp_name"], $target_file)) {
             $signature_path = $target_file;
         } else {
             $error = "Failed to upload signature image.";
         }
     }
-   $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2)); // Example: attendance_1720071624a3f2
 
     // ✅ Save attendance
     if (empty($error)) {
-    // Generate unique attendance_id
-    $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
+        $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
 
-    // Prepare insert with attendance_id
-    $stmt = $conn->prepare("INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssisss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
+        $stmt = $conn->prepare("INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssisss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
 
-    if ($stmt->execute()) {
-        $success = "Attendance submitted successfully.";
-    } else {
-        $error = "Error saving attendance: " . $stmt->error;
+        if ($stmt->execute()) {
+            $success = "Attendance submitted successfully.";
+        } else {
+            $error = "Error saving attendance: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
-    $stmt->close();
-}
-
 }
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -93,83 +110,119 @@ $conn->close();
       font-family: 'Segoe UI', sans-serif;
     }
     body {
-      background:rgb(255, 255, 255);
-      color: #111;
-      min-height: 100vh;
-      display: flex;
-    }
-    .dashboard {
-      display: flex;
-      width: 100%;
-    }
-    /* Sidebar */
-    .sidebar {
-      width: 280px;
-      background: #44830f;
-      color: white;
+  background: #f9f9f9;
+  color: #111;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 300px;
+  background: #44830f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.profile-section {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.profile-pic {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-section h2 {
+  font-size: 1rem;
+}
+
+.profile-section p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.separator {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  margin: 10px 20px;
+}
+
+.nav-menu ul {
+  list-style: none;
+  padding: 0 20px;
+}
+
+.nav-menu li {
+  margin-bottom: 16px;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.nav-menu a:hover {
+  background: #2f6a13;
+}
+
+.logout {
+    margin-top: auto;
+  padding: 20px;
+}
+
+.logout a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.logout a:hover {
+  background: #2f6a13;
+}
+.main{
+    justify-content: center;
+    align-items: center;    
+    display: flex;
+    margin-top: 20px;
+}
+.content {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 20px 0;
+      overflow-y: auto;
     }
-    .profile-section {
-      text-align: center;
-      padding: 10px 0 20px;
-    }
-    .profile-pic {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 10px;
-    }
-    .profile-section h2 {
-      font-size: 1rem;
-    }
-    .profile-section p {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-    .separator {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,0.3);
-      margin: 10px 20px;
-    }
-    .nav-menu ul {
-      list-style: none;
-      padding: 0 20px;
-    }
-    .nav-menu li {
-      margin-bottom: 16px;
-    }
-    .nav-menu a {
+
+.topbar {
+      background-color: #14532d;
       color: white;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    .nav-menu a:hover {
-      background: #2f6a13;
-    }
-    .logout {
-      margin-top: auto;
-      padding: 20px;
-    }
-    .logout a {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: white;
-      text-decoration: none;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    .logout a:hover {
-      background: #2f6a13;
+      padding: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      width: 100%;
     }
     /* Main */
     .content {
@@ -177,13 +230,7 @@ $conn->close();
       display: flex;
       flex-direction: column;
     }
-    .topbar {
-      background-color: #14532d;
-      color: white;
-      padding: 16px;
-      font-size: 20px;
-      font-weight: bold;
-    }
+    
     .main {
       display: flex;
       justify-content: center;
@@ -374,8 +421,8 @@ document.addEventListener("DOMContentLoaded", function () {
     <aside class="sidebar">
       <div class="profile-section">
         <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Raymond Dioses</h2>
-        <p>raymond.dioses@gmail.com</p>
+        <h2><?= htmlspecialchars($full_name) ?></h2>
+<p><?= htmlspecialchars($email) ?></p>
       </div>
       <hr class="separator" />
       <nav class="nav-menu">

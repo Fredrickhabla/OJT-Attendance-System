@@ -1,5 +1,7 @@
 <?php
 session_start();
+header('Content-Type: application/json'); // <-- ADD THIS
+
 if (!isset($_SESSION["user_id"])) {
     echo json_encode(["success" => false, "message" => "Unauthorized"]);
     exit();
@@ -29,53 +31,3 @@ if ($stmt->execute()) {
     echo json_encode(["success" => false, "message" => "Delete failed"]);
 }
 ?>
-✅ Step 2: Update Delete Button to Use JavaScript
-Replace your current delete button line:
-
-html
-Copy
-Edit
-<button class="icon-btn" title="Delete" onclick="this.closest('.card').remove()">
-With:
-
-html
-Copy
-Edit
-<button class="icon-btn" title="Delete" onclick="deletePost(this)">
-And add this function in your JS:
-
-js
-Copy
-Edit
-function deletePost(button) {
-  const card = button.closest(".card");
-  const postId = card.getAttribute("data-post-id");
-
-  if (!confirm("Are you sure you want to delete this post?")) return;
-
-  // If postId is 0 or not saved yet, just remove it
-  if (!postId || postId === "0") {
-    card.remove();
-    return;
-  }
-
-  // Call backend to delete
-  fetch("delete_blog_post.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: new URLSearchParams({ post_id: postId })
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        card.remove(); // Remove from DOM
-      } else {
-        alert("Failed to delete: " + data.message);
-      }
-    })
-    .catch(error => {
-      console.error("Error deleting post:", error);
-    });
-}
