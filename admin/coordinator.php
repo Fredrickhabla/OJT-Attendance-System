@@ -372,6 +372,19 @@ if ($coordinatorResult->num_rows > 0) {
   background-color: #0056b3;
 }
 
+.delete-btn {
+  background-color: rgb(219, 71, 57);
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.delete-btn:hover {
+  background-color: rgb(200, 60, 50);
+}
 
   </style>
 </head>
@@ -492,7 +505,38 @@ if ($coordinatorResult->num_rows > 0) {
         <label>Address:</label>
         <input type="text" name="address" id="edit_address" disabled>
       </div>
-      <button type="submit">Save Changes</button>
+        <div style="display: flex; gap: 20px;">
+          <button type="submit">Save Changes</button>
+          <a href="delete_coordinator.php?coordinator_id=<?= htmlspecialchars($coordinator_id) ?>"
+   class="delete-btn"
+   onclick="return confirm('Are you sure you want to delete this coordinator?');">
+   Delete
+</a>
+
+
+        </div>
+
+
+    </form>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+  <div style="background:white; padding:20px; border-radius:8px; width:400px; position:relative;">
+    <span onclick="closeDeleteModal()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold">&times;</span>
+    <h3>Confirm Delete</h3>
+    <p>Are you sure you want to delete this coordinator?</p>
+
+    <div style="margin-top:15px; font-size:14px; line-height:1.6;">
+      <strong>Position:</strong> <span id="delete_position"></span><br>
+      <strong>Email:</strong> <span id="delete_email"></span><br>
+      <strong>Phone:</strong> <span id="delete_phone"></span><br>
+      <strong>Address:</strong> <span id="delete_address"></span>
+    </div>
+    <form action="delete_coordinator.php" method="POST" onsubmit="return confirm('Are you sure?');">
+      <input type="hidden" name="coordinator_id" value="<?= htmlspecialchars($id) ?>">
+      <button type="submit" style="background:red;color:white;padding:10px 20px;border:none;border-radius:5px;">Delete</button>
     </form>
   </div>
 </div>
@@ -524,6 +568,19 @@ if ($coordinatorResult->num_rows > 0) {
 function closeModal() {
   document.getElementById('editModal').style.display = 'none';
 }
+function openDeleteModal(id, position, email, phone, address) {
+  document.getElementById('deleteModal').style.display = 'flex';
+  document.getElementById('delete_coordinator_id').value = id;
+  document.getElementById('delete_position').textContent = position;
+  document.getElementById('delete_email').textContent = email;
+  document.getElementById('delete_phone').textContent = phone;
+  document.getElementById('delete_address').textContent = address;
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+}
+
 </script>
 </html>
 
