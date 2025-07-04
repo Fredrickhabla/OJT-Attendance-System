@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Proceed with update if there's no error and all required fields are filled
     if (!$error && $date && $time_in && $time_out && $hours) {
-        $update = $pdo->prepare("UPDATE attendance_records SET date=?, time_in=?, time_out=?, hours=?, work_description=?, signature=? WHERE attendance_id=?");
+        $update = $pdo->prepare("UPDATE attendance_record SET date=?, time_in=?, time_out=?, hours=?, work_description=?, signature=? WHERE attendance_id=?");
         if ($update->execute([$date, $time_in, $time_out, $hours, $work_description, $signature_path, $attendance_id])) {
             $success = "Record updated successfully.";
             // Refresh the record
