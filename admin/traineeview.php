@@ -1,5 +1,3 @@
-
-
 <?php
 $host = "localhost";
 $username = "root";
@@ -362,101 +360,9 @@ $trainee = [
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-/* Delete Modal Styles */
-#deleteModal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-}
-
-/* Modal content box */
-#deleteModal .modal-content {
-  background-color: #fff;
-  padding: 20px 30px;
-  max-width: 400px;
-  margin: 150px auto;
-  border-radius: 10px;
-  position: relative;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-}
-
-/* Close button (X) */
-#deleteModal .close {
-  color: #aaa;
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-#deleteModal .close:hover {
-  color: #000;
-}
-
-/* Buttons */
-.delete-btn {
-  background: red;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-.delete-btn:hover {
-  background: darkred;
-}
-
-.cancel-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.cancel-btn:hover {
-  background: #eee;
-}
-
-/* Optional animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
   </style>
 </head>
 <body>
-<script>
-  // Open delete modal
-  document.getElementById("deleteBtn").onclick = function () {
-    document.getElementById("deleteModal").style.display = "block";
-  };
-
-  // Close modal with X
-  document.getElementById("closeDeleteModal").onclick = function () {
-    document.getElementById("deleteModal").style.display = "none";
-  };
-
-  // Close modal with Cancel
-  document.getElementById("cancelDelete").onclick = function () {
-    document.getElementById("deleteModal").style.display = "none";
-  };
-
-  // Close modal when clicking outside of the modal box
-  window.onclick = function (event) {
-    if (event.target === document.getElementById("deleteModal")) {
-      document.getElementById("deleteModal").style.display = "none";
-    }
-  };
-</script>
-
 
 <div class="container">
   <!-- Sidebar -->
@@ -598,22 +504,19 @@ $trainee = [
     </form>
   </div>
 </div>
-
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal">
-  <div class="modal-content">
-    <span class="close" id="closeDeleteModal">&times;</span>
+<div id="deleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; z-index:999;">
+  <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:10px; position:relative; text-align:center;">
+    <span id="closeDeleteModal" style="position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer;">&times;</span>
     <h3>Confirm Delete</h3>
     <p>Are you sure you want to delete this trainee?</p>
-    
     <form method="POST" action="delete_trainee.php">
       <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($id) ?>">
-      <button type="submit" class="delete-btn">Yes, Delete</button>
-      <button type="button" id="cancelDelete" class="cancel-btn">Cancel</button>
+      <button type="submit" style="background:red; color:white; padding:10px 20px; border:none; border-radius:5px; margin-right:10px;">Yes, Delete</button>
+      <button type="button" id="cancelDelete" style="padding:10px 20px; border:none; border-radius:5px;">Cancel</button>
     </form>
   </div>
 </div>
-
 
 </body>
 <script>
@@ -628,6 +531,30 @@ document.getElementById('closeModal').addEventListener('click', function () {
 window.onclick = function(event) {
   if (event.target == document.getElementById('editModal')) {
     document.getElementById('editModal').style.display = "none";
+  }
+};
+// Show Delete Modal
+document.getElementById('deleteBtn').addEventListener('click', function () {
+  document.getElementById('deleteModal').style.display = 'block';
+});
+
+// Close Delete Modal via X
+document.getElementById('closeDeleteModal').addEventListener('click', function () {
+  document.getElementById('deleteModal').style.display = 'none';
+});
+
+// Cancel Delete Modal via button
+document.getElementById('cancelDelete').addEventListener('click', function () {
+  document.getElementById('deleteModal').style.display = 'none';
+});
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+  if (event.target == document.getElementById('editModal')) {
+    document.getElementById('editModal').style.display = "none";
+  }
+  if (event.target == document.getElementById('deleteModal')) {
+    document.getElementById('deleteModal').style.display = "none";
   }
 };
 </script>
