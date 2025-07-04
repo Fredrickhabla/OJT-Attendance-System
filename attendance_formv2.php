@@ -26,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $time_out = $_POST["time_out"];
     $hours = $_POST["hours"];
     $work_description = trim($_POST["work_description"]);
-    
 
     // ✅ Get trainee_id from user_id
     $trainee_id = null;
