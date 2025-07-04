@@ -27,6 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $time_out = $_POST["time_out"];
     $hours = $_POST["hours"];
     $work_description = trim($_POST["work_description"]);
+    
 
     // Handle file upload
     $signature_path = "";

@@ -1,3 +1,82 @@
+<?php
+session_start();
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$user_id = $_SESSION["user_id"] ?? null;
+if (!$user_id) {
+    die("No session user_id found.");
+}
+
+$requiredHours = 0;
+$completedHours = 0;
+$remainingHours = 0;
+$percentage = 0;
+$trainee_id = null;
+$attendanceData = [];
+$full_name = "Unknown User";
+$email = "unknown@example.com"; // default fallback
+
+// Step 1: Get trainee_id, required_hours, full_name, and email
+$traineeQuery = $conn->prepare("
+    SELECT trainee_id, required_hours, email, CONCAT(first_name, ' ', surname) AS full_name 
+    FROM trainee 
+    WHERE user_id = ?
+");
+$traineeQuery->bind_param("s", $user_id);
+$traineeQuery->execute();
+$traineeResult = $traineeQuery->get_result();
+
+if ($traineeRow = $traineeResult->fetch_assoc()) {
+    $trainee_id = $traineeRow["trainee_id"];
+    $requiredHours = (int) $traineeRow["required_hours"];
+    $full_name = $traineeRow["full_name"];
+    $email = $traineeRow["email"];
+}
+$traineeQuery->close();
+
+// Step 2: Calculate completed hours, remaining hours, and percentage
+if ($trainee_id) {
+    $completedQuery = $conn->prepare("SELECT SUM(hours) as total_hours FROM attendance_record WHERE trainee_id = ?");
+    $completedQuery->bind_param("s", $trainee_id);
+    $completedQuery->execute();
+    $completedResult = $completedQuery->get_result();
+    if ($completedRow = $completedResult->fetch_assoc()) {
+        $completedHours = isset($completedRow['total_hours']) ? (float) $completedRow['total_hours'] : 0;
+        $remainingHours = max(0, $requiredHours - $completedHours);
+        $percentage = ($requiredHours > 0) ? round(($completedHours / $requiredHours) * 100) : 0;
+    }
+    $completedQuery->close();
+
+    // Step 3: Fetch attendance records
+    $attendanceQuery = $conn->prepare("
+        SELECT date, time_in, time_out, hours 
+        FROM attendance_record 
+        WHERE trainee_id = ? 
+        ORDER BY date DESC
+    ");
+    $attendanceQuery->bind_param("s", $trainee_id);
+    $attendanceQuery->execute();
+    $attendanceResult = $attendanceQuery->get_result();
+
+    while ($row = $attendanceResult->fetch_assoc()) {
+        $attendanceData[] = $row;
+    }
+
+    $attendanceQuery->close();
+}
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: indexv2.php");
+    exit();
+}
+
+$conn->close(); // ✅ Close the connection once at the end
+?>
+
+
 
 
 <!DOCTYPE html>
@@ -299,10 +378,11 @@ canvas {
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Raymond Dioses</h2>
-        <p>raymond.dioses@gmail.com</p>
-      </div>
+  <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
+  <h2><?= htmlspecialchars($full_name) ?></h2>
+  <p><?= htmlspecialchars($email) ?></p>
+</div>
+
       <hr class="separator" />
       <nav class="nav-menu">
   <ul>
@@ -352,7 +432,7 @@ canvas {
 </nav>
       <hr class="separator" />
       <div class="logout">
-  <a href="#">
+ <a href="?logout=true" class="logout-link">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -375,9 +455,9 @@ canvas {
   <div class="progress-wrapper">
     <canvas id="progressCircle" width="150" height="150"></canvas>
     <div class="progress-text">
-      <div><strong>Required Time:</strong> 240 Hours</div>
-      <div><strong>Completed:</strong> 200 Hours</div>
-      <div><strong>Time Left:</strong> 40 Hours</div>
+       <strong>Required Time:</strong> <?= $requiredHours ?> Hours<br />
+    <strong>Completed:</strong> <?= $completedHours ?> Hours<br />
+    <strong>Time Left:</strong> <?= $remainingHours ?> Hours
     </div>
   </div>
 </div>
@@ -443,27 +523,23 @@ canvas {
     }).render();
   });
 
-    const data = [
-    { name: "Raymond Dioses", date: "July 1, 2025", timeIn: "08:00 AM", timeOut: "05:00 PM", total: "9" },
-    { name: "Raymond Dioses", date: "July 2, 2025", timeIn: "08:15 AM", timeOut: "05:10 PM", total: "8.9" },
-    { name: "Raymond Dioses", date: "July 3, 2025", timeIn: "08:05 AM", timeOut: "04:55 PM", total: "8.8" },
-    // Blank rows for layout
-    ...Array.from({ length: 12 }, (_, i) => ({ name: "Raymond Dioses", date: `July ${4 + i}, 2025`, timeIn: "", timeOut: "", total: "" }))
-  ];
+    const data = <?= json_encode($attendanceData) ?>;
+const userName = <?= json_encode($full_name) ?>;
+
 
   const tableBody = document.querySelector('#dtrTable tbody');
 
-  data.forEach(entry => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${entry.name}</td>
-      <td>${entry.date}</td>
-      <td>${entry.timeIn || "&nbsp;"}</td>
-      <td>${entry.timeOut || "&nbsp;"}</td>
-      <td>${entry.total || "&nbsp;"}</td>
-    `;
-    tableBody.appendChild(row);
-  });
+ data.forEach(entry => {
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${userName}</td>
+    <td>${entry.date}</td>
+    <td>${entry.time_in || "&nbsp;"}</td>
+    <td>${entry.time_out || "&nbsp;"}</td>
+    <td>${entry.hours || "&nbsp;"}</td>
+  `;
+  tableBody.appendChild(row);
+});
 
   function drawProgressCircle(canvasId, completedHours, totalHours) {
   const canvas = document.getElementById(canvasId);
@@ -497,7 +573,9 @@ canvas {
   ctx.fillText(`${Math.round(percent * 100)}%`, centerX, centerY);
 }
 
-drawProgressCircle("progressCircle", 200, 240);
+drawProgressCircle("progressCircle", <?= $completedHours ?>, <?= $requiredHours ?>);
+
+ 
 
 </script>
 

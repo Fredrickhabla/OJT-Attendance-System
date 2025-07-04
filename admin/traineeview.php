@@ -87,6 +87,20 @@ foreach ($splitDays as $day) {
     }
 }
 
+// Get completed hours from attendance_record
+$completedQuery = $conn->prepare("SELECT SUM(hours) as total_hours FROM attendance_record WHERE trainee_id = ?");
+$completedQuery->bind_param("s", $id);
+$completedQuery->execute();
+$completedResult = $completedQuery->get_result();
+$completedRow = $completedResult->fetch_assoc();
+
+$completedHours = isset($completedRow['total_hours']) ? (float) $completedRow['total_hours'] : 0;
+$requiredHours = (int) $row["required_hours"];
+$remainingHours = max(0, $requiredHours - $completedHours);  // Prevent negative
+
+$percentage = ($requiredHours > 0) ? round(($completedHours / $requiredHours) * 100) : 0;
+
+
 
 $finalDays = implode(', ', $mappedDays);
 $schedule = !empty($finalDays) ? "$finalDays ($formattedStart - $formattedEnd)" : "Not set";
@@ -103,8 +117,10 @@ $trainee = [
     "address" => $formattedAddress,
     "image" => $image,
     "schedule" => $schedule,
-    "required_hours" => (int) $row["required_hours"] ?? 0,
-   "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
+    "required_hours" => $requiredHours,
+    "completed_hours" => $completedHours,
+    "remaining_hours" => $remainingHours,
+    "percentage" => $percentage
 ];
 
 
@@ -408,12 +424,11 @@ $trainee = [
           <!-- Right: Progress Tracker -->
           <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <?php
-              $requiredHours = $trainee['required_hours'];
-$completedHours = $trainee['completed_hours'];
-$remainingHours = $requiredHours - $completedHours;
-$percentage = round(($completedHours / $requiredHours) * 100);
-
-            ?>
+  $requiredHours = $trainee['required_hours'];
+  $completedHours = $trainee['completed_hours'];
+  $remainingHours = $trainee['remaining_hours'];
+  $percentage = $trainee['percentage'];
+?>
             <h3 style="margin-bottom: 16px; font-size: 20px; color: #2e7d32;">Progress Overview</h3>
 
             <div style="position: relative; width: 160px; height: 160px;">
