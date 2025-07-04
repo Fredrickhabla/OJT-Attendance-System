@@ -1,43 +1,33 @@
 <?php
-// delete_trainee.php
-
-// Connect to your database
 $host = "localhost";
 $username = "root";
 $password = "";
 $database = "ojtformv3";
 
+// Create DB connection
 $conn = new mysqli($host, $username, $password, $database);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check that trainee_id was provided
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["trainee_id"])) {
-    $trainee_id = trim($_POST["trainee_id"]);
+$trainee_id = $_GET['id'] ?? '';
 
-    // Delete trainee record
-    $stmt = $conn->prepare("DELETE FROM trainee WHERE trainee_id = ?");
-    $stmt->bind_param("s", $trainee_id);
+if (!empty($trainee_id)) {
+    // First, delete related records (e.g., attendance) if necessary
+    $conn->query("DELETE FROM attendance_record WHERE trainee_id = '$trainee_id'");
 
-    if ($stmt->execute()) {
-        // Optionally, delete related records in attendance_record
-        $attendanceStmt = $conn->prepare("DELETE FROM attendance_record WHERE trainee_id = ?");
-        $attendanceStmt->bind_param("s", $trainee_id);
-        $attendanceStmt->execute();
-        $attendanceStmt->close();
+    // Delete the trainee record
+    $deleteTrainee = $conn->prepare("DELETE FROM trainee WHERE trainee_id = ?");
+    $deleteTrainee->bind_param("s", $trainee_id);
 
-        // Redirect back to trainee list
-        header("Location: trainee.php?message=deleted");
-        exit();
+    if ($deleteTrainee->execute()) {
+        echo "<script>alert('Trainee deleted successfully.'); window.location.href='trainee.php';</script>";
     } else {
-        echo "Error deleting trainee: " . $conn->error;
+        echo "<script>alert('Failed to delete trainee.'); window.history.back();</script>";
     }
-
-    $stmt->close();
+    $deleteTrainee->close();
 } else {
-    echo "Invalid request.";
+    echo "<script>alert('Invalid trainee ID.'); window.history.back();</script>";
 }
 
 $conn->close();

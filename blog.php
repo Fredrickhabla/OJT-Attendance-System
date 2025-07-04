@@ -1,3 +1,48 @@
+<?php
+session_start();
+
+// Redirect if not logged in
+if (!isset($_SESSION["user_id"])) {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION["user_id"];
+
+// Connect to DB
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Get trainee_id for current user
+$stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+$stmt->bind_param("s", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$trainee = $result->fetch_assoc();
+
+if (!$trainee) {
+    echo "Trainee not found.";
+    exit();
+}
+
+$trainee_id = $trainee["trainee_id"];
+
+$posts = [];
+
+$stmt = $conn->prepare("SELECT post_id, title, content, created_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC");
+$stmt->bind_param("s", $trainee_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $posts[] = $row;
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -291,18 +336,11 @@ body {
 }
 
 .editor-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  background: #f8f8f8;
-  z-index: 999;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 40px;
-  font-family: 'Segoe UI', sans-serif;
+  background-color: #fff;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .editor-ribbon {
@@ -319,15 +357,12 @@ body {
 }
 
 .bond-paper {
-  background: white;
-  width: 80%;
-  max-width: 800px;
-  min-height: 80vh;
-  padding: 40px 30px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  border: 1px solid #ccc;
-  margin-top: 60px;
-  border-radius: 8px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .bond-paper input.title {
@@ -347,6 +382,43 @@ body {
   font-size: 16px;
   outline: none;
   line-height: 1.6;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.editor-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.editor-actions .save-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.editor-actions .save-btn:hover {
+  background-color: #0056b3;
+}
+
+.title {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
 }
 
 
@@ -424,15 +496,16 @@ body {
     </aside>
 
    <!-- Main Content -->
-  <div class="content">
-    <div class="topbar">BLOG </div>
-    <div class="main">
-        <div class="container">
- <div class="header">
+<div class="content">
+  <div class="topbar">BLOG</div>
+
+  <div class="main">
+    <!-- Card Container -->
+    <div class="container" id="cardContainer">
+      <div class="header">
         <button id="addPostBtn" class="btn">
-  <i class="fas fa-plus"></i>
-    New Post
-</button>
+          <i class="fas fa-plus"></i> New Post
+        </button>
         <div class="search-container">
           <input type="text" placeholder="Search..." />
           <i class="fas fa-search"></i>
@@ -441,182 +514,238 @@ body {
       </div>
 
       <!-- Blog Posts -->
-      <div class="posts" id="postsContainer">
-        <!-- Post 1 -->
-        <div class="card filled">
-  <div class="post-content">
-    <div class="avatar">B</div>
-    <div class="post-info">
-      <h3>New Blog Title</h3>
-      <p>Draft · July 4 2025</p>
-    </div>
-  </div>
-  <div>
-    <button class="icon-btn" title="Edit">
-   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="lucide lucide-pencil">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-    </svg>
-  </button>
-
-  <button class="icon-btn" title="Delete">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-      class="lucide lucide-trash-2">
-      <path d="M3 6h18" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M9 6V4h6v2" />
-    </svg>
-</button>
-  </div>
-</div>
-
-
-   
-     
+     <div class="posts" id="postsContainer">
+  <?php foreach ($posts as $post): ?>
+ <div class="card filled" data-post-id="<?= $post['post_id'] ?>" data-content='<?= htmlspecialchars(json_encode($post['content'])) ?>'>
+    <div class="post-content">
+      <div class="avatar"><?= strtoupper($post['title'][0]) ?></div>
+      <div class="post-info">
+        <h3><?= htmlspecialchars($post['title']) ?></h3>
+        <p><?= ucfirst($post['status']) ?> · <?= date("F j, Y", strtotime($post['created_at'])) ?></p>
       </div>
     </div>
-  </div>
-</div>
-
-<div id="editorModal" class="editor-modal">
-  <div class="editor-ribbon">
-    <span>Blog</span>
     <div>
-      <button onclick="saveBlog()" style="margin-right: 10px;">Save</button>
-      <button onclick="closeEditor()">Cancel</button>
+      <button class="icon-btn" title="Edit" onclick="openEditor(this)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-pencil">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      </button>
+      <button class="icon-btn" title="Delete" onclick="deletePost(this)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-trash-2">
+          <path d="M3 6h18" />
+          <path d="M19 6l-1 14H6L5 6" />
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+          <path d="M9 6V4h6v2" />
+        </svg>
+      </button>
     </div>
   </div>
+<?php endforeach; ?>
+
+</div>
+
+    </div>
+
+<div id="editorModal" class="editor-modal" style="display: none;">
+    
   <div class="bond-paper">
+    <div class="editor-header">
+      <span class="editor-title"></span>
+      <div class="editor-actions">
+        <button onclick="saveBlog()" class="save-btn">Save & Exit</button>
+      </div>
+    </div>
     <input type="text" id="editorTitle" class="title" placeholder="Enter blog title..." />
     <div id="quillEditor" style="height: 60vh;"></div>
   </div>
 </div>
-</body>
+
 
 <script>
+  let currentEditCard = null;
+  let quill;
 
-   let currentEditCard = null;
-
-  document.getElementById("addPostBtn").addEventListener("click", function () {
-    const container = document.getElementById("postsContainer");
-
-    const card = document.createElement("div");
-    card.className = "card filled";
-
-    const today = new Date().toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize Quill once
+    quill = new Quill("#quillEditor", {
+      theme: "snow",
+      placeholder: "Write your blog content here...",
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ["bold", "italic", "underline", "strike"],
+          ["blockquote", "code-block"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ align: [] }],
+          ["link", "image", "video"],
+          ["clean"]
+        ]
+      }
     });
 
-    card.innerHTML = `
-      <div class="post-content">
-        <div class="avatar">B</div>
-        <div class="post-info">
-          <h3>New Blog Title</h3>
-          <p>Draft · ${today}</p>
-        </div>
-      </div>
-      <div>
-        <button class="icon-btn" title="Edit" onclick="openEditor(this)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-pencil">
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </svg>
-        </button>
-        <button class="icon-btn" title="Delete" onclick="this.closest('.card').remove()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-trash-2">
-            <path d="M3 6h18" />
-            <path d="M19 6l-1 14H6L5 6" />
-            <path d="M10 11v6" />
-            <path d="M14 11v6" />
-            <path d="M9 6V4h6v2" />
-          </svg>
-        </button>
-      </div>
-    `;
+    // Handle new post button
+    document.getElementById("addPostBtn").addEventListener("click", function () {
+      const container = document.getElementById("postsContainer");
 
-    container.prepend(card);
+      const card = document.createElement("div");
+card.className = "card filled";
+card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
+
+      const today = new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      card.innerHTML = `
+        <div class="post-content">
+          <div class="avatar">B</div>
+          <div class="post-info">
+            <h3>New Blog Title</h3>
+            <p> ${today}</p>
+          </div>
+        </div>
+        <div>
+          <button class="icon-btn" title="Edit" onclick="openEditor(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-pencil">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          <button class="icon-btn" title="Delete" onclick="this.closest('.card').remove()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-trash-2">
+              <path d="M3 6h18" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+              <path d="M9 6V4h6v2" />
+            </svg>
+          </button>
+        </div>
+      `;
+
+      container.prepend(card);
+    });
   });
 
-  function openEditor(btn) {
-    const card = btn.closest(".card");
+  function openEditor(button) {
+    const card = button.closest(".card");
     const title = card.querySelector("h3").innerText;
+    const content = JSON.parse(card.getAttribute("data-content")); 
 
     document.getElementById("editorTitle").value = title;
-    document.getElementById("editorContent").value = ""; // You can load saved content if stored
+
+    // Optional: load actual blog content here
+    quill.root.innerHTML = card.querySelector("p").innerText || "";
+    quill.root.innerHTML = content; 
 
     currentEditCard = card;
-    document.getElementById("editorModal").style.display = "flex";
+
+    // Hide main view, show editor
+    document.getElementById("cardContainer").style.display = "none";
+    document.getElementById("editorModal").style.display = "block";
   }
 
   function closeEditor() {
+    // Hide editor, show main view
     document.getElementById("editorModal").style.display = "none";
+    document.getElementById("cardContainer").style.display = "block";
+
+    // Reset current card
     currentEditCard = null;
   }
 
-  function saveBlog() {
-    if (!currentEditCard) return;
+ function saveBlog() {
+  if (!currentEditCard) return;
 
-    const newTitle = document.getElementById("editorTitle").value;
-    const content = document.getElementById("editorContent").value;
+  const newTitle = document.getElementById("editorTitle").value.trim();
+  const content = quill.root.innerHTML;
+  const postId = currentEditCard.getAttribute("data-post-id"); // 🔥 Get post ID
 
-    currentEditCard.querySelector("h3").innerText = newTitle;
-
-    closeEditor();
-    // You can optionally store `content` in a JS array or send to backend.
+  if (!newTitle || !content) {
+    alert("Title and content cannot be empty.");
+    return;
   }
 
-   let quill = new Quill('#quillEditor', {
-    theme: 'snow',
-    placeholder: 'Write your blog here...',
-    modules: {
-      toolbar: [
-        [{ 'font': [] }, { 'size': [] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'script': 'sub' }, { 'script': 'super' }],
-        [{ 'header': 1 }, { 'header': 2 }, 'blockquote', 'code-block'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'align': [] }],
-        ['link', 'image', 'video'],
-        ['clean']
-      ]
+  fetch("insert_blog_post.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      title: newTitle,
+      content: content,
+      post_id: postId // 🔥 Include post_id
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+  if (data.success) {
+    currentEditCard.querySelector("h3").innerText = newTitle;
+    currentEditCard.querySelector("p").innerText = "Saved · " + new Date().toLocaleDateString();
+
+    // 🆕 Set the data-post-id attribute if it was a new post
+    if (!postId || postId === "0") {
+      currentEditCard.setAttribute("data-post-id", data.post_id);
     }
-  });
 
-  function openEditor(btn) {
-    const card = btn.closest(".card");
-    const title = card.querySelector("h3").innerText;
-
-    document.getElementById("editorTitle").value = title;
-    quill.root.innerHTML = ''; // Or load existing blog content if stored
-    currentEditCard = card;
-
-    document.getElementById("editorModal").style.display = "flex";
-  }
-
-  function saveBlog() {
-    if (!currentEditCard) return;
-
-    const newTitle = document.getElementById("editorTitle").value;
-    const content = quill.root.innerHTML; // Get rich text content
-
-    currentEditCard.querySelector("h3").innerText = newTitle;
-
-    // Save `content` to backend or local storage as needed
+     currentEditCard.setAttribute("data-content", JSON.stringify(content));
 
     closeEditor();
+  } else {
+    alert("Failed to save: " + data.message);
   }
+})
+
+  .catch(error => {
+    console.error("Error:", error);
+  });
+}
+
+function deletePost(button) {
+  const card = button.closest(".card");
+  const postId = card.getAttribute("data-post-id");
+
+  if (!confirm("Are you sure you want to delete this post?")) return;
+
+  // If postId is 0 or not saved yet, just remove it
+  if (!postId || postId === "0") {
+    card.remove();
+    return;
+  }
+
+  // Call backend to delete
+  fetch("delete_blog_post.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({ post_id: postId })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        card.remove(); // Remove from DOM
+      } else {
+        alert("Failed to delete: " + data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error deleting post:", error);
+    });
+}
+
 </script>
+
 
 </html>
