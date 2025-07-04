@@ -390,10 +390,18 @@ $trainee = [
         <div class="info-progress-wrapper">
           <!-- Left: Trainee Info -->
           <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-              <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile Picture" class="profile-img" />
-              <button class="add-photo-btn">Add Photo</button>
-            </div>
+<div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+  <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile Picture" class="profile-img" />
+
+  <form action="upload_photo.php" method="POST" enctype="multipart/form-data" style="display:inline;">
+    <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($trainee['trainee_id']) ?>">
+    <input type="file" name="photo" id="photoInput" style="display:none;" accept="image/*" onchange="this.form.submit()">
+    <button type="button" class="add-photo-btn" onclick="document.getElementById('photoInput').click();">
+      Add Photo
+    </button>
+  </form>
+</div>
+
 
             <div class="info-row"><b>Full Name:</b> <?= htmlspecialchars($trainee['name']) ?></div>
             <div class="info-row"><b>Email Address:</b> <?= htmlspecialchars($trainee['email']) ?></div>
