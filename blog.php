@@ -507,7 +507,7 @@ body {
           <i class="fas fa-plus"></i> New Post
         </button>
         <div class="search-container">
-          <input type="text" placeholder="Search..." />
+         <input type="text" id="searchInput" placeholder="Search..." />
           <i class="fas fa-search"></i>
           <i class="fas fa-microphone"></i>
         </div>
@@ -690,27 +690,18 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
   })
   .then(response => response.json())
   .then(data => {
-  if (data.success) {
-    currentEditCard.querySelector("h3").innerText = newTitle;
-    currentEditCard.querySelector("p").innerText = "Saved · " + new Date().toLocaleDateString();
-
-    // 🆕 Set the data-post-id attribute if it was a new post
-    if (!postId || postId === "0") {
-      currentEditCard.setAttribute("data-post-id", data.post_id);
+    if (data.success) {
+      // ✅ Force a reload to reflect the new post with real post_id
+      location.reload();
+    } else {
+      alert("Failed to save: " + data.message);
     }
-
-     currentEditCard.setAttribute("data-content", JSON.stringify(content));
-
-    closeEditor();
-  } else {
-    alert("Failed to save: " + data.message);
-  }
-})
-
+  })
   .catch(error => {
     console.error("Error:", error);
   });
 }
+
 
 function deletePost(button) {
   const card = button.closest(".card");
@@ -735,7 +726,8 @@ function deletePost(button) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        card.remove(); // Remove from DOM
+        // Reload the page after deletion
+        location.reload();
       } else {
         alert("Failed to delete: " + data.message);
       }
@@ -744,6 +736,25 @@ function deletePost(button) {
       console.error("Error deleting post:", error);
     });
 }
+
+// Enable search functionality
+document.getElementById("searchInput").addEventListener("input", function () {
+  const query = this.value.toLowerCase();
+  const cards = document.querySelectorAll("#postsContainer .card");
+
+  cards.forEach(card => {
+    const title = card.querySelector("h3").innerText.toLowerCase();
+    const content = card.getAttribute("data-content").toLowerCase();
+
+    if (title.includes(query) || content.includes(query)) {
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+});
+
+
 
 </script>
 

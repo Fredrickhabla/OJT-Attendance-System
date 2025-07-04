@@ -93,83 +93,119 @@ $conn->close();
       font-family: 'Segoe UI', sans-serif;
     }
     body {
-      background:rgb(255, 255, 255);
-      color: #111;
-      min-height: 100vh;
-      display: flex;
-    }
-    .dashboard {
-      display: flex;
-      width: 100%;
-    }
-    /* Sidebar */
-    .sidebar {
-      width: 280px;
-      background: #44830f;
-      color: white;
+  background: #f9f9f9;
+  color: #111;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 300px;
+  background: #44830f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.profile-section {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.profile-pic {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-section h2 {
+  font-size: 1rem;
+}
+
+.profile-section p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.separator {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  margin: 10px 20px;
+}
+
+.nav-menu ul {
+  list-style: none;
+  padding: 0 20px;
+}
+
+.nav-menu li {
+  margin-bottom: 16px;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.nav-menu a:hover {
+  background: #2f6a13;
+}
+
+.logout {
+    margin-top: auto;
+  padding: 20px;
+}
+
+.logout a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.logout a:hover {
+  background: #2f6a13;
+}
+.main{
+    justify-content: center;
+    align-items: center;    
+    display: flex;
+    margin-top: 20px;
+}
+.content {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 20px 0;
+      overflow-y: auto;
     }
-    .profile-section {
-      text-align: center;
-      padding: 10px 0 20px;
-    }
-    .profile-pic {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 10px;
-    }
-    .profile-section h2 {
-      font-size: 1rem;
-    }
-    .profile-section p {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-    .separator {
-      border: none;
-      border-top: 1px solid rgba(255,255,255,0.3);
-      margin: 10px 20px;
-    }
-    .nav-menu ul {
-      list-style: none;
-      padding: 0 20px;
-    }
-    .nav-menu li {
-      margin-bottom: 16px;
-    }
-    .nav-menu a {
+
+.topbar {
+      background-color: #14532d;
       color: white;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    .nav-menu a:hover {
-      background: #2f6a13;
-    }
-    .logout {
-      margin-top: auto;
-      padding: 20px;
-    }
-    .logout a {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: white;
-      text-decoration: none;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    .logout a:hover {
-      background: #2f6a13;
+      padding: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      width: 100%;
     }
     /* Main */
     .content {
@@ -177,13 +213,7 @@ $conn->close();
       display: flex;
       flex-direction: column;
     }
-    .topbar {
-      background-color: #14532d;
-      color: white;
-      padding: 16px;
-      font-size: 20px;
-      font-weight: bold;
-    }
+    
     .main {
       display: flex;
       justify-content: center;
