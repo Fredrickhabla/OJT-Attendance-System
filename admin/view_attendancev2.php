@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 include('connection.php');
 
@@ -145,6 +146,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .signature-img {
       max-width: 120px;
       max-height: 60px;
+      display: block;
     }
   </style>
 </head>
@@ -221,7 +223,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <tbody>
             <?php foreach ($records as $row): ?>
               <tr>
-                <td><?= htmlspecialchars($row['full_name']) ?></td>
+                <td><?= htmlspecialchars($row['full_name'] ?: 'Unknown') ?></td>
                 <td><?= htmlspecialchars($row['date']) ?></td>
                 <td>
                   <?php
@@ -243,19 +245,22 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
                 <td>
                   <?php if (!empty($row['signature'])): ?>
-                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" />
+                    <a href="/ojtform/<?= htmlspecialchars($row['signature']) ?>" target="_blank" title="View Signature">
+                      <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" />
+                    </a>
                   <?php else: ?>
                     <span class="text-muted">No signature</span>
                   <?php endif; ?>
                 </td>
-                <td>
-                  <a href="edit_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-primary" title="Edit">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                  <a href="delete_attendancev2.php?attendance_id=<?= $row['attendance_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
-                    <i class="bi bi-trash"></i>
-                  </a>
-                </td>
+              <td style="text-align: center;">
+                <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </td>
+
               </tr>
             <?php endforeach; ?>
             </tbody>
