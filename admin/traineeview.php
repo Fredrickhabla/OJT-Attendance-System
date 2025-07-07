@@ -94,6 +94,7 @@ $schedule = !empty($finalDays) ? "$finalDays ($formattedStart - $formattedEnd)" 
 
 // Store all needed info into $trainee (to keep rest of HTML unchanged)
 $trainee = [
+    "trainee_id" => $row["trainee_id"], // ✅ FIXED: added to avoid error on line 397
     "name" => $name,
     "email" => $row["email"],
     "school" => ucwords(strtolower($row["school"] ?? "Unknown")),
@@ -102,8 +103,9 @@ $trainee = [
     "image" => $image,
     "schedule" => $schedule,
     "required_hours" => (int) $row["required_hours"] ?? 0,
-   "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
+    "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
 ];
+
 
 
 
@@ -455,8 +457,8 @@ $percentage = round(($completedHours / $requiredHours) * 100);
 
         <div class="btn-group">
           <button class="action-btn" id="editBtn">Edit Profile</button>
-          <button class="action-btn" id="deleteBtn">Delete Profile</button>
-          <a href="trainee.php"><button class="action-btn">Return</button></a>
+          <button class="action-btn" id="deleteBtn" style="background:red; color:white;">Delete Profile</button>
+          <a href="trainee.php"><button class="action-btn" style="background:blue; color:white;">Return</button></a>
         </div>
 
       </div>
