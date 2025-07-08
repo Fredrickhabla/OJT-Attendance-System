@@ -274,5 +274,10 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
+<!-- Bootstrap Back to Report Button (Fixed at bottom right) -->
+<button type="button" class="btn btn-primary position-fixed bottom-0 end-0 m-3" onclick="window.location.href='report.php'">
+  <i class="bi bi-arrow-up"></i> Back to Report
+</button>
+
 </body>
 </html>
