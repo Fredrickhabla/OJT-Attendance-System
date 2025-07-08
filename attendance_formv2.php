@@ -29,14 +29,21 @@ $trainee_info = $result->fetch_assoc();
 if ($trainee_info) {
     $full_name = $trainee_info['first_name'] . ' ' . $trainee_info['surname'];
     $email = $trainee_info['email'];
-    $profile_picture = !empty($trainee_info['profile_picture'])
-    ? "uploads/profile_pics/" . $trainee_info['profile_picture']
-    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
+
+    $raw_picture = trim($trainee_info['profile_picture']);
+    $local_path = $raw_picture; 
+
+    // ✅ Check both value and if file actually exists on disk
+    if (!empty($raw_picture) && file_exists($local_path)) {
+        $profile_picture = $local_path;
+    } else {
+        $profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
+    }
 } else {
-    // Optional: fallback or redirection
     $full_name = "Unknown Trainee";
     $profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
 }
+
 
 $success = "";
 $error = "";
@@ -424,7 +431,8 @@ document.addEventListener("DOMContentLoaded", function () {
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="<?= !empty($trainee['profile_picture']) ? htmlspecialchars($trainee['profile_picture']) . '?v=' . time() : 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png' ?>" alt="Profile" class="profile-pic" />
+        <img src="<?= htmlspecialchars($profile_picture) . '?v=' . time() ?>" alt="Profile" class="profile-pic" />
+
         <h2><?= htmlspecialchars($full_name) ?></h2>
 <p><?= htmlspecialchars($email) ?></p>
       </div>
