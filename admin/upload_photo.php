@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Redirect to traineeview.php with ?id=
-    header("Location: traineeview.php?trainee_id=" . urlencode($traineeId));
+    header("Location: traineeview.php?id=" . urlencode($traineeId));
     exit;
 }
 ?>
