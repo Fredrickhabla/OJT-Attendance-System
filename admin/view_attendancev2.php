@@ -261,6 +261,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
                     <i class="bi bi-trash"></i>
                   </a>
+                  
                 </td>
               </tr>
             <?php endforeach; ?>
