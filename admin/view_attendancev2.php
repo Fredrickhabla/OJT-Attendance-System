@@ -216,7 +216,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Time Out</th>
                 <th>Hours</th>
                 <th>Work Description</th>
-                <th>Signature</th>
+                <th>View Signature</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -245,11 +245,15 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
                 <td>
                   <?php if (!empty($row['signature'])): ?>
-                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" title="Click to enlarge" />
+                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" 
+                        alt="Signature" 
+                        class="signature-img mx-auto d-block" 
+                        title="Click to enlarge" />
                   <?php else: ?>
-                    <span class="text-muted">No signature</span>
+                    <span class="text-muted d-block text-center">No signature</span>
                   <?php endif; ?>
                 </td>
+
                 <td style="text-align: center;">
                   <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
@@ -280,7 +284,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text-center">
-        <img src="" id="signatureModalImg" class="img-fluid" alt="Signature Image">
+        <img src="" id="signatureModalImg" class="img-fluid mb-3" alt="Signature Image">
+        <br>
+        <a href="#" id="downloadSignatureBtn" class="btn btn-success" download>
+          <i class="bi bi-download"></i> Download Signature
+        </a>
       </div>
     </div>
   </div>
@@ -288,17 +296,25 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- Bootstrap JS + Modal Script -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 <script>
   document.querySelectorAll('.signature-img').forEach(function(img) {
     img.addEventListener('click', function(e) {
       const src = this.getAttribute('src');
       const modalImg = document.getElementById('signatureModalImg');
       modalImg.src = src;
+
+      const downloadLink = document.getElementById('downloadSignatureBtn');
+      downloadLink.href = src;
+
       const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
       modal.show();
     });
   });
 </script>
+
 
 <!-- Back to Report Button -->
 <button type="button" class="btn btn-primary position-fixed bottom-0 end-0 m-3" onclick="window.location.href='report.php'">
