@@ -14,7 +14,6 @@ if (!preg_match('/^[a-zA-Z0-9_]+$/', $attendance_id)) {
     die("Invalid attendance ID format.");
 }
 
-
 // Fetch record from the correct table
 $stmt = $pdo->prepare("SELECT * FROM attendance_record WHERE attendance_id = ?");
 $stmt->execute([$attendance_id]);
@@ -38,18 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle file upload if a new signature is uploaded
     if (isset($_FILES['signature']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'uploads/attendance_id';
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/ojtform/uploads/';
+
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $filename = basename($_FILES['signature']['name']);
-        $targetPath = $uploadDir . time() . '_' . $filename;
+        $filename = time() . '_' . basename($_FILES['signature']['name']);
+        $fullTargetPath = $uploadDir . $filename;
+        $webPath = 'uploads/' . $filename; // this goes in DB
 
-        if (move_uploaded_file($_FILES['signature']['tmp_name'], $targetPath)) {
-            $signature_path = $targetPath;
+        if (move_uploaded_file($_FILES['signature']['tmp_name'], $fullTargetPath)) {
+            $signature_path = $webPath;
         } else {
-            $error = "Failed to upload the signature.";
+            $error = "Failed to upload the signature. Error code: " . $_FILES['signature']['error'];
         }
     }
 
@@ -69,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
