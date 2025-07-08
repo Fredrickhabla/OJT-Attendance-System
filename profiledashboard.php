@@ -39,12 +39,17 @@ $traineePicturePath = null;
 if (isset($_FILES['trainee_picture']) && $_FILES['trainee_picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = 'uploads/trainees/';
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true); // Create directory if not exists
+        mkdir($uploadDir, 0777, true);
     }
     $fileName = uniqid('trainee_') . '_' . basename($_FILES['trainee_picture']['name']);
     $uploadPath = $uploadDir . $fileName;
     move_uploaded_file($_FILES['trainee_picture']['tmp_name'], $uploadPath);
     $traineePicturePath = $uploadPath;
+}
+
+// ✅ Keep the old one if not updated
+if ($traineePicturePath === null && isset($trainee['profile_picture'])) {
+    $traineePicturePath = $trainee['profile_picture'];
 }
 
 // Upload coordinator photo
@@ -60,6 +65,9 @@ if (isset($_FILES['coordinator_picture']) && $_FILES['coordinator_picture']['err
     $coordinatorPicturePath = $uploadPath;
 }
 
+if ($coordinatorPicturePath === null && isset($coordinator['profile_picture'])) {
+    $coordinatorPicturePath = $coordinator['profile_picture'];
+}
 
 // Set user name/email if from session or DB
 $user_name = $trainee['first_name'] . ' ' . $trainee['surname'] ?? '';
@@ -86,6 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $coordinatorEmail = $_POST['coordEmail'];
     $coordinatorPhone = $_POST['phone'];
 
+
+    // If an existing coordinator is selected, update its info
+if (!empty($coordId)) {
+    $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
+    $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordId]);
+}
+
     // If coordinator is new, insert it
     if (empty($coordId)) {
         $coordId = uniqid('coord_');
@@ -94,32 +109,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$coordId, $coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath]);
     }
 
-    $fullSchedule = $scheduleDays . ' (' . $scheduleStart . '-' . $scheduleEnd . ')';
+    
 
     if ($trainee) {
-        // UPDATE if trainee already exists
+        
         $stmt = $pdo->prepare("UPDATE trainee SET 
-            first_name = ?, 
-            surname = ?, 
-            email = ?, 
-            school = ?, 
-            phone_number = ?, 
-            address = ?, 
-            schedule = ?, 
-            required_hours = ?, 
-            profile_picture = ?, 
-            coordinator_id = ?
-            WHERE user_id = ?");
+        first_name = ?, 
+        surname = ?, 
+        email = ?, 
+        school = ?, 
+        phone_number = ?, 
+        address = ?, 
+        schedule_days = ?, 
+        schedule_start = ?, 
+        schedule_end = ?, 
+        required_hours = ?, 
+        profile_picture = ?, 
+        coordinator_id = ?
+        WHERE user_id = ?");
 
-        $stmt->execute([
-            $firstName, $surname, $email, $school, $phoneNumber, $address,
-            $fullSchedule, $requiredHours, $traineePicturePath, $coordId, $user_id
-        ]);
+    $stmt->execute([
+        $firstName,
+        $surname,
+        $email,
+        $school,
+        $phoneNumber,
+        $address,
+        $scheduleDays,
+        $scheduleStart,
+        $scheduleEnd,
+        $requiredHours,
+        $traineePicturePath,
+        $coordId,
+        $user_id
+    ]);
     } else {
         $fullSchedule = $scheduleDays . ' (' . $scheduleStart . '-' . $scheduleEnd . ')';
 
 $stmt = $pdo->prepare("UPDATE trainee SET 
-    first_name = ?, 
+      first_name = ?, 
     surname = ?, 
     email = ?, 
     school = ?, 
@@ -148,10 +176,9 @@ $stmt->execute([
     $coordId,
     $user_id
 ]);
-
     }
 
-    echo "<script>alert('Trainee profile saved successfully!'); window.location.href='attendance_formv2.php';</script>";
+    echo "<script>alert('Trainee profile saved successfully!'); window.location.href='dashboardv2.php';</script>";
 }
 
 ?>
@@ -583,6 +610,9 @@ $stmt->execute([
       object-position: top right;
     }
 
+    .profile-section h2{
+      margin-bottom: 0;
+    }
   </style>
   
 
@@ -593,9 +623,9 @@ $stmt->execute([
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
-        <h2>Fredrick L. Habla</h2>
-<p> hablarekrek@gmail.com</p>
+        <img src="<?= !empty($trainee['profile_picture']) ? htmlspecialchars($trainee['profile_picture']) . '?v=' . time() : 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png' ?>" alt="Profile" class="profile-pic" />
+  <h2><?= htmlspecialchars($user_name) ?></h2>
+  <p><?= htmlspecialchars($user_email) ?></p>
       </div>
       <hr class="separator" />
       <nav class="nav-menu">
@@ -812,4 +842,97 @@ $stmt->execute([
       </div>
     </div>
 
-      
+      <script>
+  const scheduleInput = document.getElementById('schedule');
+  const schedulePicker = document.getElementById('schedulePicker');
+  const dayCheckboxes = schedulePicker.querySelectorAll('input[name="days"]');
+  const startTimeInput = document.getElementById('startTime');
+  const endTimeInput = document.getElementById('endTime');
+  const scheduleDaysInput = document.getElementById('schedule_days');
+  const scheduleStartInput = document.getElementById('schedule_start');
+  const scheduleEndInput = document.getElementById('schedule_end');
+
+  function formatTime24to12(time24) {
+    if (!time24) return '';
+    let [h, m] = time24.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m.toString().padStart(2,'0')} ${ampm}`;
+  }
+
+  function updateScheduleInput() {
+    const selectedDays = Array.from(dayCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+
+    if (!selectedDays.length || !startTimeInput.value || !endTimeInput.value) {
+      scheduleInput.value = '';
+      return;
+    }
+
+    const start = formatTime24to12(startTimeInput.value);
+    const end = formatTime24to12(endTimeInput.value);
+
+    scheduleInput.value = `${selectedDays.join(', ')} ${start}–${end}`;
+  }
+
+  function syncScheduleToHiddenInputs() {
+    const selectedDays = Array.from(dayCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value)
+      .join(',');
+
+    scheduleDaysInput.value = selectedDays;
+    scheduleStartInput.value = startTimeInput.value;
+    scheduleEndInput.value = endTimeInput.value;
+  }
+
+  // Toggle picker visibility
+  scheduleInput.addEventListener('click', () => {
+    schedulePicker.style.display = schedulePicker.style.display === 'block' ? 'none' : 'block';
+  });
+
+  // Hide picker when clicking outside
+  document.addEventListener('click', e => {
+    if (!scheduleInput.contains(e.target) && !schedulePicker.contains(e.target)) {
+      schedulePicker.style.display = 'none';
+    }
+  });
+
+  // Update display on any change
+  dayCheckboxes.forEach(cb => cb.addEventListener('change', updateScheduleInput));
+  startTimeInput.addEventListener('input', updateScheduleInput);
+  endTimeInput.addEventListener('input', updateScheduleInput);
+
+  // Sync hidden fields on form submit
+  document.querySelector('form').addEventListener('submit', syncScheduleToHiddenInputs);
+
+  // Initial display update
+  updateScheduleInput();
+
+  // Preview trainee photo
+  document.getElementById('trainee_picture').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('trainee-preview');
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Preview coordinator photo
+  document.getElementById('coordinator_picture').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('coordinator-preview');
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>

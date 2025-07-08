@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 }
 
 // Get trainee's full info (trainee_id, name, email) using user_id
-$stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email FROM trainee WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email, profile_picture FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -30,7 +30,9 @@ if (!$trainee) {
 $trainee_id = $trainee['trainee_id'];
 $full_name = $trainee['first_name'] . ' ' . $trainee['surname'];
 $email = $trainee['email'];
-
+$profile_picture = !empty($trainee['profile_picture']) 
+    ? $trainee['profile_picture'] 
+    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"; // Default image
 
 $trainee_id = $trainee["trainee_id"];
 
@@ -434,7 +436,7 @@ body {
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
+        <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Profile Picture" class="profile-pic" />
         <h2><?= htmlspecialchars($full_name) ?></h2>
   <p><?= htmlspecialchars($email) ?></p>
       </div>

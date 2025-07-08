@@ -20,7 +20,7 @@ if ($conn->connect_error) {
 $full_name = "User"; // Default fallback
 $email = "";
 
-$stmt = $conn->prepare("SELECT first_name, surname, email FROM trainee WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT first_name, surname, email, profile_picture FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -29,9 +29,13 @@ $trainee_info = $result->fetch_assoc();
 if ($trainee_info) {
     $full_name = $trainee_info['first_name'] . ' ' . $trainee_info['surname'];
     $email = $trainee_info['email'];
+    $profile_picture = !empty($trainee_info['profile_picture'])
+    ? "uploads/profile_pics/" . $trainee_info['profile_picture']
+    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
 } else {
     // Optional: fallback or redirection
     $full_name = "Unknown Trainee";
+    $profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
 }
 
 $success = "";
@@ -420,7 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
+        <img src="<?= !empty($trainee['profile_picture']) ? htmlspecialchars($trainee['profile_picture']) . '?v=' . time() : 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png' ?>" alt="Profile" class="profile-pic" />
         <h2><?= htmlspecialchars($full_name) ?></h2>
 <p><?= htmlspecialchars($email) ?></p>
       </div>
@@ -449,7 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
       </a>
     </li>
     <li>
-      <a href="#">
+      <a href="profiledashboard.php">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 0 0-3-3.87"/>

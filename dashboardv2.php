@@ -19,9 +19,10 @@ $attendanceData = [];
 $full_name = "Unknown User";
 $email = "unknown@example.com"; // default fallback
 
-// Step 1: Get trainee_id, required_hours, full_name, and email
+$profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"; // default fallback
+
 $traineeQuery = $conn->prepare("
-    SELECT trainee_id, required_hours, email, CONCAT(first_name, ' ', surname) AS full_name 
+    SELECT trainee_id, required_hours, email, profile_picture, CONCAT(first_name, ' ', surname) AS full_name 
     FROM trainee 
     WHERE user_id = ?
 ");
@@ -34,6 +35,7 @@ if ($traineeRow = $traineeResult->fetch_assoc()) {
     $requiredHours = (int) $traineeRow["required_hours"];
     $full_name = $traineeRow["full_name"];
     $email = $traineeRow["email"];
+    $profile_picture = !empty($traineeRow["profile_picture"]) ? $traineeRow["profile_picture"] : $profile_picture;
 }
 $traineeQuery->close();
 
@@ -378,7 +380,7 @@ canvas {
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-  <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Profile" class="profile-pic" />
+  <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Profile" class="profile-pic" />
   <h2><?= htmlspecialchars($full_name) ?></h2>
   <p><?= htmlspecialchars($email) ?></p>
 </div>
