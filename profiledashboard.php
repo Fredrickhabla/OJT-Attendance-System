@@ -376,6 +376,8 @@ $stmt->execute([
       flex: 1.1;
       padding: 1rem;
       overflow-y: auto;
+       
+  
       position: relative;
       overflow: hidden;
       border-bottom: 1px solid #ddd;
@@ -613,6 +615,101 @@ $stmt->execute([
     .profile-section h2{
       margin-bottom: 0;
     }
+
+    /* Password Change Modal Styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.overlay-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.overlay-content h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.overlay-content .form-group {
+  margin-bottom: 15px;
+}
+
+.overlay-content input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.overlay-content .form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.overlay-content .btn {
+  padding: 8px 16px;
+}
+
+.overlay-content .cancel {
+  background: #eee;
+}
+.passbtn {
+    display: flex;
+  justify-content: center; /* centers the whole checkbox-label in the section */
+  margin-top: 200px;         /* pushes it to the bottom if container is flex-column */
+  padding-top: 20px;
+ 
+
+}
+
+
+
+#passbtn:hover {
+  background-color: #19794a;
+  transform: translateY(-2px);
+}
+
+#passbtn:active {
+  transform: scale(0.97);
+}
+
+.passbtn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 5rem;
+
+  }
+
+
+
+.checkbox-label {
+  display: flex;
+  align-items: left;
+  gap: 6px; /* Controls spacing between checkbox and text */
+  font-size: 16px;
+  cursor: pointer;
+    white-space: nowrap;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;     /* Removes default spacing */
+  padding: 0;
+  transform: scale(1.1); /* Optional: makes the checkbox slightly bigger */
+}
   </style>
   
 
@@ -698,6 +795,7 @@ $stmt->execute([
       <form method="POST" enctype="multipart/form-data" class="content">
 
         <!-- Left Section -->
+         <div>
         <div class="left-section">
           <div class="avatar">
             <img id="trainee-preview" 
@@ -711,6 +809,12 @@ $stmt->execute([
           <p class="email"><?= htmlspecialchars($user_email) ?></p>
           <label for="trainee_picture" class="btn"> Insert Photo</label>
           <input type="file" id="trainee_picture" name="trainee_picture" accept="image/*" style="display: none;">
+</div>
+
+    <div class="passbtn-container" style="margin-top: 16rem; ">
+  <label class="checkbox-label">
+    <input type="checkbox" id="togglePasswordForm">Change Password</label>
+</div>
 
           
           
@@ -759,9 +863,10 @@ $stmt->execute([
                   <label><input type="checkbox" name="days" value="Th"> Th</label>
                   <label><input type="checkbox" name="days" value="F"> F</label>
                 </div>
-                <input type="hidden" name="schedule_days" id="schedule_days" />
-                <input type="hidden" name="schedule_start" id="schedule_start" />
-                <input type="hidden" name="schedule_end" id="schedule_end" />
+              <input type="hidden" name="schedule_days" id="schedule_days" value="<?= htmlspecialchars($trainee['schedule_days'] ?? '') ?>" />
+<input type="hidden" name="schedule_start" id="schedule_start" value="<?= htmlspecialchars($trainee['schedule_start'] ?? '') ?>" />
+<input type="hidden" name="schedule_end" id="schedule_end" value="<?= htmlspecialchars($trainee['schedule_end'] ?? '') ?>" />
+
                 <div>
                   <label class="time-label" for="startTime">Start:
                     <input id="startTime" type="time" value="14:30" />
@@ -841,6 +946,32 @@ $stmt->execute([
 
       </div>
     </div>
+
+    <!-- Overlay Change Password Form -->
+<div id="passwordOverlay" class="overlay" style="display: none;">
+  <div class="overlay-content">
+    <h2>Change Password</h2>
+    <form id="passwordForm">
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <input type="password" id="currentPassword" name="currentPassword" required>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" onclick="submitPasswordChange()">Update</button>
+        <button type="button" class="btn cancel" onclick="closePasswordForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
       <script>
   const scheduleInput = document.getElementById('schedule');
@@ -935,4 +1066,75 @@ $stmt->execute([
       reader.readAsDataURL(file);
     }
   });
+
+  window.addEventListener('DOMContentLoaded', () => {
+  const savedDays = scheduleDaysInput.value.split(',');
+  const savedStart = scheduleStartInput.value;
+  const savedEnd = scheduleEndInput.value;
+
+  // Set checkboxes
+  dayCheckboxes.forEach(cb => {
+    if (savedDays.includes(cb.value)) {
+      cb.checked = true;
+    }
+  });
+
+  // Set times
+  if (savedStart) startTimeInput.value = savedStart;
+  if (savedEnd) endTimeInput.value = savedEnd;
+
+  updateScheduleInput();
+});
+
+// Show/Hide Overlay using checkbox
+const togglePasswordCheckbox = document.getElementById("togglePasswordForm");
+
+togglePasswordCheckbox.addEventListener("change", () => {
+  const overlay = document.getElementById("passwordOverlay");
+  overlay.style.display = togglePasswordCheckbox.checked ? "flex" : "none";
+});
+
+// Close password form (and uncheck checkbox)
+function closePasswordForm() {
+  document.getElementById("passwordOverlay").style.display = "none";
+  document.getElementById("togglePasswordForm").checked = false;
+}
+
+// Handle Password Submission
+function submitPasswordChange() {
+  const current = document.getElementById("currentPassword").value;
+  const newPass = document.getElementById("newPassword").value;
+  const confirm = document.getElementById("confirmPassword").value;
+
+  if (!current || !newPass || !confirm) {
+    alert("All fields are required.");
+    return;
+  }
+
+  if (newPass !== confirm) {
+    alert("New passwords do not match.");
+    return;
+  }
+
+  // Send to PHP
+  fetch("change_password.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `current=${encodeURIComponent(current)}&new=${encodeURIComponent(newPass)}`
+  })
+  .then(res => res.text())
+  .then(msg => {
+    alert(msg);
+    if (msg.toLowerCase().includes("success")) {
+      closePasswordForm();
+    }
+  })
+  .catch(() => {
+    alert("Something went wrong.");
+  });
+}
+
+
+
+
 </script>
