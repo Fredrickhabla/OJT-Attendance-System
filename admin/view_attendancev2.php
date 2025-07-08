@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 include('connection.php');
 
@@ -147,6 +146,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       max-width: 120px;
       max-height: 60px;
       display: block;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -245,22 +245,19 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
                 <td>
                   <?php if (!empty($row['signature'])): ?>
-                    <a href="/ojtform/<?= htmlspecialchars($row['signature']) ?>" target="_blank" title="View Signature">
-                      <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" />
-                    </a>
+                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" alt="Signature" class="signature-img" title="Click to enlarge" />
                   <?php else: ?>
                     <span class="text-muted">No signature</span>
                   <?php endif; ?>
                 </td>
-              <td style="text-align: center;">
-                <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
-                  <i class="bi bi-pencil"></i>
-                </a>
-                <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
-                  <i class="bi bi-trash"></i>
-                </a>
-              </td>
-
+                <td style="text-align: center;">
+                  <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
               </tr>
             <?php endforeach; ?>
             </tbody>
@@ -274,7 +271,36 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- Bootstrap Back to Report Button (Fixed at bottom right) -->
+<!-- Modal for Signature Image -->
+<div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="signatureModalLabel">Signature Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="" id="signatureModalImg" class="img-fluid" alt="Signature Image">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS + Modal Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.signature-img').forEach(function(img) {
+    img.addEventListener('click', function(e) {
+      const src = this.getAttribute('src');
+      const modalImg = document.getElementById('signatureModalImg');
+      modalImg.src = src;
+      const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
+      modal.show();
+    });
+  });
+</script>
+
+<!-- Back to Report Button -->
 <button type="button" class="btn btn-primary position-fixed bottom-0 end-0 m-3" onclick="window.location.href='report.php'">
   <i class="bi bi-arrow-up"></i> Back to Report
 </button>
