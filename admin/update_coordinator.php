@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $imagePath = '';
     if (!empty($_FILES['profile_picture']['name'])) {
         $filename = basename($_FILES['profile_picture']['name']);
-        $targetPath = "uploads/" . $filename;
+        $targetPath = "admin/uploads/" . $filename;
         move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetPath);
         $imagePath = $targetPath;
     }
