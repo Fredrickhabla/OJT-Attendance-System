@@ -9,31 +9,36 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Get trainee ID
     $traineeId = $_POST['trainee_id'] ?? '';
 
-    // Check if a file was uploaded successfully
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $fileTmp = $_FILES['photo']['tmp_name'];
-        $fileName = basename($_FILES['photo']['name']);
-        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $tmpFile = $_FILES['photo']['tmp_name'];
+        $originalName = basename($_FILES['photo']['name']);
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'gif', 'jfif'];
 
-        if (in_array($fileExt, $allowed)) {
-            // Build the filename WITHOUT extra "trainee_"
-            // For example: uploads/trainee_686788dbce4b4.jfif
-            $newFileName = "../uploads/" . $traineeId . "." . $fileExt;
+        if (in_array($ext, $allowed)) {
+            // Make sure the upload directory exists
+            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/ojtform/uploads/';
+            $webPathBase = 'uploads/';
 
-            // Move the file to uploads folder
-            if (move_uploaded_file($fileTmp, $newFileName)) {
-                // Update the profile_picture column
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Always save as uploads/{traineeId}.{ext}
+            $filename = $traineeId . "." . $ext;
+            $fullPath = $uploadDir . $filename;
+            $webPath = $webPathBase . $filename;
+
+            if (move_uploaded_file($tmpFile, $fullPath)) {
+                // Save relative path in database
                 $stmt = $pdo->prepare("UPDATE trainee SET profile_picture = ? WHERE trainee_id = ?");
-                $stmt->execute([$newFileName, $traineeId]);
+                $stmt->execute([$webPath, $traineeId]);
             }
         }
     }
 
-    // Redirect to traineeview.php with ?id=
     header("Location: traineeview.php?id=" . urlencode($traineeId));
     exit;
 }
