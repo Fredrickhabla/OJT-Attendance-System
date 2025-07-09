@@ -1,9 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
-    header("Location: /ojtform/indexv2.php");
-    exit;
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -202,6 +198,8 @@ flex-direction: column;
       margin-right: 6px;
     }
 
+    
+
   </style>
 </head>
 <body>
@@ -256,19 +254,9 @@ flex-direction: column;
 
   <!-- Main Content -->
   <div class="content">
-    <div class="topbar">Reports & Tools</div>
+    <div class="topbar">Blogs</div>
     <div class="main">
-      <div class="report-box">
-        <h2>Access Admin Tools</h2>
-
-        <a href="view_attendancev2.php" class="report-btn btn-green">
-          <i class="bi bi-calendar-check-fill"></i> View Attendance Records
-        </a>
-
-        <a href="manage_usersv2.php" class="report-btn btn-blue">
-          <i class="bi bi-people-fill"></i> Manage Users
-        </a>
-      </div>
+        
     </div>
   </div>
 </div>
