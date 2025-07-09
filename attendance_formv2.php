@@ -271,6 +271,8 @@ $conn->close();
    overflow: hidden;
    margin-bottom: 20px;
    height: 90%;
+   justify-content: center;
+   align-items: center;
 
     }
     .header {
