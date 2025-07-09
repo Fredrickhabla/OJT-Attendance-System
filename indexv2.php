@@ -282,7 +282,7 @@ h1.acerojt {
           <label for="remember">Remember me for 30 days</label>
         </div>
 
-        <a href="forgot_password.php" class="forgot">Forgot Password?</a>
+        <a href="forget_password.php" class="forgot">Forgot Password?</a>
         <button type="submit" class="signin-button">Sign in</button>
       </form>
     </div>
