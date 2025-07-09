@@ -669,7 +669,8 @@ $stmt->execute([
 }
 
 .overlay-content .cancel {
-  background: #eee;
+  background-color: #ccc;
+  color: #333;
 }
 .passbtn {
     display: flex;
