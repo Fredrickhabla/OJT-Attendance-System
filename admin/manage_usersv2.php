@@ -111,6 +111,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
+<body>
+
 <div class="layout">
   <aside class="sidebar">
     <div>
@@ -186,7 +188,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   <a href="delete_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
                     <i class="bi bi-trash"></i>
                   </a>
-                </td >
+                </td>
               </tr>
               <?php endforeach; ?>
             </tbody>
@@ -195,12 +197,18 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
           <p class="text-center">No users found.</p>
         <?php endif; ?>
+
+        <!-- Back to Report Button inside the box -->
+        <div class="mt-4 text-end">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='report.php'">
+            <i class="bi bi-arrow-left"></i> Back to Report
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
-<button type="button" class="btn btn-primary position-fixed bottom-0 end-0 m-3" onclick="window.location.href='report.php'">
-  <i class="bi bi-arrow-up"></i> Back to Report
-</button>
+
 </body>
 </html>
