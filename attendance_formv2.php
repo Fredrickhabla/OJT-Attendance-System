@@ -240,21 +240,28 @@ $conn->close();
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
     
     .main {
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px 20px;
+      margin-bottom: 20px;
+      padding: 0px 20px;
+    
     }
     .container {
       background: white;
-      border-radius: 28px;
-      padding: 40px;
-      width: 100%;
-      max-width: 800px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  border-radius: 28px;
+  padding: 30px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+   overflow: hidden;
+   margin-bottom: 20px;
+   height: 90%;
+
     }
     .header {
       text-align: center;
@@ -294,7 +301,7 @@ $conn->close();
       border: 2px solid #3b8c2a;
       border-radius: 8px;
       padding: 10px;
-      font-size: 15px;
+      font-size: 14px;
       transition: border 0.3s;
     }
     input:focus,
@@ -376,7 +383,7 @@ $conn->close();
   box-sizing: border-box;
 }
 #work_description {
-  height: 120px;
+  height: 100px;
   width: 206%;
   padding: 10px;
   font-size: 15px;
@@ -386,8 +393,12 @@ $conn->close();
   box-sizing: border-box;
 }
 
+.WOW {
+  margin-bottom: 40px;
+}
+
   </style>
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", function () {
   const timeInInput = document.getElementById("time_in");
   const timeOutInput = document.getElementById("time_out");
@@ -397,32 +408,54 @@ document.addEventListener("DOMContentLoaded", function () {
     const timeIn = timeInInput.value;
     const timeOut = timeOutInput.value;
 
-    if (timeIn && timeOut) {
-      const [inHour, inMin] = timeIn.split(":").map(Number);
-      const [outHour, outMin] = timeOut.split(":").map(Number);
+    // 💡 Show values in console
+    console.log("Time In:", timeIn);
+    console.log("Time Out:", timeOut);
 
-      const inTime = new Date(0, 0, 0, inHour, inMin);
-      const outTime = new Date(0, 0, 0, outHour, outMin);
-
-      let diff = (outTime - inTime) / 1000 / 60; // diff in minutes
-
-      if (diff < 0) {
-        diff += 24 * 60; // handle overnight shift
-      }
-
-      const hours = Math.floor(diff / 60);
-      const minutes = diff % 60;
-
-      // Example format: 9.25 (for 9 hours 15 minutes)
-      const decimalHours = (hours + minutes / 60).toFixed(2);
-      hoursInput.value = decimalHours;
+    if (!timeIn || !timeOut) {
+      hoursInput.value = "";
+      return;
     }
+
+    const [inHour, inMin] = timeIn.split(":").map(Number);
+    const [outHour, outMin] = timeOut.split(":").map(Number);
+
+    // 💡 Check if the parsed numbers are valid
+    if (
+      isNaN(inHour) || isNaN(inMin) ||
+      isNaN(outHour) || isNaN(outMin)
+    ) {
+      console.warn("Invalid time format");
+      hoursInput.value = "";
+      return;
+    }
+
+    // Construct date objects
+    const inDate = new Date(2000, 0, 1, inHour, inMin);
+    const outDate = new Date(2000, 0, 1, outHour, outMin);
+
+    // Handle overnight shift
+    if (outDate < inDate) {
+      outDate.setDate(outDate.getDate() + 1);
+    }
+
+    const diffMs = outDate - inDate;
+    const diffMinutes = diffMs / 1000 / 60;
+    const totalHours = (diffMinutes / 60).toFixed(2);
+
+    console.log("Calculated Decimal Hours:", totalHours);
+    hoursInput.value = totalHours;
   }
 
-  timeInInput.addEventListener("change", calculateHours);
-  timeOutInput.addEventListener("change", calculateHours);
+  timeInInput.addEventListener("input", calculateHours);
+  timeOutInput.addEventListener("input", calculateHours);
+
+  // If inputs are pre-filled
+  calculateHours();
 });
 </script>
+
+
 
 </head>
 <body>
@@ -515,7 +548,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="message error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" class="WOW">
         <div>
           <label for="date">Date</label>
           <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required />
