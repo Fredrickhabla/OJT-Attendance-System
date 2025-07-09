@@ -152,6 +152,8 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
+<body>
+
 <div class="layout">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -253,7 +255,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <span class="text-muted d-block text-center">No signature</span>
                   <?php endif; ?>
                 </td>
-
                 <td style="text-align: center;">
                   <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
@@ -261,7 +262,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
                     <i class="bi bi-trash"></i>
                   </a>
-                  
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -271,6 +271,14 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
           <p class="text-center">No attendance records found.</p>
         <?php endif; ?>
+
+        <!-- Back to Report Button inside the box -->
+        <div class="mt-4 text-end">
+          <button type="button" class="btn btn-primary" onclick="window.location.href='report.php'">
+            <i class="bi bi-arrow-left"></i> Back to Report
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -297,8 +305,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- Bootstrap JS + Modal Script -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
 <script>
   document.querySelectorAll('.signature-img').forEach(function(img) {
@@ -316,11 +322,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   });
 </script>
 
-
-<!-- Back to Report Button -->
-<button type="button" class="btn btn-primary position-fixed bottom-0 end-0 m-3" onclick="window.location.href='report.php'">
-  <i class="bi bi-arrow-up"></i> Back to Report
-</button>
-
 </body>
+
 </html>
