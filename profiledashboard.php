@@ -302,6 +302,7 @@ $stmt->execute([
       display: flex;
       flex-direction: column;
       overflow-y: auto;
+      
     }
 
 .topbar {
@@ -373,10 +374,10 @@ $stmt->execute([
     }
 
     .left-section {
-      flex: 1.1;
+      flex: 1;
       padding: 1rem;
       overflow-y: auto;
-       
+      padding-top: 2rem; /* Adjust padding to account for the fixed topbar */
   
       position: relative;
       overflow: hidden;
@@ -384,7 +385,8 @@ $stmt->execute([
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 26px;
+      
+       height: 100%;
     }
 
     @media (min-width: 768px) {
@@ -394,10 +396,12 @@ $stmt->execute([
       }
     }
 
+    
+
     .middle-section,
     .right-section {
-      padding: 1.5rem;
-      flex: 1.5;
+      padding: 1.4rem;
+      flex: 1.2;
       overflow-y: auto;
       border-bottom: 1px solid #ddd;
       justify-content: space-between; /* Makes sure bottom content stays at the bottom */
@@ -702,13 +706,18 @@ $stmt->execute([
   gap: 6px; /* Controls spacing between checkbox and text */
   font-size: 16px;
   cursor: pointer;
-    white-space: nowrap;
+  white-space: nowrap;
+  margin-top:35px;
 }
 
 .checkbox-label input[type="checkbox"] {
   margin: 0;     /* Removes default spacing */
   padding: 0;
   transform: scale(1.1); /* Optional: makes the checkbox slightly bigger */
+}
+
+.leftholder {
+    width: 25%;
 }
   </style>
   
@@ -795,7 +804,7 @@ $stmt->execute([
       <form method="POST" enctype="multipart/form-data" class="content">
 
         <!-- Left Section -->
-         <div>
+         <div class="leftholder">
         <div class="left-section">
           <div class="avatar">
             <img id="trainee-preview" 
@@ -809,12 +818,14 @@ $stmt->execute([
           <p class="email"><?= htmlspecialchars($user_email) ?></p>
           <label for="trainee_picture" class="btn"> Insert Photo</label>
           <input type="file" id="trainee_picture" name="trainee_picture" accept="image/*" style="display: none;">
-</div>
 
-    <div class="passbtn-container" style="margin-top: 16rem; ">
+          <div class="passbtn-container" style="margin-top: 16rem; ">
   <label class="checkbox-label">
     <input type="checkbox" id="togglePasswordForm">Change Password</label>
 </div>
+</div>
+
+    
 
           
           
