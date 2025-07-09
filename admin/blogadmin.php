@@ -16,6 +16,7 @@ if (!empty($search)) {
         CONCAT(t.first_name, ' ', t.surname) LIKE ?
         OR bp.title LIKE ?
         OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
+        
     )";
     $searchParam = "%" . $search . "%";
 }
