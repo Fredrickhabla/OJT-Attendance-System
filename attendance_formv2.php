@@ -55,6 +55,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $hours = $_POST["hours"];
     $work_description = trim($_POST["work_description"]);
 
+    
+
     // ✅ Get trainee_id from user_id
     $trainee_id = null;
     $trainee_query = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
@@ -90,11 +92,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($error)) {
         $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
 
+        if (strlen($time_in) === 5) {
+    $time_in .= ":00"; // Make it HH:MM:SS
+}
+if (strlen($time_out) === 5) {
+    $time_out .= ":00";
+}
+
         $stmt = $conn->prepare("INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, work_description, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssisss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
+        $stmt->bind_param("sssssiss", $attendance_id, $trainee_id, $date, $time_in, $time_out, $hours, $work_description, $signature_path);
 
         if ($stmt->execute()) {
             $success = "Attendance submitted successfully.";
+
         } else {
             $error = "Error saving attendance: " . $stmt->error;
         }
@@ -560,11 +570,11 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="time-pair-row">
           <div class="time-small">
             <label for="time_in">Time In</label>
-            <input type="time" id="time_in" name="time_in" required />
+            <input type="time" id="time_in" name="time_in" value="<?= isset($_POST['time_in']) ? $_POST['time_in'] : '' ?>" required />
           </div>
           <div class="time-small">
             <label for="time_out">Time Out</label>
-            <input type="time" id="time_out" name="time_out" required />
+            <input type="time" id="time_out" name="time_out" value="<?= isset($_POST['time_out']) ? $_POST['time_out'] : '' ?>" required />
           </div>
       <div>
         <label for="signature">E-Signature Image</label>

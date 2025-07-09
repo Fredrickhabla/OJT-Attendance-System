@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Check if user is logged in
 if (!isset($_SESSION["user_id"])) {
     echo "Unauthorized access.";
     exit();
@@ -20,7 +19,7 @@ try {
     $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Get current password hash
+    
     $stmt = $pdo->prepare("SELECT password_hashed FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -30,13 +29,13 @@ try {
         exit();
     }
 
-    // Update to new password
+    
     $newHashed = password_hash($new, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare("UPDATE users SET password_hashed = ? WHERE user_id = ?");
     $stmt->execute([$newHashed, $user_id]);
 
     echo "Password changed successfully.";
 } catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage(); // for debugging
+    echo "Database error: " . $e->getMessage(); 
 }
 ?>
