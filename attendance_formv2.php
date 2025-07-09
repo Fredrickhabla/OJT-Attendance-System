@@ -451,7 +451,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const diffMs = outDate - inDate;
     const diffMinutes = diffMs / 1000 / 60;
-    const totalHours = (diffMinutes / 60).toFixed(2);
+    const totalHours = Math.floor(diffMinutes / 60); 
 
     console.log("Calculated Decimal Hours:", totalHours);
     hoursInput.value = totalHours;
