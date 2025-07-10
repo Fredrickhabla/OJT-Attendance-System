@@ -34,6 +34,11 @@ if ($trainee && !empty($trainee['coordinator_id'])) {
 $stmt = $pdo->query("SELECT * FROM coordinator");
 $all_coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch all departments for dropdown
+$stmt = $pdo->query("SELECT * FROM departments WHERE status = 'active'");
+$all_departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 // Upload trainee photo
 $traineePicturePath = null;
 if (isset($_FILES['trainee_picture']) && $_FILES['trainee_picture']['error'] === UPLOAD_ERR_OK) {
@@ -70,7 +75,7 @@ if ($coordinatorPicturePath === null && isset($coordinator['profile_picture'])) 
 }
 
 // Set user name/email if from session or DB
-$user_name = $trainee['first_name'] . ' ' . $trainee['surname'] ?? '';
+$user_name = $trainee ? ($trainee['first_name'] . ' ' . $trainee['surname']) : '';
 $user_email = $trainee['email'] ?? '';
 
 
@@ -87,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $scheduleStart = $_POST['schedule_start'] ?? '';
     $scheduleEnd = $_POST['schedule_end'] ?? '';
     $requiredHours = $_POST['requiredHours'] ?? 0;
+    $departmentId = $_POST['department'] ?? null;
 
     $coordId = $_POST['existingCoordinator'];
     $coordinatorName = $_POST['coordName'];
@@ -129,7 +135,8 @@ if (!empty($coordId) && $coordId !== $coordinator_id) {
         schedule_end = ?, 
         required_hours = ?, 
         profile_picture = ?, 
-        coordinator_id = ?
+        coordinator_id = ?,
+        department_id = ?
         WHERE user_id = ?");
 
     $stmt->execute([
@@ -145,6 +152,7 @@ if (!empty($coordId) && $coordId !== $coordinator_id) {
         $requiredHours,
         $traineePicturePath,
         $coordId,
+        $departmentId,
         $user_id
     ]);
     } else {
@@ -162,7 +170,8 @@ $stmt = $pdo->prepare("UPDATE trainee SET
     schedule_end = ?, 
     required_hours = ?, 
     profile_picture = ?, 
-    coordinator_id = ?
+    coordinator_id = ?,
+    department_id = ?
     WHERE user_id = ?");
 
 $stmt->execute([
@@ -178,6 +187,7 @@ $stmt->execute([
     $requiredHours,
     $traineePicturePath,
     $coordId,
+    $departmentId,
     $user_id
 ]);
     }
@@ -191,7 +201,7 @@ $stmt->execute([
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Attendance Form</title>
+  <title>Profile</title>
   <style>
     * {
       box-sizing: border-box;
@@ -484,14 +494,15 @@ $stmt->execute([
     .form-vertical {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      margin-top: 1rem;
+      gap: .7rem;
+      margin-top: .5rem;
       flex-grow: 1;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
+      margin-top: 0px;
     }
 
     label {
@@ -703,6 +714,15 @@ $stmt->execute([
 
   }
 
+  .big-select {
+  font-size: 15px;
+  padding: 2px;
+  color: gray;
+  width: 100%; /* Optional: full width */
+  border-radius: 6px;
+  border: 1px solid #1f8f59; /* <-- fixed this line */
+}
+
 
 
 .checkbox-label {
@@ -900,7 +920,22 @@ $stmt->execute([
               <label for="requiredHours">Required Hours</label>
               <input id="requiredHours" type="number" name="requiredHours" value="<?= htmlspecialchars($trainee['required_hours']?? '') ?>" />
             </div>
+
+            <div class="form-group">
+  <label for="department">Department</label>
+  <select id="department" name="department" class = "big-select" required>
+    <option value="">-- Choose Department --</option>
+    <?php foreach ($all_departments as $dept): ?>
+      <option value="<?= htmlspecialchars($dept['department_id']) ?>" 
+        <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+        <?= htmlspecialchars($dept['name']) ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
+</div>
+
           </div>
+
         </div>
 
         <!-- Right Section -->
