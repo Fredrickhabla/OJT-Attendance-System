@@ -478,7 +478,7 @@ canvas {
    <div class="card wide">
   <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
   <span>Daily Time Record</span>
-  <button id="downloadBtn" style="background: none;  border: none; cursor: pointer; color: #3b7c1b;" title="Download DTR">
+  <button id="downloadBtn" style="background: none;  border: none; cursor: pointer; margin-right: 10px; color: #3b7c1b;" title="Download DTR">
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
