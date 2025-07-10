@@ -1,36 +1,13 @@
-<?php
-$host = "localhost";
-$dbname = "ojtformv3";
-$username = "root";
-$password = "";
-
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Count trainees
-    $stmtTrainee = $conn->query("SELECT COUNT(*) FROM trainee");
-    $traineeCount = $stmtTrainee->fetchColumn();
-
-    // Count coordinators
-    $stmtCoordinator = $conn->query("SELECT COUNT(*) FROM coordinator");
-    $coordinatorCount = $stmtCoordinator->fetchColumn();
-
-} catch (PDOException $e) {
-    die("DB Error: " . $e->getMessage());
-}
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard - OJT ACER</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Trainee - OJT ACER</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-   * {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -115,88 +92,89 @@ try {
     .bi {
       margin-right: 6px;
     }
+    .acerlogo {
+      text-align: center;
+      font-size: 20px;
+    }
+    .topbar {
+      background-color: #14532d;
+      color: white;
+      padding: 10px 16px;
+      font-size: 20px;
+      font-weight: bold;
 
-    /* Main */
+      display: flex;
+      align-items: center;
+      height: 55px;
+      text-align: left;
+    }
     .main {
       flex: 1;
-      padding: 28px;
-      overflow-y: auto;
-      margin-left: 30px;
-      margin-right: 30px;
-      margin-top:10px;
+      padding: 32px;
+      
+      margin-left: 20px;
+      margin-right: 20px;
+      margin-top: 10px;
+      
     }
+  
+   .main-content {
+  flex: 1;
+  
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      margin-bottom: 30px;
-      height: 200px;
+  justify-content: center;
+   overflow-y: auto;
+   width: 100%;
 
-    }
 
-    .card {
-      margin: 10px;
-      background: white;
-      border: 2px solid #166534;
-      border-radius: 8px;
-      padding: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  
+}
 
-    .card .info {
-      text-align: right;
-    }
+.card-wrapper {
+  background-color: transparent;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: none;
+  width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+width: 100%;
+   
+ 
+  
+}
 
-    .card .title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #166534;
-      margin-right : 10px;
-      padding: 10px;
-    }
+.card {
+  border: 2px solid #3a7d0f;
+  border-radius: 12px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  
+}
 
-    .card .value {
-      font-size: 32px;
-      font-weight: bold;
-      margin-right : 10px;
-      padding: 10px;
-    }
+.card .icon {
+  font-size: 40px;
+  color: #3a7d0f;
+}
 
-    .cardlogo {
-        width: 80px;
-        height: 80px;
-        margin-left: 15px;
-    }
+.card .label {
+  margin-top: 10px;
+  font-weight: 500;
+}
 
-    .cardlogo1 {
-        width: 90px;
-        height: 90px;
-        margin-left: 15px;
-    }
+.card.empty {
+  border: none;
+  background: transparent;
+}
 
-    .chart-container {
-        background: white;
-        border: 2px solid #166534;
-        border-radius: 8px;
-        padding: 20px;
-        height: 67%;
-        margin-left: 10px;
-        margin-right: 10px;
-        
-        
-    }
-
-    .acerlogo {
-        text-align: center;
-        font-size: 20px;
-    }
   </style>
 </head>
 <body>
-
 <div class="container">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -250,82 +228,84 @@ try {
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main">
+  <!-- Main Area -->
+  <div style="flex: 1; display: flex; flex-direction: column;">
 
-    <!-- Cards -->
-    <div class="cards">
-      <div class="card">
-        <img class="cardlogo" src="/ojtform/images/user.png" alt="Trainee Icon">
-        <div class="info">
-          <div class="title">TRAINEE</div>
-          <div class="value"><?php echo $traineeCount; ?></div>
+        <div class="topbar topbar-space-between">
+                <div class="topbar-left">
+            
+            Departments
+            </div>
+        
+
+
         </div>
-      </div>
-
-      <div class="card">
-        <img class="cardlogo1" src="/ojtform/images/multiple_user.png" alt="Trainee Icon">
-        <div class="info">
-          <div class="title">COORDINATOR</div>
-          <div class="value"><?php echo $coordinatorCount; ?></div>
+   <div class="main-content">
+      <div class="card-wrapper">
+        <div class="card">
+          <i class="fas fa-calculator icon"></i>
+    
+          <span class="label">Accounting</span>
         </div>
-      </div>
-    </div>
+        <div class="card">
+          <i class="fas fa-file-alt icon"></i>
+          <span class="label">Finance</span>
+        </div>
+        <div class="card">
+          <i class="fas fa-truck icon"></i>
+          <span class="label">Logistics</span>
+        </div>
+        <div class="card">
+          <i class="fas fa-dollar-sign icon"></i>
+          <span class="label">Sales</span>
+        </div>
+        <div class="card">
+          <i class="fas fa-clipboard-list icon"></i>
+          <span class="label">Inventory</span>
+        </div>
+        <div class="card">
+          <i class="fas fa-users icon"></i>
+          <span class="label">Human Resources</span>
+        </div>
+        <!-- Empty cards -->
+    
+        <div class="card">
+    <i class="fas fa-laptop-code icon"></i>
+    <span class="label">IT</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-bullhorn icon"></i>
+    <span class="label">Marketing</span>
+  </div>
 
-    <!-- Chart -->
-    <div class="chart-container">
-      <canvas id="barChart"></canvas>
-    </div>
-
-    <script>
-
-      const traineeCount = <?php echo $traineeCount; ?>;
-  const coordinatorCount = <?php echo $coordinatorCount; ?>;
-      const ctx = document.getElementById('barChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['TRAINEE', 'COORDINATOR'],
-          datasets: [{
-            label: 'OJT Count',
-            data: [traineeCount, coordinatorCount],
-            backgroundColor: ['#44830f', '#14532d'],
-            borderRadius: 10,
-            barThickness: 400
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 20,
-              ticks: {
-                stepSize: 5,
-                callback: value => value + '%'
-              },
-              grid: {
-                color: '#ddd'
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            }
-          }
-        }
-      });
-    </script>
-
-  </main>
+  
+  <div class="card">
+    <i class="fas fa-headset icon"></i>
+    <span class="label">Service</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-gavel icon"></i>
+    <span class="label">Legal</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-check-circle icon"></i>
+    <span class="label">Quality Assurance</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-cogs icon"></i>
+    <span class="label">Engineering</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-building icon"></i>
+    <span class="label">Administration</span>
+  </div>
+  <div class="card">
+    <i class="fas fa-industry icon"></i>
+    <span class="label">Operations</span>
+  </div>
 </div>
-
+      </div>
+    </div>
+  </div>
 </body>
 </html>
