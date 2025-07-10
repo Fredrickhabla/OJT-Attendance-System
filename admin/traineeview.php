@@ -406,6 +406,14 @@ $trainee = [
           </svg>
         <span>Blogs</span>
       </a>
+    <a href="department.php" style="display: flex; align-items: center; gap: 6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+        </svg>
+        <span>Department</span>
+    </a>
+
+
     </nav>
   </aside>
 
