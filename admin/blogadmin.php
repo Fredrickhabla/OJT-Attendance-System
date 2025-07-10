@@ -11,6 +11,37 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 $searchSql = '';
 $searchParam = '';
 
+// Pagination setup
+$limit = 10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Count total rows for pagination
+$countQuery = "SELECT COUNT(*) as total FROM blog_posts bp 
+               LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
+               WHERE 1=1";
+
+if ($filter !== 'all') {
+    $countQuery .= " AND bp.trainee_id = ?";
+}
+if (!empty($search)) {
+    $countQuery .= $searchSql;
+}
+
+$countStmt = $conn->prepare($countQuery);
+if ($filter !== 'all' && !empty($search)) {
+    $countStmt->bind_param("ssss", $filter, $searchParam, $searchParam, $searchParam);
+} elseif ($filter !== 'all') {
+    $countStmt->bind_param("s", $filter);
+} elseif (!empty($search)) {
+    $countStmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
+}
+$countStmt->execute();
+$countResult = $countStmt->get_result();
+$totalBlogs = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalBlogs / $limit);
+
+
 if (!empty($search)) {
     $searchSql = " AND (
         CONCAT(t.first_name, ' ', t.surname) LIKE ?
@@ -27,23 +58,29 @@ if ($filter === 'all') {
               FROM blog_posts bp
               LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
               WHERE 1=1 $searchSql
-              ORDER BY bp.created_at DESC";
+              ORDER BY bp.created_at DESC
+              LIMIT ? OFFSET ?";
 } else {
     $query = "SELECT bp.*, t.first_name, t.surname 
               FROM blog_posts bp
               LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
               WHERE bp.trainee_id = ? $searchSql
-              ORDER BY bp.created_at DESC";
+              ORDER BY bp.created_at DESC
+              LIMIT ? OFFSET ?";
 }
+
 
 $stmt = $conn->prepare($query);
 if ($filter !== 'all' && !empty($search)) {
-    $stmt->bind_param("ssss", $filter, $searchParam, $searchParam, $searchParam);
+    $stmt->bind_param("ssssii", $filter, $searchParam, $searchParam, $searchParam, $limit, $offset);
 } elseif ($filter !== 'all') {
-    $stmt->bind_param("s", $filter);
+    $stmt->bind_param("sii", $filter, $limit, $offset);
 } elseif (!empty($search)) {
-    $stmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
+    $stmt->bind_param("sssii", $searchParam, $searchParam, $searchParam, $limit, $offset);
+} else {
+    $stmt->bind_param("ii", $limit, $offset);
 }
+
 
 $stmt->execute();
 $result = $stmt->get_result();
@@ -410,15 +447,19 @@ flex-direction: column;
   border-radius: 9999px;
   border: 1px solid #d1d5db;
   font-size: 14px;
+  
+
 }
 
 .search-icon {
   position: absolute;
-  right: 14px;
+  top: 12px;
+  right: 18px;
   width: 20px;
   height: 20px;
   color: #9ca3af;
   pointer-events: none;
+  
 }
 
 .bond-paper {
@@ -463,6 +504,32 @@ border-radius: 4px;
   border: 1px solid #ccc;
 }
 
+.pagination {
+  text-align: right;
+  margin: 20px 0;
+ 
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 0 4px;
+  background-color: #f1f1f1;
+  color: #333;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.pagination a.active {
+  background-color: #047857;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination a:hover {
+  background-color:rgb(12, 100, 74);
+  color: white;
+}
 
 
 
@@ -561,8 +628,8 @@ border-radius: 4px;
 
   <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search by name, title, or date..." value="<?= htmlspecialchars($search) ?>">
   
-  <button type="submit" style="background: none; border: none; cursor: pointer;">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+  <button type="submit" style="background: none; border: none; cursor: pointer; ">
+    <svg  xmlns="http://www.w3.org/2000/svg" fill="none"
          viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
@@ -603,6 +670,21 @@ border-radius: 4px;
     </div>
   </div>
 <?php endwhile; ?>
+
+<div class="pagination">
+  <?php if ($page > 1): ?>
+    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>
+  <?php endif; ?>
+
+  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" 
+       class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+  <?php endfor; ?>
+
+  <?php if ($page < $totalPages): ?>
+    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
+  <?php endif; ?>
+</div>
 
         </div>
       </section>
