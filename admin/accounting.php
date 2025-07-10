@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Trainee - OJT ACER</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <title>Accounting - OJT ACER</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -92,92 +91,100 @@
     .bi {
       margin-right: 6px;
     }
-    .acerlogo {
-      text-align: center;
-      font-size: 20px;
-    }
+
     .topbar {
       background-color: #14532d;
       color: white;
       padding: 10px 16px;
       font-size: 20px;
       font-weight: bold;
-
       display: flex;
       align-items: center;
       height: 55px;
       text-align: left;
     }
-    .main {
+
+    .main-content {
       flex: 1;
-      padding: 32px;
-      
-      margin-left: 20px;
-      margin-right: 20px;
-      margin-top: 10px;
-      
+      padding: 24px;
+      overflow-y: auto;
     }
-  
-   .main-content {
-  flex: 1;
-  
 
-  justify-content: center;
-   overflow-y: auto;
-   width: 100%;
+    .card-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
+    .card {
+      border: 2px solid #3a7d0f;
+      border-radius: 12px;
+      background-color: white;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-  
-}
+    .card .icon {
+      font-size: 32px;
+      color: #3a7d0f;
+    }
 
-.card-wrapper {
-  background-color: transparent;
-  padding: 40px;
-  border-radius: 24px;
-  box-shadow: none;
-  width: 1000px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-width: 100%;
-   
- 
-  
-}
+    .card .label {
+      margin-top: 8px;
+      font-weight: 500;
+      text-align: center;
+    }
 
-.card {
-  border: 2px solid #3a7d0f;
-  border-radius: 12px;
-  height: 150px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-.card .icon {
-  font-size: 40px;
-  color: #3a7d0f;
-}
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
 
-.card .label {
-  margin-top: 10px;
-  font-weight: 500;
-}
+    th {
+      background-color: #3a7d0f;
+      color: white;
+    }
 
-.card.empty {
-  border: none;
-  background: transparent;
-}
+    tr:hover {
+      background-color: #f1f1f1;
+    }
 
+    .upload-btn {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 10px 16px;
+      background-color: #3a7d0f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .upload-btn:hover {
+      background-color: #2c6b11;
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <!-- Sidebar -->
-  <aside class="sidebar">
+<aside class="sidebar">
     <h1 class="acerlogo">OJT - ACER</h1>
     <div class="menu-label">Menu</div>
     <nav class="nav">
@@ -228,82 +235,70 @@ width: 100%;
     </div>
   </aside>
 
-  <!-- Main Area -->
-  <div style="flex: 1; display: flex; flex-direction: column;">
 
-        <div class="topbar topbar-space-between">
-                <div class="topbar-left">
-            
-            Departments
-            </div>
-        
-        </div>
-   <div class="main-content">
+  <!-- Main -->
+  <div style="flex:1; display:flex; flex-direction:column;">
+    <div class="topbar">
+      Accounting Department
+    </div>
+
+    <div class="main-content">
+      <!-- Statistics -->
       <div class="card-wrapper">
-      <div class="card" onclick="window.location.href='accounting.php';" style="cursor: pointer;">
-        <i class="fas fa-calculator icon"></i>
-        <span class="label">Accounting</span>
-      </div>
-
-        <div class="card">
-          <i class="fas fa-file-alt icon"></i>
-          <span class="label">Finance</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-truck icon"></i>
-          <span class="label">Logistics</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-dollar-sign icon"></i>
-          <span class="label">Sales</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-clipboard-list icon"></i>
-          <span class="label">Inventory</span>
-        </div>
         <div class="card">
           <i class="fas fa-users icon"></i>
-          <span class="label">Human Resources</span>
+          <span class="label">5 Trainees</span>
         </div>
-        <!-- Empty cards -->
-    
         <div class="card">
-    <i class="fas fa-laptop-code icon"></i>
-    <span class="label">IT</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-bullhorn icon"></i>
-    <span class="label">Marketing</span>
-  </div>
-
-  
-  <div class="card">
-    <i class="fas fa-headset icon"></i>
-    <span class="label">Service</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-gavel icon"></i>
-    <span class="label">Legal</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-check-circle icon"></i>
-    <span class="label">Quality Assurance</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-cogs icon"></i>
-    <span class="label">Engineering</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-building icon"></i>
-    <span class="label">Administration</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-industry icon"></i>
-    <span class="label">Operations</span>
-  </div>
-</div>
+          <i class="fas fa-file-alt icon"></i>
+          <span class="label">12 Reports Submitted</span>
+        </div>
+        <div class="card">
+          <i class="fas fa-check-circle icon"></i>
+          <span class="label">3 Completed</span>
+        </div>
       </div>
+
+      <!-- Upload Button -->
+      <a href="#" class="upload-btn"><i class="bi bi-upload"></i> Upload Report</a>
+
+      <!-- Trainee Table -->
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>School</th>
+            <th>Hours Completed</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Juan Dela Cruz</td>
+            <td>ABC University</td>
+            <td>120</td>
+            <td>Active</td>
+            <td>
+              <a href="#">View</a> |
+              <a href="#">Edit</a>
+            </td>
+          </tr>
+          <tr>
+            <td>Maria Santos</td>
+            <td>XYZ College</td>
+            <td>150</td>
+            <td>Completed</td>
+            <td>
+              <a href="#">View</a> |
+              <a href="#">Edit</a>
+            </td>
+          </tr>
+          <!-- More rows as needed -->
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 </body>
 </html>

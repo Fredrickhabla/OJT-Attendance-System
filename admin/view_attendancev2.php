@@ -24,6 +24,8 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Attendance Records</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"/>
+
   <style>
   * {
       margin: 0;
@@ -31,17 +33,14 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     body {
       background-color: #f0f2f5;
       color: #333;
     }
-
     .layout {
       display: flex;
       height: 100vh;
     }
-
     .sidebar {
       width: 300px;
       background-color: #44830f;
@@ -50,13 +49,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: flex;
       flex-direction: column;
     }
-
     .sidebar h1 {
       font-size: 22px;
       margin-bottom: 40px;
       text-align: center;
     }
-
     .menu-label {
       text-transform: uppercase;
       font-size: 13px;
@@ -64,13 +61,11 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       margin-bottom: 16px;
       opacity: 0.8;
     }
-
     .nav {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-
     .nav a {
       display: flex;
       align-items: center;
@@ -80,19 +75,15 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       border-radius: 4px;
       transition: 0.2s;
     }
-
     .nav a:hover {
       background-color: #14532d;
     }
-
     .nav svg {
       margin-right: 8px;
     }
-
     .logout {
       margin-top: auto;
     }
-
     .logout a {
       display: flex;
       align-items: center;
@@ -102,11 +93,9 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       border-radius: 6px;
       transition: 0.2s;
     }
-
     .logout a:hover {
       background-color: #2c6b11;
     }
-
     .bi {
       margin-right: 6px;
     }
@@ -114,7 +103,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       text-align: center;
       font-size: 20px;
     }
-
     .content {
       flex: 1;
       display: flex;
@@ -152,8 +140,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-<body>
-
 <div class="layout">
   <!-- Sidebar -->
   <aside class="sidebar">
@@ -185,13 +171,19 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </svg>
           Report
         </a>
-      <a href="blogadmin.php">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
-            </svg>
-            <span>Blogs</span>
+        <a href="blogadmin.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+          </svg>
+          Blogs
         </a>
+        <a href="department.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+          </svg>
+          Department
       </nav>
     </div>
     <div class="logout">
@@ -216,7 +208,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <?php if ($records): ?>
         <div class="table-responsive">
-          <table class="table table-bordered table-striped">
+          <table id="attendanceTable" class="table table-bordered table-striped">
             <thead class="table-success">
               <tr>
                 <th>Name</th>
@@ -279,7 +271,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <p class="text-center">No attendance records found.</p>
         <?php endif; ?>
 
-        <!-- Back to Report Button inside the box -->
         <div class="mt-4 text-end">
           <button type="button" class="btn btn-primary" onclick="window.location.href='report.php'">
             <i class="bi bi-arrow-left"></i> Back to Report
@@ -291,7 +282,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- Modal for Signature Image -->
 <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -310,19 +300,24 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- Bootstrap JS + Modal Script -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+  $(document).ready(function() {
+    $('#attendanceTable').DataTable({
+      "order": [[1, "desc"]],
+      "pageLength": 10
+    });
+  });
+
   document.querySelectorAll('.signature-img').forEach(function(img) {
     img.addEventListener('click', function(e) {
       const src = this.getAttribute('src');
-      const modalImg = document.getElementById('signatureModalImg');
-      modalImg.src = src;
-
-      const downloadLink = document.getElementById('downloadSignatureBtn');
-      downloadLink.href = src;
-
+      document.getElementById('signatureModalImg').src = src;
+      document.getElementById('downloadSignatureBtn').href = src;
       const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
       modal.show();
     });
@@ -330,5 +325,4 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </script>
 
 </body>
-
 </html>
