@@ -89,6 +89,8 @@ $conn->close(); // ✅ Close the connection once at the end
   <title>User Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/lucide@latest/dist/umd/lucide.min.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
 </head>
 <style>
     * {
@@ -474,7 +476,19 @@ canvas {
 
     <!-- Right Column (Daily Time Record) -->
    <div class="card wide">
-  <div class="card-header">Daily Time Record</div>
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+  <span>Daily Time Record</span>
+  <button id="downloadBtn" style="background: none;  border: none; cursor: pointer; color: #3b7c1b;" title="Download DTR">
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </button>
+</div>
+
+
   <div class="table-wrapper">
     <table class="dtr-table" id="dtrTable">
       <thead>
@@ -577,7 +591,12 @@ const userName = <?= json_encode($full_name) ?>;
 
 drawProgressCircle("progressCircle", <?= $completedHours ?>, <?= $requiredHours ?>);
 
- 
+ document.getElementById("downloadBtn").addEventListener("click", function () {
+  const table = document.getElementById("dtrTable");
+  const workbook = XLSX.utils.table_to_book(table, { sheet: "Daily Time Record" });
+  XLSX.writeFile(workbook, "DailyTimeRecord.xlsx");
+});
+
 
 </script>
 

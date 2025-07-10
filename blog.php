@@ -37,9 +37,22 @@ $profile_picture = !empty($trainee['profile_picture'])
 $trainee_id = $trainee["trainee_id"];
 
 $posts = [];
+// Pagination variables
+$limit = 8;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
 
-$stmt = $conn->prepare("SELECT post_id, title, content, created_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC");
-$stmt->bind_param("s", $trainee_id);
+// Count total posts for pagination
+$count_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM blog_posts WHERE trainee_id = ?");
+$count_stmt->bind_param("s", $trainee_id);
+$count_stmt->execute();
+$count_result = $count_stmt->get_result()->fetch_assoc();
+$total_posts = $count_result['total'];
+$total_pages = ceil($total_posts / $limit);
+
+
+$stmt = $conn->prepare("SELECT post_id, title, content, created_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
+$stmt->bind_param("sii", $trainee_id, $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -428,6 +441,33 @@ body {
   margin-bottom: 15px;
 }
 
+.pagination {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 0 4px;
+  background-color: #f1f1f1;
+  color: #333;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.pagination a.active {
+  background-color: #047857;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination a:hover {
+  background-color:rgb(12, 100, 74);
+  color: white;
+}
+
+
 
     </style>
 
@@ -556,6 +596,21 @@ body {
 <?php endforeach; ?>
 
 </div>
+
+<div class="pagination">
+  <?php if ($page > 1): ?>
+    <a href="?page=<?= $page - 1 ?>">&laquo; Prev</a>
+  <?php endif; ?>
+
+  <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+    <a href="?page=<?= $i ?>" <?= $i === $page ? 'class="active"' : '' ?>><?= $i ?></a>
+  <?php endfor; ?>
+
+  <?php if ($page < $total_pages): ?>
+    <a href="?page=<?= $page + 1 ?>">Next &raquo;</a>
+  <?php endif; ?>
+</div>
+
 
     </div>
 

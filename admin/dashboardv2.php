@@ -19,6 +19,29 @@ try {
 } catch (PDOException $e) {
     die("DB Error: " . $e->getMessage());
 }
+
+
+if (isset($_POST['export_excel'])) {
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $stmt = $pdo->query("SELECT trainee_id, log_date, time_in, time_out FROM daily_time_record ORDER BY log_date DESC");
+
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=daily_time_record.xls");
+
+        echo "Trainee ID\tDate\tTime In\tTime Out\n";
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "{$row['trainee_id']}\t{$row['log_date']}\t{$row['time_in']}\t{$row['time_out']}\n";
+        }
+        exit; // stop further HTML from rendering
+    } catch (PDOException $e) {
+        die("Error: " . $e->getMessage());
+    }
+}
+
+
 ?>
 
 
