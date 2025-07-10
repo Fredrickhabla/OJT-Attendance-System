@@ -380,6 +380,13 @@ $trainee = [
         </svg>
         Report
       </a>
+      <a href="blogadmin.php">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+          </svg>
+        <span>Blogs</span>
+      </a>
     </nav>
   </aside>
 
@@ -392,18 +399,17 @@ $trainee = [
         <div class="info-progress-wrapper">
           <!-- Left: Trainee Info -->
           <div style="flex: 1;">
-<div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-  <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile Picture" class="profile-img" />
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+            <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile Picture" class="profile-img" />
 
-  <form action="upload_photo.php" method="POST" enctype="multipart/form-data" style="display:inline;">
-    <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($trainee['trainee_id']) ?>">
-    <input type="file" name="photo" id="photoInput" style="display:none;" accept="image/*" onchange="this.form.submit()">
-    <button type="button" class="add-photo-btn" onclick="document.getElementById('photoInput').click();">
-      Add Photo
-    </button>
-  </form>
-</div>
-
+            <form action="upload_photo.php" method="POST" enctype="multipart/form-data" style="display:inline;">
+              <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($trainee['trainee_id']) ?>">
+              <input type="file" name="photo" id="photoInput" style="display:none;" accept="image/*" onchange="this.form.submit()">
+              <button type="button" class="add-photo-btn" onclick="document.getElementById('photoInput').click();">
+                Add Photo
+              </button>
+            </form>
+          </div>
 
             <div class="info-row"><b>Full Name:</b> <?= htmlspecialchars($trainee['name']) ?></div>
             <div class="info-row"><b>Email Address:</b> <?= htmlspecialchars($trainee['email']) ?></div>
@@ -417,9 +423,9 @@ $trainee = [
           <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <?php
               $requiredHours = $trainee['required_hours'];
-$completedHours = $trainee['completed_hours'];
-$remainingHours = $requiredHours - $completedHours;
-$percentage = round(($completedHours / $requiredHours) * 100);
+              $completedHours = $trainee['completed_hours'];
+              $remainingHours = $requiredHours - $completedHours;
+              $percentage = round(($completedHours / $requiredHours) * 100);
 
             ?>
             <h3 style="margin-bottom: 16px; font-size: 20px; color: #2e7d32;">Progress Overview</h3>
