@@ -28,6 +28,15 @@ $stmt->execute();
 
 $result = $stmt->get_result();
 
+$deptQuery = $conn->query("SELECT department_id, name FROM departments ORDER BY name ASC");
+$departments = [];
+
+if ($deptQuery && $deptQuery->num_rows > 0) {
+    while ($deptRow = $deptQuery->fetch_assoc()) {
+        $departments[] = $deptRow;
+    }
+}
+
 if ($result->num_rows === 0) {
     echo "<h2 style='color:red;'>Trainee not found for ID: $id</h2>";
 
@@ -317,6 +326,16 @@ $trainee = [
   font-weight: bold;
 }
 
+  .big-select {
+    font-size: 12px;
+    padding: 8px;
+    width: 100%;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 0.5px solid gray;
+  }
+
+
 #editModal form input[type="text"],
 #editModal form input[type="email"],
 #editModal form input[type="time"] {
@@ -499,6 +518,17 @@ $trainee = [
       <input type="text" name="schedule_days" value="<?= htmlspecialchars($row["schedule_days"]) ?>" placeholder="e.g., M, T, W" required>
       <input type="time" name="schedule_start" value="<?= htmlspecialchars($row["schedule_start"]) ?>" required>
       <input type="time" name="schedule_end" value="<?= htmlspecialchars($row["schedule_end"]) ?>" required>
+
+      <label>Department:</label>
+<select name="department_id" class="big-select" required>
+  <option value="">-- Select Department --</option>
+  <?php foreach ($departments as $dept): ?>
+    <option value="<?= $dept['department_id'] ?>"
+      <?= ($row['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+      <?= htmlspecialchars($dept['name']) ?>
+    </option>
+  <?php endforeach; ?>
+</select>
 
       <br><br>
       <button type="submit" style="display: block; margin: 0 auto;">Save Changes</button>

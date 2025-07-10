@@ -26,13 +26,19 @@ while ($row = $result->fetch_assoc()) {
     $all_coordinators[] = $row;
 }
 
+$departments = [];
+$result = $conn->query("SELECT department_id, name FROM departments ORDER BY name");
+while ($row = $result->fetch_assoc()) {
+    $departments[] = $row;
+}
+
 // Fetch trainee data (if $trainee_id is defined somewhere else)
 $trainee = [];
 if (!empty($trainee_id)) {
-    $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address, schedule_days, schedule_start, schedule_end, required_hours, profile_picture FROM trainee WHERE trainee_id = ?");
+    $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address, schedule_days, schedule_start, schedule_end, required_hours, department_id, profile_picture FROM trainee WHERE trainee_id = ?");
     $stmt->bind_param("s", $trainee_id);
     $stmt->execute();
-    $stmt->bind_result($first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $profile_picture);
+    $stmt->bind_result($first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $department_id, $profile_picture);
     if ($stmt->fetch()) {
         $trainee = compact('first_name', 'surname', 'email', 'school', 'phone_number', 'address', 'schedule_days', 'schedule_start', 'schedule_end', 'required_hours', 'profile_picture');
     }
@@ -84,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $schedule_days = $_POST['schedule_days'] ?? '';
     $schedule_start = $_POST['schedule_start'] ?? '';
     $schedule_end = $_POST['schedule_end'] ?? '';
+    $department_id = $_POST['department_id'] ?? null;
 
     $selectedCoordinatorId = $_POST['existingCoordinator'] ?? '';
     $coord_name = trim($_POST['coordName'] ?? '');
@@ -107,18 +114,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!$hasTrainee) {
         $trainee_id = uniqid("trainee_");
-        $stmt = $conn->prepare("INSERT INTO trainee (trainee_id, user_id, first_name, surname, email, school, phone_number, address, schedule_days, schedule_start, schedule_end, required_hours, profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssssssssis", $trainee_id, $user_id, $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $trainee_picture_path);
+        $stmt = $conn->prepare("INSERT INTO trainee (trainee_id, user_id, first_name, surname, email, school, phone_number, address, schedule_days, schedule_start, schedule_end, required_hours, department_id, profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssssssssiss", $trainee_id, $user_id, $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $department_id, $trainee_picture_path);
+
         $stmt->execute();
         $stmt->close();
     } else {
         $trainee_id = $trainee_id_check;
         if ($trainee_picture_path) {
-            $stmt = $conn->prepare("UPDATE trainee SET first_name=?, surname=?, email=?, school=?, phone_number=?, address=?, schedule_days=?, schedule_start=?, schedule_end=?, required_hours=?, profile_picture=? WHERE trainee_id=?");
-            $stmt->bind_param("ssssssssssss", $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $trainee_picture_path, $trainee_id);
+            $stmt = $conn->prepare("UPDATE trainee SET first_name=?, surname=?, email=?, school=?, phone_number=?, address=?, schedule_days=?, schedule_start=?, schedule_end=?, required_hours=?, department_id=?, profile_picture=? WHERE trainee_id=?");
+            $stmt->bind_param("sssssssssssss", $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $department_id, $trainee_picture_path, $trainee_id);
         } else {
-            $stmt = $conn->prepare("UPDATE trainee SET first_name=?, surname=?, email=?, school=?, phone_number=?, address=?, schedule_days=?, schedule_start=?, schedule_end=?, required_hours=? WHERE trainee_id=?");
-            $stmt->bind_param("sssssssssis", $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $trainee_id);
+            $stmt = $conn->prepare("UPDATE trainee SET first_name=?, surname=?, email=?, school=?, phone_number=?, address=?, schedule_days=?, schedule_start=?, schedule_end=?, required_hours=?, department_id=?WHERE trainee_id=?");
+            $stmt->bind_param("sssssssssiss", $first_name, $surname, $email, $school, $phone_number, $address, $schedule_days, $schedule_start, $schedule_end, $required_hours, $department_id, $trainee_id);
         }
         $stmt->execute();
         $stmt->close();
@@ -473,6 +481,20 @@ h2 {
   border-radius: 50%;
 }
 
+.dept {
+  margin-top: 1rem;
+}
+
+.big-select {
+  font-size: 12px;
+  padding: 10px;
+  color: gray;
+  width: 100%; /* Optional: full width */
+  border-radius: 6px;
+  border: 1px solid #1f8f59; /* <-- fixed this line */
+}
+
+
 
   </style>
 </head>
@@ -564,6 +586,19 @@ h2 {
 
             </div>
           </div>
+          <div class="form-group">
+  <label for="department_id" class="dept">Department</label>
+  <select id="department_id" name="department_id" class="big-select" required>
+    <option value="" class="deptlist">-- Select Department --</option>
+    <?php foreach ($departments as $dept): ?>
+      <option value="<?= $dept['department_id'] ?>" 
+        <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+        <?= htmlspecialchars($dept['name']) ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
+</div>
+
         </div>
 
         <!-- Right Section -->
