@@ -2,7 +2,7 @@
 session_start();
 
 // Connect to database
-$conn = new mysqli("127.0.0.1", "ojtacer", "acerojtpassword", "ojtformv3");
+$conn = new mysqli("127.0.0.1", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
