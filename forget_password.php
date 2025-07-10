@@ -37,15 +37,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $mail = new PHPMailer(true);
         try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'YOUR_EMAIL@gmail.com';
-            $mail->Password = 'YOUR_APP_PASSWORD';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+           $mail->isSMTP();
+$mail->Host = 'smtp.gmail.com';
+$mail->SMTPAuth = true;
+$mail->Username = 'your@gmail.com';
+$mail->Password = 'your_app_password'; // App password here
+$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+$mail->Port = 587;
 
-            $mail->setFrom('YOUR_EMAIL@gmail.com', 'AcerOJT');
+            $mail->setFrom('ojtacer@gmail.com', 'AcerOJT');
             $mail->addAddress($email, $username);
 
             $mail->isHTML(true);

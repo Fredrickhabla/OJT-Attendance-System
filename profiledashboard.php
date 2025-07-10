@@ -95,21 +95,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $coordinatorPhone = $_POST['phone'];
 
 
-    // If an existing coordinator is selected, update its info
-if (!empty($coordId)) {
-    $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
-    $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordId]);
-}
 
-    // If coordinator is new, insert it
-    if (empty($coordId)) {
+if (!empty($coordId) && $coordId !== $coordinator_id) {
+ 
+} else {
+  
+    if (!empty($coordinator_id)) {
+      
+        $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
+        $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordinator_id]);
+
+        $coordId = $coordinator_id;
+    } else {
+       
         $coordId = uniqid('coord_');
         $stmt = $pdo->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) 
                                VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$coordId, $coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath]);
     }
-
-    
+}
 
     if ($trainee) {
         

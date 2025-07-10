@@ -2,7 +2,7 @@
 session_start();
 
 // Connect to database
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
+$conn = new mysqli("127.0.0.1", "ojtacer", "acerojtpassword", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -282,7 +282,7 @@ h1.acerojt {
           <label for="remember">Remember me for 30 days</label>
         </div>
 
-        <a href="forget_password.php" class="forgot">Forgot Password?</a>
+        <a href="forgot_password.php" class="forgot">Forgot Password?</a>
         <button type="submit" class="signin-button">Sign in</button>
       </form>
     </div>
