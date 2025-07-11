@@ -22,3 +22,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <?php if ($reversed): ?>
     <p><strong>Reversed name:</strong> <?= htmlspecialchars($reversed) ?></p>
 <?php endif; ?>
+
+

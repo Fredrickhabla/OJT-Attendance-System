@@ -526,21 +526,47 @@ canvas {
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const calendarEl = document.getElementById('calendar');
-    new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      contentHeight: 350,  // Shrink vertical size
-      aspectRatio: 1.5,    // Wider layout
-      headerToolbar: {
-        left: 'prev,next',
-        center: 'title',
-        right: '',
-      }
-    }).render();
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    contentHeight: 350,
+    aspectRatio: 1.5,
+    headerToolbar: {
+      left: 'prev,next',
+      center: 'title',
+      right: '',
+    },
+    events: attendanceEvents // ← add attendance days to calendar
   });
+
+  calendar.render();
+});
+
 
     const data = <?= json_encode($attendanceData) ?>;
 const userName = <?= json_encode($full_name) ?>;
+
+// Convert attendance data into calendar events (for green background)
+const today = new Date(); // get current date
+today.setHours(0, 0, 0, 0); // remove time part for comparison
+
+
+
+const attendanceEvents = data
+  .filter(entry => {
+    const entryDate = new Date(entry.date);
+    entryDate.setHours(0, 0, 0, 0);
+    return entryDate <= today;
+  })
+  .map(entry => ({
+    title: 'Present',
+    start: entry.date,
+    display: 'auto',
+    backgroundColor: '#d1fae5',
+    borderColor: '#34d399',
+    textColor: '#065f46'
+  }));
+
 
 
   const tableBody = document.querySelector('#dtrTable tbody');
