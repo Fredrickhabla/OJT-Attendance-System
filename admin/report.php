@@ -119,7 +119,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
       justify-content: center;
       align-items: center;
       display: flex;
-flex-direction: column;
+      flex-direction: column;
   
     }
 

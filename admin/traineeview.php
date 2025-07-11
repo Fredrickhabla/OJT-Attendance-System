@@ -128,8 +128,9 @@ $trainee = [
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
     body {
       background-color: #f4f6f9;
       color: #333;
@@ -143,11 +144,16 @@ $trainee = [
       background-color: #44830f;
       color: white;
       padding: 24px;
+      display: flex;
+      flex-direction: column;
     }
+
     .sidebar h1 {
       font-size: 22px;
       margin-bottom: 40px;
+      text-align: center;
     }
+
     .menu-label {
       text-transform: uppercase;
       font-size: 13px;
@@ -403,12 +409,13 @@ $trainee = [
           </svg>
         <span>Blogs</span>
       </a>
-    <a href="department.php" style="display: flex; align-items: center; gap: 6px;">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
-        </svg>
-        <span>Department</span>
-    </a>
+      <a href="department.php" style="display: flex; align-items: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+          </svg>
+          <span>Department</span>
+      </a>
+
     </nav>
   </aside>
     
