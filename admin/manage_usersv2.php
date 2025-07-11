@@ -18,6 +18,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Manage Users</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
   <style>
     body {
       background-color: #f4f6f9;
@@ -111,8 +113,6 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 
-<body>
-
 <div class="layout">
   <aside class="sidebar">
     <div>
@@ -150,12 +150,11 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </svg>
           Blogs
         </a>
-    <a href="department.php" style="display: flex; align-items: center; gap: 6px;">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <a href="department.php" style="display: flex; align-items: center; gap: 6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
-        </svg>
-        <span>Department</span>
-    </a>
+          </svg>
+          <span>Department</span>
         </a>
       </nav>
     </div>
@@ -174,7 +173,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <?php if ($users): ?>
         <div class="table-responsive">
-          <table class="table table-bordered table-striped">
+          <table id="usersTable" class="table table-bordered table-striped">
             <thead class="table-success">
               <tr>
                 <th>ID</th>
@@ -212,7 +211,6 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <p class="text-center">No users found.</p>
         <?php endif; ?>
 
-        <!-- Back to Report Button inside the box -->
         <div class="mt-4 text-end">
           <button type="button" class="btn btn-primary" onclick="window.location.href='report.php'">
             <i class="bi bi-arrow-left"></i> Back to Report
@@ -223,6 +221,29 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
+
+<!-- JS Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('#usersTable').DataTable({
+      "pageLength": 10,
+      "order": [[0, "desc"]],
+      "language": {
+        "search": "Search users:",
+        "lengthMenu": "Show _MENU_ entries per page",
+        "zeroRecords": "No matching users found",
+        "info": "Showing _START_ to _END_ of _TOTAL_ users",
+        "infoEmpty": "No users available",
+        "infoFiltered": "(filtered from _MAX_ total users)"
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
