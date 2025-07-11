@@ -490,8 +490,8 @@ $trainee = [
 
         <div class="btn-group">
           <button class="action-btn" id="editBtn">Edit Profile</button>
-          <button class="action-btn" id="deleteBtn" style="background:red; color:white;">Delete Profile</button>
-          <a href="trainee.php"><button class="action-btn" style="background:blue; color:white;">Return</button></a>
+          <button class="action-btn" id="deleteBtn" style="background:#FF7F7F; color:white;">Delete Profile</button>
+          <a href="trainee.php"><button class="action-btn" style="background:#ADD8E6; color:white;">Return</button></a>
         </div>
 
       </div>
