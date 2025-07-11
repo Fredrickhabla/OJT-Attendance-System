@@ -172,7 +172,7 @@ logAudit(
         "address" => $address
     ]),
     null,
-    $first_name
+    $first_name 
 );
 
 
@@ -200,7 +200,7 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->close();
 
     // 🔽 LOG new coordinator creation
-logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $user_id);
+logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $first_name);
 logAudit(
     $pdo,
     $user_id,
@@ -217,11 +217,11 @@ logAudit(
 }
 
 if ($trainee_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $user_id);
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $first_name);
 }
 
 if ($coordinator_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $user_id);
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $first_name);
 }
 
 

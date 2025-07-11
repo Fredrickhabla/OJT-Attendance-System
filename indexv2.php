@@ -23,35 +23,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Check if user exists in `users` table
-    $stmt = $conn->prepare("SELECT user_id, name, password_hashed FROM users WHERE username = ?");
+    $stmt = $conn->prepare("SELECT user_id, name, password_hashed, role, is_approved FROM users WHERE username = ?");
+
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-    $stmt->bind_result($user_id, $name, $hashed_password);
+    $stmt->bind_result($user_id, $name, $hashed_password, $role, $is_approved);
     $stmt->fetch();
 
     if (password_verify($password, $hashed_password)) {
+    // Admin or Student role check
+    if ($role === 'admin' && $is_approved !== 'Y') {
+        $error = "Please wait until your admin account is approved.";
+        logAudit($conn, $user_id, "Sign In Blocked - Unapproved Admin", "-", "-", $username, 'N');
+    } else {
         $_SESSION['user_id'] = $user_id;
         $_SESSION['username'] = $username;
-        $_SESSION['role'] = "student";
+        $_SESSION['role'] = $role;
 
         logTransaction($conn, $user_id, $name, "User signed in successfully", $username);
 
-        $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
-        $checkTrainee->bind_param("s", $user_id);
-        $checkTrainee->execute();
-        $checkTrainee->store_result();
+        if ($role === 'student') {
+            $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+            $checkTrainee->bind_param("s", $user_id);
+            $checkTrainee->execute();
+            $checkTrainee->store_result();
 
-        if ($checkTrainee->num_rows > 0) {
-            header("Location: dashboardv2.php");
-        } else {
-            header("Location: profile.php");
+            if ($checkTrainee->num_rows > 0) {
+                header("Location: dashboardv2.php");
+            } else {
+                header("Location: profile.php");
+            }
+
+            $checkTrainee->close();
+        } else if ($role === 'admin') {
+            header("Location: admin/dashboardv2.php");
         }
 
-        $checkTrainee->close();
         exit();
+    }
+
     } else {
         $error = "Invalid username or password.";
         logAudit($conn, $user_id, "Sign In Failed", "-", "-", $username, 'N');

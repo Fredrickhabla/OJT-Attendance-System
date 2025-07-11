@@ -173,10 +173,9 @@ background: #00bf63;
 /* Right Panel */
 .right-panel {
   background: white;
-  flex: 34;
-  padding-top: 34px;
-  padding-right: 64px;
-  padding-left: 64px;
+  flex: 3;
+  
+  padding: 38px 64px;
   color: #065f46;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
