@@ -21,8 +21,20 @@ $ongoing = 0;
 
 $traineeData = []; // store full info for table
 
+// Pagination settings
+$perPage = 10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $perPage;
+
+// Count total trainees in this department
+$countResult = $conn->query("SELECT COUNT(*) AS total FROM trainee WHERE department_id = '$dept_id'");
+$totalRows = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalRows / $perPage);
+
+
 // Get trainees for this department
-$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id'");
+$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id' LIMIT $perPage OFFSET $offset");
+
 while ($trainee = $traineeResult->fetch_assoc()) {
     $trainee_id = $trainee['trainee_id'];
     $required = $trainee['required_hours'];
@@ -44,13 +56,17 @@ while ($trainee = $traineeResult->fetch_assoc()) {
     $totalTrainees++;
 
     // Store data for table
-    $traineeData[] = [
-        'name' => $trainee['first_name'] . ' ' . $trainee['surname'],
-        'school' => $trainee['school'],
-        'required' => $required,
-        'completed' => $completed_hours,
-        'status' => $status
-    ];
+   $traineeData[] = [
+  'trainee_id' => $trainee['trainee_id'],
+  'name' => $trainee['first_name'] . ' ' . $trainee['surname'],
+  'school' => $trainee['school'],
+  'required' => $required,
+  'completed' => $completed_hours,
+  'status' => $status,
+  'remarks' => $trainee['remarks'] ?? ''
+];
+
+
 }
 ?>
 
@@ -300,6 +316,120 @@ tbody tr:hover {
   color: #0369a1;
 }
 
+.modal-overlay {
+  display: none; /* Keep this */
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Modal Box */
+.modal-box {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.25s ease-out;
+}
+
+/* Title and Subtitle */
+.modal-title {
+  font-size: 1.5rem;
+  color: #14532d;
+  margin-bottom: 4px;
+}
+
+.modal-subtitle {
+  color: #4b5563;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.highlighted-name {
+  font-weight: 600;
+  color: #15803d;
+}
+
+/* Textarea */
+.remarks-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+  font-size: 14px;
+  outline-color: #16a34a;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Action Buttons */
+.modal-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-submit {
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-submit:hover {
+  background-color: #15803d;
+}
+
+.btn-cancel {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #d1d5db;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
 
 
   </style>
@@ -346,9 +476,8 @@ tbody tr:hover {
         </a>
         <a href="department.php">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
-            </svg>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+           </svg>
             <span>Department</span>
         </a>
 
@@ -369,7 +498,7 @@ tbody tr:hover {
 
    <section class="cards">
   <div class="card">
-    <!-- 👤 Trainee Icon -->
+    <!--  Trainee Icon -->
     <!-- Better Trainee Icon -->
 <svg xmlns="http://www.w3.org/2000/svg" height="60px" class="icon" viewBox="0 0 24 24" fill="#16a34a">
   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -417,14 +546,16 @@ $rowCount = 0;
 foreach ($traineeData as $trainee):
   $rowCount++;
 ?>
-  <tr>
-    <td><?= htmlspecialchars($trainee['name']) ?></td>
-    <td><?= htmlspecialchars($trainee['school']) ?></td>
-    <td><?= $trainee['required'] ?></td>
-    <td><?= $trainee['completed'] ?></td>
-    <td><span class="badge <?= $trainee['status'] ?>"><?= $trainee['status'] ?></span></td>
-    <td></td>
-  </tr>
+  <tr class="trainee-row" data-name="<?= htmlspecialchars($trainee['name']) ?>" data-id="<?= $trainee['trainee_id'] ?>">
+  <td><?= htmlspecialchars($trainee['name']) ?></td>
+  <td><?= htmlspecialchars($trainee['school']) ?></td>
+  <td><?= $trainee['required'] ?></td>
+  <td><?= $trainee['completed'] ?></td>
+  <td><span class="badge <?= $trainee['status'] ?>"><?= $trainee['status'] ?></span></td>
+  <td><?= htmlspecialchars($trainee['remarks']) ?></td>
+
+</tr>
+
 <?php endforeach; ?>
 
 <?php
@@ -438,4 +569,69 @@ for ($i = $rowCount; $i < 8; $i++):
 </tbody>
 
   </table>
+
+  <div style="padding: 1rem; text-align: center;">
+  <?php if ($totalPages > 1): ?>
+    <?php if ($page > 1): ?>
+      <a href="?dept_id=<?= $dept_id ?>&page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
+    <?php endif; ?>
+
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+      <?php if ($p == $page): ?>
+        <strong><?= $p ?></strong>
+      <?php else: ?>
+        <a href="?dept_id=<?= $dept_id ?>&page=<?= $p ?>" style="margin: 0 5px;"><?= $p ?></a>
+      <?php endif; ?>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+      <a href="?dept_id=<?= $dept_id ?>&page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
+    <?php endif; ?>
+  <?php endif; ?>
 </div>
+
+</div>
+
+
+<!-- Remarks Modal -->
+<div id="remarksModal" class="modal-overlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Add Remarks</h2>
+    <p class="modal-subtitle">For: <span id="traineeName" class="highlighted-name"></span></p>
+
+    <form action="save_remarks.php" method="POST">
+      <input type="hidden" name="trainee_id" id="traineeId">
+       <input type="hidden" name="dept_id" value="<?= htmlspecialchars($dept_id) ?>">
+      
+      <textarea 
+        name="remarks" 
+        placeholder="Type your remarks here..." 
+        class="remarks-textarea" 
+        required
+      ></textarea>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn-submit">Save</button>
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+function closeModal() {
+  document.getElementById('remarksModal').style.display = 'none';
+}
+
+document.querySelectorAll('.trainee-row').forEach(row => {
+  row.addEventListener('click', () => {
+    const name = row.getAttribute('data-name');
+    const id = row.getAttribute('data-id');
+
+    document.getElementById('traineeName').innerText = name;
+    document.getElementById('traineeId').value = id;
+    document.getElementById('remarksModal').style.display = 'flex';
+  });
+});
+</script>
