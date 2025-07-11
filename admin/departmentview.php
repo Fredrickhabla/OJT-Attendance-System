@@ -1,3 +1,60 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$dept_id = $_GET['dept_id'] ?? null;
+
+if (!$dept_id) {
+    die("No department selected.");
+}
+
+// Get department name
+$deptResult = $conn->query("SELECT name FROM departments WHERE department_id = '$dept_id'");
+$dept = $deptResult->fetch_assoc();
+
+// Initialize counters
+$totalTrainees = 0;
+$completed = 0;
+$ongoing = 0;
+
+$traineeData = []; // store full info for table
+
+// Get trainees for this department
+$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id'");
+while ($trainee = $traineeResult->fetch_assoc()) {
+    $trainee_id = $trainee['trainee_id'];
+    $required = $trainee['required_hours'];
+
+    // Get completed hours from attendance_record
+    $attendanceQuery = $conn->query("SELECT SUM(hours) AS total_hours FROM attendance_record WHERE trainee_id = '$trainee_id'");
+    $attendance = $attendanceQuery->fetch_assoc();
+    $completed_hours = floatval($attendance['total_hours'] ?? 0);
+
+    // Determine status
+    $status = ($completed_hours >= $required) ? 'Completed' : 'Ongoing';
+
+    if ($status === 'Completed') {
+        $completed++;
+    } else {
+        $ongoing++;
+    }
+
+    $totalTrainees++;
+
+    // Store data for table
+    $traineeData[] = [
+        'name' => $trainee['first_name'] . ' ' . $trainee['surname'],
+        'school' => $trainee['school'],
+        'required' => $required,
+        'completed' => $completed_hours,
+        'status' => $status
+    ];
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,6 +204,7 @@
   align-items: center;
   border-radius: 14px;
   height: 130px;
+   background-color: #ffffff;
 }
 
 .icon {
@@ -162,6 +220,9 @@
 
 .table-section {
   padding: 0 1.5rem 1.5rem;
+  height: 100%;
+
+  
 }
 
 /* Table container */
@@ -169,21 +230,25 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-  border: 1px solid #16a34a;
+  background-color: #ffffff;
+  border: 2px solid #16a34a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-    background-color: transparent; /* Changed from #ffffff */
+   border-radius: 8px;        /* ← Rounded corners */
+  overflow: hidden;  
+  height: 100%;
 
 }
 
 /* Table header row */
 thead {
-  background-color:rgb(228, 240, 217);
-  color: rgb(59, 124, 27);
+  background-color:rgb(68, 131, 15);
+  color: white;
   font-weight: bold;
+
   
 }
+
 
 /* Table cells */
 th, td {
@@ -191,10 +256,24 @@ th, td {
   text-align: left;
   font-size: 14px;
   
-  border: 1px solid #16a34a;
+}
+
+tbody td {
+  line-height: 1.4;
+  white-space: nowrap;  /* Prevent wrapping */
+  height: 50px;          /* Fixed row height */
+  vertical-align: middle;
 }
 
 
+tbody tr {
+  border-bottom: 1px solid #d1d5db; /* light gray line */
+}
+
+/* Hover effect */
+tbody tr:hover {
+  background-color: #f0fdf4;
+}
 
 /* Status badges */
 .badge {
@@ -284,7 +363,8 @@ th, td {
 
   <!-- Main Content -->
   <div class="content">
-    <div class="topbar">Accounting</div>
+    <div class="topbar"><?= htmlspecialchars($dept['name']) ?></div>
+
     <div class="main">
 
    <section class="cards">
@@ -295,7 +375,7 @@ th, td {
   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
 </svg>
 
-    <span class="card-label">5 Trainee</span>
+    <span class="card-label"><?= $totalTrainees ?> Trainee</span>
   </div>
 
   <div class="card">
@@ -305,7 +385,7 @@ th, td {
       <polyline points="23 20 23 14 17 14" />
       <path d="M20.49 9A9 9 0 0 0 5.51 5M3 14a9 9 0 0 0 15.49 4" />
     </svg>
-    <span class="card-label">3 Ongoing</span>
+    <span class="card-label"><?= $ongoing ?> Ongoing</span>
   </div>
 
   <div class="card">
@@ -314,7 +394,7 @@ th, td {
       <path d="M9 12l2 2l4 -4" />
       <circle cx="12" cy="12" r="10" />
     </svg>
-    <span class="card-label">2 Completed</span>
+    <span class="card-label"><?= $completed ?> Completed</span>
   </div>
 </section>
 
@@ -331,57 +411,31 @@ th, td {
       </tr>
     </thead>
     <tbody>
-      <!-- JavaScript will populate rows here -->
-    </tbody>
+<tbody>
+<?php
+$rowCount = 0;
+foreach ($traineeData as $trainee):
+  $rowCount++;
+?>
+  <tr>
+    <td><?= htmlspecialchars($trainee['name']) ?></td>
+    <td><?= htmlspecialchars($trainee['school']) ?></td>
+    <td><?= $trainee['required'] ?></td>
+    <td><?= $trainee['completed'] ?></td>
+    <td><span class="badge <?= $trainee['status'] ?>"><?= $trainee['status'] ?></span></td>
+    <td></td>
+  </tr>
+<?php endforeach; ?>
+
+<?php
+for ($i = $rowCount; $i < 8; $i++):
+?>
+  <tr>
+    <td colspan="6" style="height: 50px; color: #aaa; text-align: center;">— Empty Slot —</td>
+  </tr>
+<?php endfor; ?>
+
+</tbody>
+
   </table>
 </div>
-
-<script>
-  const tableBody = document.querySelector("tbody");
-
-  const trainees = [
-    {
-      name: "Fredrick Habla",
-      school: "PLM",
-      requiredTime: 240,
-      completedTime: 120,
-      status: "Active"
-    },
-    {
-      name: "Jane Dela Cruz",
-      school: "UST",
-      requiredTime: 240,
-      completedTime: 240,
-      status: "Completed"
-    },
-    {
-      name: "Carlos Santos",
-      school: "Adamson",
-      requiredTime: 240,
-      completedTime: 80,
-      status: "Ongoing"
-    }
-  ];
-
-  tableBody.innerHTML = ""; // Clear existing content
-
-  trainees.forEach((trainee) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${trainee.name}</td>
-      <td>${trainee.school}</td>
-      <td>${trainee.requiredTime}</td>
-      <td>${trainee.completedTime}</td>
-      <td><span class="badge">${trainee.status}</span></td>
-      <td></td>
-    `;
-    tableBody.appendChild(row);
-  });
-
-  // Optionally add 7 empty rows to match layout
-  for (let i = 0; i < 7; i++) {
-    const emptyRow = document.createElement("tr");
-    emptyRow.innerHTML = `<td colspan="6">&nbsp;</td>`;
-    tableBody.appendChild(emptyRow);
-  }
-</script>
