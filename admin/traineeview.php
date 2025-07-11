@@ -115,11 +115,8 @@ $trainee = [
     "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
 ];
 
-
-
-
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -412,11 +409,9 @@ $trainee = [
         </svg>
         <span>Department</span>
     </a>
-
-
     </nav>
   </aside>
-
+    
   <!-- Main Content -->
   <div class="content">
     <div class="topbar">Trainee - <?= htmlspecialchars($trainee['name']) ?></div>
@@ -528,17 +523,18 @@ $trainee = [
       <input type="time" name="schedule_end" value="<?= htmlspecialchars($row["schedule_end"]) ?>" required>
 
       <label>Department:</label>
-<select name="department_id" class="big-select" required>
-  <option value="">-- Select Department --</option>
-  <?php foreach ($departments as $dept): ?>
-    <option value="<?= $dept['department_id'] ?>"
-      <?= ($row['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
-      <?= htmlspecialchars($dept['name']) ?>
-    </option>
-  <?php endforeach; ?>
-</select>
+    <select name="department_id" class="big-select" required>
+      <option value="">-- Select Department --</option>
+      <?php foreach ($departments as $dept): ?>
+        <option value="<?= $dept['department_id'] ?>"
+          <?= ($row['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+          <?= htmlspecialchars($dept['name']) ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
 
       <br><br>
+      
       <button type="submit" style="display: block; margin: 0 auto;">Save Changes</button>
     </form>
   </div>
@@ -597,5 +593,13 @@ window.onclick = function(event) {
   }
 };
 </script>
+<?php if (isset($_GET['update']) && $_GET['update'] === 'success'): ?>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    alert("✅ Trainee updated successfully!");
+    history.replaceState(null, null, window.location.pathname + '?id=<?= htmlspecialchars($_GET["id"]) ?>');
+  });
+</script>
+<?php endif; ?>
 
 </html>
