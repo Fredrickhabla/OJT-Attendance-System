@@ -147,6 +147,7 @@
   align-items: center;
   border-radius: 14px;
   height: 130px;
+   background-color: #ffffff;
 }
 
 .icon {
@@ -162,6 +163,9 @@
 
 .table-section {
   padding: 0 1.5rem 1.5rem;
+  height: 100%;
+
+  
 }
 
 /* Table container */
@@ -169,21 +173,25 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-  border: 1px solid #16a34a;
+  background-color: #ffffff;
+  border: 2px solid #16a34a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-    background-color: transparent; /* Changed from #ffffff */
+   border-radius: 8px;        /* ← Rounded corners */
+  overflow: hidden;  
+  height: 100%;
 
 }
 
 /* Table header row */
 thead {
-  background-color:rgb(228, 240, 217);
-  color: rgb(59, 124, 27);
+  background-color:rgb(68, 131, 15);
+  color: white;
   font-weight: bold;
+
   
 }
+
 
 /* Table cells */
 th, td {
@@ -191,10 +199,16 @@ th, td {
   text-align: left;
   font-size: 14px;
   
-  border: 1px solid #16a34a;
 }
 
+tbody tr {
+  border-bottom: 1px solid #d1d5db; /* light gray line */
+}
 
+/* Hover effect */
+tbody tr:hover {
+  background-color: #f0fdf4;
+}
 
 /* Status badges */
 .badge {

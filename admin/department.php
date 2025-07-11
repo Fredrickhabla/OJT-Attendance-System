@@ -1,3 +1,13 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$departments = $conn->query("SELECT * FROM departments WHERE status = 'active'");
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -228,81 +238,25 @@ width: 100%;
   </aside>
 
   <!-- Main Area -->
-  <div style="flex: 1; display: flex; flex-direction: column;">
-
-        <div class="topbar topbar-space-between">
-                <div class="topbar-left">
-            
-            Departments
-            </div>
-        
-        </div>
-   <div class="main-content">
-      <div class="card-wrapper">
-      <div class="card" onclick="window.location.href='accounting.php';" style="cursor: pointer;">
-        <i class="fas fa-calculator icon"></i>
-        <span class="label">Accounting</span>
-      </div>
-
-        <div class="card">
-          <i class="fas fa-file-alt icon"></i>
-          <span class="label">Finance</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-truck icon"></i>
-          <span class="label">Logistics</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-dollar-sign icon"></i>
-          <span class="label">Sales</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-clipboard-list icon"></i>
-          <span class="label">Inventory</span>
-        </div>
-        <div class="card">
-          <i class="fas fa-users icon"></i>
-          <span class="label">Human Resources</span>
-        </div>
-        <!-- Empty cards -->
-    
-        <div class="card">
-    <i class="fas fa-laptop-code icon"></i>
-    <span class="label">IT</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-bullhorn icon"></i>
-    <span class="label">Marketing</span>
-  </div>
-
-  
-  <div class="card">
-    <i class="fas fa-headset icon"></i>
-    <span class="label">Service</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-gavel icon"></i>
-    <span class="label">Legal</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-check-circle icon"></i>
-    <span class="label">Quality Assurance</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-cogs icon"></i>
-    <span class="label">Engineering</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-building icon"></i>
-    <span class="label">Administration</span>
-  </div>
-  <div class="card">
-    <i class="fas fa-industry icon"></i>
-    <span class="label">Operations</span>
-  </div>
-</div>
-      </div>
+  <!-- Main Area -->
+<div style="flex: 1; display: flex; flex-direction: column;">
+  <div class="topbar topbar-space-between">
+    <div class="topbar-left">
+      Departments
     </div>
   </div>
+
+  <div class="main-content">
+    <div class="card-wrapper">
+      <?php while ($row = $departments->fetch_assoc()): ?>
+        <div class="card" onclick="window.location.href='departmentview.php?dept_id=<?= $row['department_id'] ?>';" style="cursor: pointer;">
+          <i class="<?= htmlspecialchars($row['icon_class'] ?? 'fas fa-building') ?> icon"></i>
+          <span class="label"><?= htmlspecialchars($row['name']) ?></span>
+        </div>
+      <?php endwhile; ?>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
