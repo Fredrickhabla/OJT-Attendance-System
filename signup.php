@@ -17,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     $pass = $_POST['password'] ?? '';
+    $role = $_POST['role'] ?? 'student'; 
 
     if ($name && $username && $email && $pass) {
         try {
@@ -24,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $hashedPassword = password_hash($pass, PASSWORD_DEFAULT);
 
             $stmt = $pdo->prepare("
-                INSERT INTO users (user_id, name, username, password_hashed, role, email, created_at)
-                VALUES (?, ?, ?, ?, 'student', ?, CURDATE())
-            ");
-            $stmt->execute([$user_id, $name, $username, $hashedPassword, $email]);
+    INSERT INTO users (user_id, name, username, password_hashed, role, email, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, CURDATE())
+");
+$stmt->execute([$user_id, $name, $username, $hashedPassword, $role, $email]);
 
 try {
     logTransaction($pdo, $user_id, $name, "Created new user account", $username);
@@ -122,6 +123,7 @@ background: #00bf63;
 
 }
 
+
 .welcome-content {
   display: flex;
   flex-direction: column;
@@ -171,8 +173,10 @@ background: #00bf63;
 /* Right Panel */
 .right-panel {
   background: white;
-  flex: 3;
-  padding: 64px;
+  flex: 34;
+  padding-top: 34px;
+  padding-right: 64px;
+  padding-left: 64px;
   color: #065f46;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
@@ -247,6 +251,32 @@ form .grid-2 {
     width: 500px;
 }
 
+.role-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.role-options input[type="radio"] {
+  display: none;
+}
+
+.role-options label {
+  padding: 10px 20px;
+  border-radius: 999px;
+  background-color: #ecfdf5;
+  color: #065f46;
+  cursor: pointer;
+  border: 2px solid transparent;
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+.role-options input[type="radio"]:checked + label {
+  background-color: #065f46;
+  color: white;
+  border: 2px solid #047857;
+}
 
 </style>
 <body>
@@ -289,6 +319,22 @@ form .grid-2 {
     <input type="checkbox" id="terms" required/>
     <label for="terms">By creating an account, you agree to our Terms.</label>
   </div>
+
+  <div class="field">
+  <label>Select Role</label>
+  <div class="role-options">
+    <input type="radio" id="role-trainee" name="role" value="trainee" required>
+    <label for="role-trainee">Trainee</label>
+
+    <input type="radio" id="role-admin" name="role" value="admin">
+    <label for="role-admin">Admin</label>
+
+    <input type="radio" id="role-coordinator" name="role" value="coordinator">
+    <label for="role-coordinator">Coordinator</label>
+  </div>
+</div>
+
+  
   <div class="submit-wrap">
     <button type="submit" class="btn-solid">Sign up</button>
   </div>

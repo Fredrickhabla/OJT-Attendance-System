@@ -23,13 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Check if user exists in `users` table
-    $stmt = $conn->prepare("SELECT user_id, password_hashed FROM users WHERE username = ?");
+    $stmt = $conn->prepare("SELECT user_id, name, password_hashed FROM users WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->bind_result($user_id, $name, $hashed_password);
     $stmt->fetch();
 
     if (password_verify($password, $hashed_password)) {
@@ -37,11 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['username'] = $username;
         $_SESSION['role'] = "student";
 
-        // ✅ Log successful login
-        logTransaction($conn, $user_id, '-', "User signed in successfully", $username);
-        logAudit($conn, $user_id, "Sign In", "-", "-", $username, 'Y');
+        logTransaction($conn, $user_id, $name, "User signed in successfully", $username);
 
-        // Redirect
         $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
         $checkTrainee->bind_param("s", $user_id);
         $checkTrainee->execute();

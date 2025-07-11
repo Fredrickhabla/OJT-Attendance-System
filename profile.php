@@ -15,6 +15,7 @@ $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 $user_id = $_SESSION['user_id'];
 $user_name = $user_email = "";
 $coordinator_id = null;
+
 $stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -106,6 +107,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
+      // Check if trainee already exists
+    $stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($trainee_id_check);
+    $hasTrainee = $stmt->fetch();
+    $stmt->close();
+
     if ($hasTrainee) {
     // 🔽 GET OLD VALUES FOR AUDIT
     $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address FROM trainee WHERE trainee_id = ?");
@@ -117,13 +126,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 
-    // Check if trainee already exists
-    $stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
-    $stmt->bind_param("s", $user_id);
-    $stmt->execute();
-    $stmt->bind_result($trainee_id_check);
-    $hasTrainee = $stmt->fetch();
-    $stmt->close();
+  
 
         if ($hasTrainee) {
     // 🔽 GET OLD VALUES FOR AUDIT
@@ -155,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->close();
     }
 
-    // 🔽 AFTER trainee update
+
 logAudit(
     $pdo,
     $user_id,
@@ -195,17 +198,8 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->bind_param("ss", $coordinator_id, $trainee_id);
     $stmt->execute();
     $stmt->close();
-}
 
-if ($trainee_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $user_id);
-}
-
-if ($coordinator_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $user_id);
-}
-
-// 🔽 LOG new coordinator creation
+    // 🔽 LOG new coordinator creation
 logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $user_id);
 logAudit(
     $pdo,
@@ -220,12 +214,21 @@ logAudit(
     null,
     $first_name
 );
+}
+
+if ($trainee_picture_path) {
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $user_id);
+}
+
+if ($coordinator_picture_path) {
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $user_id);
+}
 
 
 
 
 logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $user_id);
-// Final message and redirect
+//Final message and redirect
 echo "<script>
     alert('Profile saved successfully.');
     window.location.href = 'dashboardv2.php';

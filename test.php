@@ -44,6 +44,7 @@ if ($conn->connect_error) {
 $user_id = $_SESSION['user_id'];
 $user_name = $user_email = "";
 $coordinator_id = null;
+$trainee_id = null;
 $stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -187,12 +188,12 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->close();
 }
 
-// Final message and redirect
-echo "<script>
-    alert('Profile saved successfully.');
-    window.location.href = 'dashboardv2.php';
-</script>";
-exit();
+// // Final message and redirect
+// echo "<script>
+//     alert('Profile saved successfully.');
+//     window.location.href = 'dashboardv2.php';
+// </script>";
+// exit();
 }
 ?>
 
