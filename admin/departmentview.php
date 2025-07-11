@@ -21,8 +21,20 @@ $ongoing = 0;
 
 $traineeData = []; // store full info for table
 
+// Pagination settings
+$perPage = 10;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $perPage;
+
+// Count total trainees in this department
+$countResult = $conn->query("SELECT COUNT(*) AS total FROM trainee WHERE department_id = '$dept_id'");
+$totalRows = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalRows / $perPage);
+
+
 // Get trainees for this department
-$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id'");
+$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id' LIMIT $perPage OFFSET $offset");
+
 while ($trainee = $traineeResult->fetch_assoc()) {
     $trainee_id = $trainee['trainee_id'];
     $required = $trainee['required_hours'];
@@ -346,9 +358,8 @@ tbody tr:hover {
         </a>
         <a href="department.php">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
-            </svg>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+           </svg>
             <span>Department</span>
         </a>
 
@@ -438,4 +449,25 @@ for ($i = $rowCount; $i < 8; $i++):
 </tbody>
 
   </table>
+
+  <div style="padding: 1rem; text-align: center;">
+  <?php if ($totalPages > 1): ?>
+    <?php if ($page > 1): ?>
+      <a href="?dept_id=<?= $dept_id ?>&page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
+    <?php endif; ?>
+
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+      <?php if ($p == $page): ?>
+        <strong><?= $p ?></strong>
+      <?php else: ?>
+        <a href="?dept_id=<?= $dept_id ?>&page=<?= $p ?>" style="margin: 0 5px;"><?= $p ?></a>
+      <?php endif; ?>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+      <a href="?dept_id=<?= $dept_id ?>&page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
+    <?php endif; ?>
+  <?php endif; ?>
+</div>
+
 </div>
