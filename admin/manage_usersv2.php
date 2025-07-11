@@ -182,6 +182,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Role</th>
                 <th>Email</th>
                 <th>Creation</th>
+                <th>Approved</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -194,6 +195,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <td><?= htmlspecialchars($user['role']) ?></td>
                 <td><?= htmlspecialchars($user['email']) ?></td>
                 <td><?= htmlspecialchars($user['created_at']) ?></td>
+                <td><?= htmlspecialchars($user['is_approved']) ?></td>
                 <td class="text-center">
                   <a href="edit_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-pencil"></i>

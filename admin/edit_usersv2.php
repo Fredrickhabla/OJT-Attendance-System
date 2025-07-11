@@ -29,12 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $role    = trim($_POST['role'] ?? '');
     $email    = trim($_POST['email'] ?? '');
     $created_at     = trim($_POST['created_at'] ?? '');
+    $is_approved     = trim($_POST['is_approved'] ?? '');
 
     if (empty($name) || empty($username)) {
         $error = "Name and Username are required.";
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ? WHERE user_id = ?");
-        $stmt->execute([$name, $username, $password_hashed, $role, $email, $created_at, $user_id]);
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ?, is_approved = ? WHERE user_id = ?");
+        $stmt->execute([$name, $username, $password_hashed, $role, $email, $created_at, $is_approved, $user_id]);
         header("Location: manage_usersv2.php");
         exit;
     }
@@ -179,6 +180,19 @@ if (!$user) {
           </svg>
           Report
         </a>
+        <a href="blogadmin.php">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+          </svg>
+          Blogs
+        </a>
+        <a href="department.php" style="display: flex; align-items: center; gap: 6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+          </svg>
+          <span>Department</span>
+        </a>
       </nav>
     </div>
     <div class="logout">
@@ -220,6 +234,15 @@ if (!$user) {
             <label for="created_at" class="form-label">Created At</label>
             <input type="text" name="created_at" id="created_at" class="form-control" value="<?= htmlspecialchars($user['created_at']) ?>">
           </div>
+          <div class="mb-3">
+          <label for="is_approved" class="form-label">Is Approved?</label>
+          <select name="is_approved" id="is_approved" class="form-control" required>
+            <option value="">-- Select --</option>
+            <option value="Yes" <?= ($user['is_approved'] === 'Y') ? 'selected' : '' ?>>Yes</option>
+            <option value="No" <?= ($user['is_approved'] === 'N') ? 'selected' : '' ?>>No</option>
+          </select>
+        </div>
+
           <div class="d-grid gap-2">
             <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
             <a href="manage_usersv2.php" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Back</a>

@@ -257,17 +257,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="date" name="date" class="form-control" value="<?= htmlspecialchars($record['date']) ?>" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Time In</label>
-            <input type="time" name="time_in" class="form-control" value="<?= htmlspecialchars($record['time_in']) ?>" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Time Out</label>
-            <input type="time" name="time_out" class="form-control" value="<?= htmlspecialchars($record['time_out']) ?>" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Hours</label>
-            <input type="number" name="hours" step="0.01" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required>
-          </div>
+  <label class="form-label">Time In</label>
+  <input type="time" id="time_in" name="time_in" class="form-control" value="<?= htmlspecialchars($record['time_in']) ?>" required>
+</div>
+<div class="mb-3">
+  <label class="form-label">Time Out</label>
+  <input type="time" id="time_out" name="time_out" class="form-control" value="<?= htmlspecialchars($record['time_out']) ?>" required>
+</div>
+<div class="mb-3">
+  <label class="form-label">Hours</label>
+  <input type="number" id="hours" name="hours" step="0.01" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required readonly>
+</div>
+
           <div class="mb-3">
             <label class="form-label">Work Description</label>
             <textarea name="work_description" class="form-control"><?= htmlspecialchars($record['work_description']) ?></textarea>
@@ -295,6 +296,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 </div>
+<script>
+  function calculateHours() {
+    const timeIn = document.getElementById("time_in").value;
+    const timeOut = document.getElementById("time_out").value;
+    const hoursField = document.getElementById("hours");
+
+    if (timeIn && timeOut) {
+      const [inHours, inMinutes] = timeIn.split(":").map(Number);
+      const [outHours, outMinutes] = timeOut.split(":").map(Number);
+
+      const start = new Date();
+      const end = new Date();
+
+      start.setHours(inHours, inMinutes, 0);
+      end.setHours(outHours, outMinutes, 0);
+
+      let diff = (end - start) / 1000 / 60 / 60; // in hours
+      if (diff < 0) diff += 24; // handle overnight times
+
+      hoursField.value = diff.toFixed(2);
+    }
+  }
+
+  document.getElementById("time_in").addEventListener("change", calculateHours);
+  document.getElementById("time_out").addEventListener("change", calculateHours);
+
+  // Optional: auto-calculate on page load
+  window.addEventListener("DOMContentLoaded", calculateHours);
+</script>
 
 </body>
 </html>
