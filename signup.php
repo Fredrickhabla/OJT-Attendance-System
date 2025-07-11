@@ -10,6 +10,7 @@ try {
 } catch (PDOException $e) {
     die("DB connection failed: " . $e->getMessage());
 }
+require_once 'logger.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'] ?? '';
@@ -28,9 +29,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ");
             $stmt->execute([$user_id, $name, $username, $hashedPassword, $email]);
 
-            echo "<script>alert('Signup successful!'); window.location.href='indexv2.php';</script>";
+try {
+    logTransaction($pdo, $user_id, $name, "Created new user account", $username);
+} catch (Exception $ex) {
+    echo "<script>alert('Transaction log failed: " . addslashes($ex->getMessage()) . "');</script>";
+}
+
+try {
+    logAudit($pdo, $user_id, "User Signup", $email, "-", $username, 'Y');
+} catch (Exception $ex) {
+    echo "<script>alert('Audit log failed: " . addslashes($ex->getMessage()) . "');</script>";
+}
+
+
+echo "<script>alert('Signup successful!'); window.location.href='indexv2.php';</script>";
+
         } catch (PDOException $e) {
-            echo "<script>alert('Signup failed: " . $e->getMessage() . "'); history.back();</script>";
+            logAudit($pdo, 'N/A', "Signup Failed", $email, "-", "system", 'N');
+echo "<script>alert('Signup failed: " . $e->getMessage() . "'); history.back();</script>";
+
         }
     } else {
         echo "<script>alert('Missing required fields.'); history.back();</script>";

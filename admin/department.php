@@ -164,7 +164,23 @@ width: 100%;
   align-items: center;
   justify-content: center;
   background-color: white;
-  
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* <-- Added */
+
+    opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.card:hover {
+  transform: translateY(-5px); /* <-- Added */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* <-- Added */
 }
 
 .card .icon {

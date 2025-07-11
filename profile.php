@@ -9,6 +9,8 @@ $conn = new mysqli("localhost", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+require_once 'logger.php';
+$pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 
 $user_id = $_SESSION['user_id'];
 $user_name = $user_email = "";
@@ -104,6 +106,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
+    if ($hasTrainee) {
+    // 🔽 GET OLD VALUES FOR AUDIT
+    $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address FROM trainee WHERE trainee_id = ?");
+    $stmt->bind_param("s", $trainee_id);
+    $stmt->execute();
+    $stmt->bind_result($old_fname, $old_sname, $old_email, $old_school, $old_phone, $old_address);
+    $stmt->fetch();
+    $stmt->close();
+}
+
+
     // Check if trainee already exists
     $stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
     $stmt->bind_param("s", $user_id);
@@ -111,6 +124,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_result($trainee_id_check);
     $hasTrainee = $stmt->fetch();
     $stmt->close();
+
+        if ($hasTrainee) {
+    // 🔽 GET OLD VALUES FOR AUDIT
+    $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address FROM trainee WHERE trainee_id = ?");
+    $stmt->bind_param("s", $trainee_id);
+    $stmt->execute();
+    $stmt->bind_result($old_fname, $old_sname, $old_email, $old_school, $old_phone, $old_address);
+    $stmt->fetch();
+    $stmt->close();
+}
 
     if (!$hasTrainee) {
         $trainee_id = uniqid("trainee_");
@@ -131,6 +154,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
         $stmt->close();
     }
+
+    // 🔽 AFTER trainee update
+logAudit(
+    $pdo,
+    $user_id,
+    "New trainee profile",
+    json_encode([
+        "first_name" => $first_name,
+        "surname" => $surname,
+        "email" => $email,
+        "school" => $school,
+        "phone" => $phone_number,
+        "address" => $address
+    ]),
+    null,
+    $first_name
+);
+
 
     // Coordinator logic
 if (!empty($selectedCoordinatorId)) {
@@ -156,6 +197,34 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->close();
 }
 
+if ($trainee_picture_path) {
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $user_id);
+}
+
+if ($coordinator_picture_path) {
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $user_id);
+}
+
+// 🔽 LOG new coordinator creation
+logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $user_id);
+logAudit(
+    $pdo,
+    $user_id,
+    "New coordinator added",
+    json_encode([
+        "name" => $coord_name,
+        "position" => $position,
+        "email" => $coord_email,
+        "phone" => $coord_phone
+    ]),
+    null,
+    $first_name
+);
+
+
+
+
+logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $user_id);
 // Final message and redirect
 echo "<script>
     alert('Profile saved successfully.');
@@ -464,7 +533,7 @@ h2 {
 
   .bg-image {
  position: absolute;
-  bottom: -146px;;
+  bottom: -150px;;
   left: 0;  
   width: 410px; 
   height:460px; 

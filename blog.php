@@ -273,15 +273,37 @@ body {
     }
 
     .card {
-        border: 2px dashed #047857;
+  border: 2px dashed #047857;
   border-radius: 16px;
   padding: 16px;
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center; /* <-- This is the key */
-  gap: 12px; /* Optional: better spacing */
-    }
+  align-items: center;
+  gap: 12px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeInUp 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
     .card > div:last-child {
   display: flex;
@@ -656,7 +678,7 @@ body {
       const container = document.getElementById("postsContainer");
 
       const card = document.createElement("div");
-card.className = "card filled";
+card.className = "card filled fade-in";
 card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
 
       const today = new Date().toLocaleDateString('en-US', {

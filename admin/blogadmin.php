@@ -4,89 +4,104 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle filter if set
-$filter = isset($_GET['trainee_id']) ? $_GET['trainee_id'] : 'all';
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+// Filters
+$filter = $_GET['trainee_id'] ?? 'all';
+$department_filter = $_GET['department_id'] ?? 'all';
+$search = $_GET['search'] ?? '';
 
-$searchSql = '';
-$searchParam = '';
-
-// Pagination setup
+// Pagination
 $limit = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Count total rows for pagination
-$countQuery = "SELECT COUNT(*) as total FROM blog_posts bp 
-               LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
+// Dropdowns
+$trainee_result = $conn->query("SELECT trainee_id, first_name, surname FROM trainee");
+$department_result = $conn->query("SELECT department_id, name FROM departments");
+
+// Prepare search query
+$searchSql = '';
+$searchParam = '';
+if (!empty($search)) {
+    $searchSql = " AND (
+        CONCAT(t.first_name, ' ', t.surname) LIKE ?
+        OR bp.title LIKE ?
+        OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
+    )";
+    $searchParam = "%" . $search . "%";
+}
+
+// Build base COUNT query
+$countQuery = "SELECT COUNT(*) as total 
+               FROM blog_posts bp 
+               LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id 
+               LEFT JOIN departments d ON t.department_id = d.department_id 
                WHERE 1=1";
+
+$countTypes = '';
+$countParams = [];
 
 if ($filter !== 'all') {
     $countQuery .= " AND bp.trainee_id = ?";
+    $countTypes .= 's';
+    $countParams[] = $filter;
+}
+if ($department_filter !== 'all') {
+    $countQuery .= " AND t.department_id = ?";
+    $countTypes .= 's';
+    $countParams[] = $department_filter;
 }
 if (!empty($search)) {
     $countQuery .= $searchSql;
+    $countTypes .= 'sss';
+    array_push($countParams, $searchParam, $searchParam, $searchParam);
 }
 
+// Execute COUNT
 $countStmt = $conn->prepare($countQuery);
-if ($filter !== 'all' && !empty($search)) {
-    $countStmt->bind_param("ssss", $filter, $searchParam, $searchParam, $searchParam);
-} elseif ($filter !== 'all') {
-    $countStmt->bind_param("s", $filter);
-} elseif (!empty($search)) {
-    $countStmt->bind_param("sss", $searchParam, $searchParam, $searchParam);
+if ($countTypes) {
+    $countStmt->bind_param($countTypes, ...$countParams);
 }
 $countStmt->execute();
 $countResult = $countStmt->get_result();
 $totalBlogs = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalBlogs / $limit);
 
+// Build main SELECT query
+$query = "SELECT bp.*, t.first_name, t.surname, d.name AS department_name 
+          FROM blog_posts bp 
+          LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id 
+          LEFT JOIN departments d ON t.department_id = d.department_id 
+          WHERE 1=1";
 
+$types = '';
+$params = [];
+
+if ($filter !== 'all') {
+    $query .= " AND bp.trainee_id = ?";
+    $types .= 's';
+    $params[] = $filter;
+}
+if ($department_filter !== 'all') {
+    $query .= " AND t.department_id = ?";
+    $types .= 's';
+    $params[] = $department_filter;
+}
 if (!empty($search)) {
-    $searchSql = " AND (
-        CONCAT(t.first_name, ' ', t.surname) LIKE ?
-        OR bp.title LIKE ?
-        OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
-        
-    )";
-    $searchParam = "%" . $search . "%";
+    $query .= $searchSql;
+    $types .= 'sss';
+    array_push($params, $searchParam, $searchParam, $searchParam);
 }
 
-// Now use $searchSql in the query
-if ($filter === 'all') {
-    $query = "SELECT bp.*, t.first_name, t.surname 
-              FROM blog_posts bp
-              LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
-              WHERE 1=1 $searchSql
-              ORDER BY bp.created_at DESC
-              LIMIT ? OFFSET ?";
-} else {
-    $query = "SELECT bp.*, t.first_name, t.surname 
-              FROM blog_posts bp
-              LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id
-              WHERE bp.trainee_id = ? $searchSql
-              ORDER BY bp.created_at DESC
-              LIMIT ? OFFSET ?";
-}
+$query .= " ORDER BY bp.created_at DESC LIMIT ? OFFSET ?";
+$types .= 'ii';
+$params[] = $limit;
+$params[] = $offset;
 
-
+// Execute SELECT
 $stmt = $conn->prepare($query);
-if ($filter !== 'all' && !empty($search)) {
-    $stmt->bind_param("ssssii", $filter, $searchParam, $searchParam, $searchParam, $limit, $offset);
-} elseif ($filter !== 'all') {
-    $stmt->bind_param("sii", $filter, $limit, $offset);
-} elseif (!empty($search)) {
-    $stmt->bind_param("sssii", $searchParam, $searchParam, $searchParam, $limit, $offset);
-} else {
-    $stmt->bind_param("ii", $limit, $offset);
-}
-
-
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
-
-// Fetch all trainees for the filter dropdown
-$trainee_result = $conn->query("SELECT trainee_id, first_name, surname FROM trainee");
 ?>
 
 
@@ -312,9 +327,19 @@ flex-direction: column;
 
 .filter-select {
   width: 300px;
-  padding: 8px;
+  padding-left:8px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
+}
+
+.filter-select1 {
+  width: 250px;
+  padding-left:8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+
+
+  
 }
 
 .search-box {
@@ -613,14 +638,25 @@ border-radius: 4px;
         <section class="content1">
         <!-- Filters -->
         <div class="filters">
-          <select class="filter-select" onchange="location = this.value;">
-  <option value="?trainee_id=all" <?= $filter === 'all' ? 'selected' : '' ?>>All Trainees</option>
-  <?php while($trainee = $trainee_result->fetch_assoc()): ?>
-    <option value="?trainee_id=<?= $trainee['trainee_id'] ?>" <?= $filter === $trainee['trainee_id'] ? 'selected' : '' ?>>
-      <?= htmlspecialchars($trainee['first_name'] . ' ' . $trainee['surname']) ?>
-    </option>
-  <?php endwhile; ?>
-</select>
+  <select class="filter-select" onchange="location = this.value;">
+    <option value="?trainee_id=all" <?= $filter === 'all' ? 'selected' : '' ?>>All Trainees</option>
+    <?php while($trainee = $trainee_result->fetch_assoc()): ?>
+      <option value="?trainee_id=<?= $trainee['trainee_id'] ?>&department_id=<?= $department_filter ?>" <?= $filter === $trainee['trainee_id'] ? 'selected' : '' ?>>
+        <?= htmlspecialchars($trainee['first_name'] . ' ' . $trainee['surname']) ?>
+      </option>
+    <?php endwhile; ?>
+  </select>
+
+  <!-- Add this below -->
+  <select class="filter-select1" onchange="location = this.value;">
+    <option value="?trainee_id=<?= $filter ?>&department_id=all" <?= $department_filter === 'all' ? 'selected' : '' ?>>All Departments</option>
+    <?php while($dept = $department_result->fetch_assoc()): ?>
+      <option value="?trainee_id=<?= $filter ?>&department_id=<?= $dept['department_id'] ?>" <?= $department_filter === $dept['department_id'] ? 'selected' : '' ?>>
+        <?= htmlspecialchars($dept['name']) ?>
+      </option>
+    <?php endwhile; ?>
+  </select>
+
           <form method="get" class="search-container" style="display: flex; align-items: center;">
   <!-- Keep current filter on form submit -->
   <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($filter) ?>">

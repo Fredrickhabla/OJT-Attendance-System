@@ -6,7 +6,7 @@ $conn = new mysqli("127.0.0.1", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+require_once 'logger.php';
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -29,36 +29,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $hashed_password);
-        $stmt->fetch();
+    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->fetch();
 
-        if (password_verify($password, $hashed_password)) {
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['username'] = $username;
-            $_SESSION['role'] = "student";
+    if (password_verify($password, $hashed_password)) {
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['username'] = $username;
+        $_SESSION['role'] = "student";
 
-            // Now check if this user exists in the trainee table
-            $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
-            $checkTrainee->bind_param("s", $user_id);
-            $checkTrainee->execute();
-            $checkTrainee->store_result();
+        // ✅ Log successful login
+        logTransaction($conn, $user_id, '-', "User signed in successfully", $username);
+        logAudit($conn, $user_id, "Sign In", "-", "-", $username, 'Y');
 
-            if ($checkTrainee->num_rows > 0) {
-                // Found in trainee table → redirect to attendance_form
-                header("Location: dashboardv2.php");
-            } else {
-                // Not found in trainee table → redirect to profile
-                header("Location: profile.php");
-            }
+        // Redirect
+        $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+        $checkTrainee->bind_param("s", $user_id);
+        $checkTrainee->execute();
+        $checkTrainee->store_result();
 
-            $checkTrainee->close();
-            exit();
+        if ($checkTrainee->num_rows > 0) {
+            header("Location: dashboardv2.php");
         } else {
-            $error = "Invalid username or password.";
+            header("Location: profile.php");
         }
+
+        $checkTrainee->close();
+        exit();
     } else {
         $error = "Invalid username or password.";
+        logAudit($conn, $user_id, "Sign In Failed", "-", "-", $username, 'N');
     }
+} else {
+    $error = "Invalid username or password.";
+    logAudit($conn, "N/A", "Sign In Failed", "-", "-", $username, 'N');
+}
+
 
     $stmt->close();
 }
