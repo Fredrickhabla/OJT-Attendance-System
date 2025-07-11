@@ -77,6 +77,8 @@ while ($trainee = $traineeResult->fetch_assoc()) {
   <meta charset="UTF-8">
   <title>Reports - OJT Attendance Monitoring</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     * {
       margin: 0;
@@ -152,12 +154,12 @@ while ($trainee = $traineeResult->fetch_assoc()) {
     .topbar {
       background-color: #14532d;
       color: white;
-      padding: 10px 24px;
+      padding: 10px 16px;
       font-size: 20px;
       font-weight: bold;
       display: flex;
       align-items: center;
-      height: 60px;
+      height: 55px;
     }
 
     
@@ -432,6 +434,14 @@ tbody tr:hover {
 }
 
 
+  @media print {
+    .back-department {
+      display: none;
+    }
+  }
+
+
+
   </style>
 </head>
 <body>
@@ -492,7 +502,31 @@ tbody tr:hover {
 
   <!-- Main Content -->
   <div class="content">
-    <div class="topbar"><?= htmlspecialchars($dept['name']) ?></div>
+<!-- Topbar with department name and back link -->
+<!-- Topbar with Department Name and Back Icon -->
+<div class="topbar" style="
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+">
+
+    <!-- Department Name -->
+    <span><?= htmlspecialchars($dept['name']) ?></span>
+
+    <!-- Back Icon Link -->
+    <a href="department.php" class="back-home" style="
+        text-decoration: none;
+        color: #28a745;
+        font-size: 24px;
+    ">
+        <i class="fa fa-arrow-circle-left"></i>
+    </a>
+</div>
+
 
     <div class="main">
 
@@ -518,7 +552,7 @@ tbody tr:hover {
   </div>
 
   <div class="card">
-    <!-- ✅ Completed Icon -->
+    <!-- Completed Icon -->
     <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 12l2 2l4 -4" />
       <circle cx="12" cy="12" r="10" />
