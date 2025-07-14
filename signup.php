@@ -322,8 +322,8 @@ form .grid-2 {
   <div class="field">
   <label>Select Role</label>
   <div class="role-options">
-    <input type="radio" id="role-trainee" name="role" value="trainee" required>
-    <label for="role-trainee">Trainee</label>
+    <input type="radio" id="role-student" name="role" value="student" required>
+    <label for="role-student">Student</label>
 
     <input type="radio" id="role-admin" name="role" value="admin">
     <label for="role-admin">Admin</label>
@@ -351,7 +351,7 @@ form .grid-2 {
       document.body.classList.add('fade-out');
       setTimeout(() => {
         window.location.href = href;
-      }, 600); // must match CSS transition duration
+      }, 600); 
     });
   });
     
@@ -369,7 +369,7 @@ document.querySelectorAll('a.transition, button.transition').forEach(el => {
     document.body.classList.add('fade-out');
     setTimeout(() => {
       window.location.href = href;
-    }, 600); // match with CSS duration
+    }, 600); 
   });
 });
 

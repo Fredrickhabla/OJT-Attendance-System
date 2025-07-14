@@ -1,4 +1,5 @@
 <?php
+// logger.php
 function generateUUID() {
     return uniqid("log_", true); // Or use better UUID if needed
 }

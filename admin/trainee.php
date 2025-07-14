@@ -43,7 +43,7 @@ if ($result->num_rows > 0) {
             "email" => $row["email"],
             "phone" => $row["phone_number"],
             "address" => $shortAddress,
-            "image" => !empty($row["profile_picture"]) ? "/ojtform/" . $row["profile_picture"] : "/ojtform/images/sampleprofile.jpg"
+            "image" => !empty($row["profile_picture"]) ? "/ojtform/" . $row["profile_picture"] : "/ojtform/images/placeholder.jpg"
         ];
     }
 }

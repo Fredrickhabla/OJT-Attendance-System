@@ -9,6 +9,7 @@ $user_id = $_SESSION["user_id"] ?? null;
 if (!$user_id) {
     die("No session user_id found.");
 }
+require_once 'logger.php';
 
 $requiredHours = 0;
 $completedHours = 0;
@@ -17,9 +18,9 @@ $percentage = 0;
 $trainee_id = null;
 $attendanceData = [];
 $full_name = "Unknown User";
-$email = "unknown@example.com"; // default fallback
+$email = "unknown@example.com"; 
 
-$profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"; // default fallback
+$profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"; 
 
 $traineeQuery = $conn->prepare("
     SELECT trainee_id, required_hours, email, profile_picture, CONCAT(first_name, ' ', surname) AS full_name 
@@ -36,10 +37,16 @@ if ($traineeRow = $traineeResult->fetch_assoc()) {
     $full_name = $traineeRow["full_name"];
     $email = $traineeRow["email"];
     $profile_picture = !empty($traineeRow["profile_picture"]) ? $traineeRow["profile_picture"] : $profile_picture;
+
+        // Log the download of DTR
+    $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    logTransaction($pdo, $user_id, $full_name, "Downloaded Daily Time Record", $full_name);
+
 }
 $traineeQuery->close();
 
-// Step 2: Calculate completed hours, remaining hours, and percentage
 if ($trainee_id) {
     $completedQuery = $conn->prepare("SELECT SUM(hours) as total_hours FROM attendance_record WHERE trainee_id = ?");
     $completedQuery->bind_param("s", $trainee_id);
@@ -52,7 +59,7 @@ if ($trainee_id) {
     }
     $completedQuery->close();
 
-    // Step 3: Fetch attendance records
+
     $attendanceQuery = $conn->prepare("
         SELECT date, time_in, time_out, hours 
         FROM attendance_record 
@@ -75,7 +82,7 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-$conn->close(); // ✅ Close the connection once at the end
+$conn->close(); 
 ?>
 
 
@@ -111,7 +118,7 @@ body {
   height: 100vh;
 }
 
-/* Sidebar */
+
 .sidebar {
   width: 300px;
   background: #44830f;
@@ -193,7 +200,6 @@ body {
   background: #2f6a13;
 }
 
-/* Main Content */
 .main-content {
   flex: 1;
   padding: 40px;
@@ -220,17 +226,17 @@ body {
   
 }
 
-/* Box 1 (shorter card) */
+
 .card.short-card {
   height: 40%;
 }
 
-/* Box 2 (slightly taller) */
+
 .card.tall-card {
   height: 60%;
 }
 
-/* Right side card */
+
 .card.wide {
  flex: 1.7;
   display: flex;
@@ -238,7 +244,7 @@ body {
   height: 100%;
 }
 .table-wrapper {
-   max-height: 500px;
+   max-height: 100%;
     overflow-y: auto;
 }
 
@@ -267,7 +273,6 @@ body {
   justify-content: space-between;
 }
 
-/* Optional: Force a fixed height on the card for consistency */
 .card-header {
   font-weight: bold;
   color: #3b7c1b;
@@ -278,6 +283,7 @@ body {
 .dtr-table {
      width: 100%;
     border-collapse: collapse;
+    height: 100%;
 }
 
 .dtr-table th,
@@ -306,14 +312,14 @@ body {
 
 .calendar-container {
   width: 100%;
-  height: 350px; /* Adjust to fit */
+  height: 350px; 
   overflow: hidden;
   border-radius: 8px;
   background-color: #fff;
 }
 
 .fc {
-  font-size: 0.75rem; /* Smaller text in calendar */
+  font-size: 0.75rem;
   color: blie;
 }
   .fc .fc-button {
@@ -325,22 +331,19 @@ body {
     font-weight: bold;
   }
 
-  /* Specific style for prev button */
   .fc .fc-prev-button {
     background-color: #3b7c1b;
   }
 
-  /* Specific style for next button */
   .fc .fc-next-button {
     background-color: #3b7c1b;
   }
 
-   /* Hover effect */
+   
   .fc .fc-button:hover {
     background-color: #2e5e14;
   }
 
-  /* Disabled buttons */
   .fc .fc-button:disabled {
     background-color: #ccc;
     color: #666;
@@ -457,7 +460,7 @@ canvas {
     <div class="left-col">
       <div class="card short-card progress-card">
   <div class="progress-wrapper">
-    <canvas id="progressCircle" width="150" height="150"></canvas>
+    <canvas class = "progresscircle" id="progressCircle" width="150" height="150"></canvas>
     <div class="progress-text">
        <strong>Required Time:</strong> <?= $requiredHours ?> Hours<br />
     <strong>Completed:</strong> <?= $completedHours ?> Hours<br />
@@ -474,7 +477,6 @@ canvas {
       </div>
     </div>
 
-    <!-- Right Column (Daily Time Record) -->
    <div class="card wide">
   <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
   <span>Daily Time Record</span>
@@ -501,7 +503,6 @@ canvas {
         </tr>
       </thead>
       <tbody>
-        <!-- JavaScript will populate rows -->
       </tbody>
     </table>
   </div>
@@ -536,7 +537,7 @@ canvas {
       center: 'title',
       right: '',
     },
-    events: attendanceEvents // ← add attendance days to calendar
+    events: attendanceEvents 
   });
 
   calendar.render();
@@ -546,9 +547,9 @@ canvas {
     const data = <?= json_encode($attendanceData) ?>;
 const userName = <?= json_encode($full_name) ?>;
 
-// Convert attendance data into calendar events (for green background)
-const today = new Date(); // get current date
-today.setHours(0, 0, 0, 0); // remove time part for comparison
+
+const today = new Date(); 
+today.setHours(0, 0, 0, 0); 
 
 
 
@@ -592,14 +593,12 @@ const attendanceEvents = data
   const lineWidth = 10;
   const percent = completedHours / totalHours;
 
-  // Background circle
   ctx.beginPath();
   ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
   ctx.strokeStyle = "#e6e6e6";
   ctx.lineWidth = lineWidth;
   ctx.stroke();
 
-  // Progress arc
   ctx.beginPath();
   ctx.arc(centerX, centerY, radius, -0.5 * Math.PI, (2 * Math.PI * percent) - 0.5 * Math.PI);
   ctx.strokeStyle = "#3b7c1b";
@@ -607,7 +606,6 @@ const attendanceEvents = data
   ctx.lineCap = "round";
   ctx.stroke();
 
-  // Text
   ctx.font = "16px Segoe UI";
   ctx.fillStyle = "#3b7c1b";
   ctx.textAlign = "center";
@@ -617,11 +615,27 @@ const attendanceEvents = data
 
 drawProgressCircle("progressCircle", <?= $completedHours ?>, <?= $requiredHours ?>);
 
- document.getElementById("downloadBtn").addEventListener("click", function () {
+document.getElementById("downloadBtn").addEventListener("click", function () {
   const table = document.getElementById("dtrTable");
   const workbook = XLSX.utils.table_to_book(table, { sheet: "Daily Time Record" });
   XLSX.writeFile(workbook, "DailyTimeRecord.xlsx");
+
+  fetch('log_download.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ action: "download_dtr" })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Log status:", data.status);
+  })
+  .catch(error => {
+    console.error("Logging error:", error);
+  });
 });
+
 
 
 </script>

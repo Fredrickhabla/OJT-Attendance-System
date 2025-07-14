@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Redirect if not logged in
+
 if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
     exit();
@@ -9,13 +9,13 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 
-// Connect to DB
+
 $conn = new mysqli("localhost", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get trainee's full info (trainee_id, name, email) using user_id
+
 $stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email, profile_picture FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -32,17 +32,17 @@ $full_name = $trainee['first_name'] . ' ' . $trainee['surname'];
 $email = $trainee['email'];
 $profile_picture = !empty($trainee['profile_picture']) 
     ? $trainee['profile_picture'] 
-    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png"; // Default image
+    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
 
 $trainee_id = $trainee["trainee_id"];
 
 $posts = [];
-// Pagination variables
+
 $limit = 8;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Count total posts for pagination
+
 $count_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM blog_posts WHERE trainee_id = ?");
 $count_stmt->bind_param("s", $trainee_id);
 $count_stmt->execute();
@@ -633,7 +633,6 @@ body {
   <?php endif; ?>
 </div>
 
-
     </div>
 
 <div id="editorModal" class="editor-modal" style="display: none;">
@@ -649,6 +648,8 @@ body {
     <div id="quillEditor" style="height: 60vh;"></div>
   </div>
 </div>
+
+
 
 
 <script>
@@ -679,7 +680,7 @@ body {
 
       const card = document.createElement("div");
 card.className = "card filled fade-in";
-card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
+card.setAttribute("data-post-id", "0"); 
 
       const today = new Date().toLocaleDateString('en-US', {
         month: 'long',
@@ -720,6 +721,10 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
 
       container.prepend(card);
     });
+    <?php if ($total_posts == 0): ?>
+   
+    document.getElementById("addPostBtn").click();
+  <?php endif; ?>
   });
 
   function openEditor(button) {
@@ -729,23 +734,22 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
 
     document.getElementById("editorTitle").value = title;
 
-    // Optional: load actual blog content here
+    
     quill.root.innerHTML = card.querySelector("p").innerText || "";
     quill.root.innerHTML = content; 
 
     currentEditCard = card;
 
-    // Hide main view, show editor
+   
     document.getElementById("cardContainer").style.display = "none";
     document.getElementById("editorModal").style.display = "block";
   }
 
   function closeEditor() {
-    // Hide editor, show main view
+   
     document.getElementById("editorModal").style.display = "none";
     document.getElementById("cardContainer").style.display = "block";
 
-    // Reset current card
     currentEditCard = null;
   }
 
@@ -754,8 +758,7 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
 
   const newTitle = document.getElementById("editorTitle").value.trim();
   const content = quill.root.innerHTML;
-  const postId = currentEditCard.getAttribute("data-post-id"); // 🔥 Get post ID
-
+  const postId = currentEditCard.getAttribute("data-post-id"); 
   if (!newTitle || !content) {
     alert("Title and content cannot be empty.");
     return;
@@ -769,13 +772,13 @@ card.setAttribute("data-post-id", "0"); // 🆕 New post placeholder
     body: new URLSearchParams({
       title: newTitle,
       content: content,
-      post_id: postId // 🔥 Include post_id
+      post_id: postId 
     })
   })
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // ✅ Force a reload to reflect the new post with real post_id
+     
       location.reload();
     } else {
       alert("Failed to save: " + data.message);
@@ -793,13 +796,13 @@ function deletePost(button) {
 
   if (!confirm("Are you sure you want to delete this post?")) return;
 
-  // If postId is 0 or not saved yet, just remove it
+  
   if (!postId || postId === "0") {
     card.remove();
     return;
   }
 
-  // Call backend to delete
+
   fetch("delete_blog_post.php", {
     method: "POST",
     headers: {
@@ -810,7 +813,7 @@ function deletePost(button) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Reload the page after deletion
+       
         location.reload();
       } else {
         alert("Failed to delete: " + data.message);
@@ -821,7 +824,7 @@ function deletePost(button) {
     });
 }
 
-// Enable search functionality
+
 document.getElementById("searchInput").addEventListener("input", function () {
   const query = this.value.toLowerCase();
   const cards = document.querySelectorAll("#postsContainer .card");

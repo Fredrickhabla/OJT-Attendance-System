@@ -35,7 +35,7 @@ while ($row = $result->fetch_assoc()) {
     $departments[] = $row;
 }
 
-// Fetch trainee data (if $trainee_id is defined somewhere else)
+
 $trainee = [];
 if (!empty($trainee_id)) {
     $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address, schedule_days, schedule_start, schedule_end, required_hours, department_id, profile_picture FROM trainee WHERE trainee_id = ?");
@@ -48,7 +48,7 @@ if (!empty($trainee_id)) {
     $stmt->close();
 }
 
-// Fetch coordinator data (if $coordinator_id is defined)
+
 $coordinator = [];
 if (!empty($coordinator_id)) {
     $stmt = $conn->prepare("SELECT name, position, email, phone, profile_picture FROM coordinator WHERE coordinator_id = ?");
@@ -62,7 +62,7 @@ if (!empty($coordinator_id)) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Upload pictures
+    
     $uploadDir = "uploads/";
     if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
@@ -82,7 +82,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         move_uploaded_file($_FILES['coordinator_picture']['tmp_name'], $coordinator_picture_path);
     }
 
-    // Collect POST data
     $first_name = trim($_POST['firstName'] ?? '');
     $surname = trim($_POST['surname'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -107,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
-      // Check if trainee already exists
+  
     $stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
     $stmt->bind_param("s", $user_id);
     $stmt->execute();
@@ -116,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->close();
 
     if ($hasTrainee) {
-    // 🔽 GET OLD VALUES FOR AUDIT
+
     $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address FROM trainee WHERE trainee_id = ?");
     $stmt->bind_param("s", $trainee_id);
     $stmt->execute();
@@ -129,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   
 
         if ($hasTrainee) {
-    // 🔽 GET OLD VALUES FOR AUDIT
+   
     $stmt = $conn->prepare("SELECT first_name, surname, email, school, phone_number, address FROM trainee WHERE trainee_id = ?");
     $stmt->bind_param("s", $trainee_id);
     $stmt->execute();
@@ -171,21 +170,21 @@ logAudit(
         "phone" => $phone_number,
         "address" => $address
     ]),
-    null,
+    "-",
     $first_name 
 );
 
 
-    // Coordinator logic
+
 if (!empty($selectedCoordinatorId)) {
-    // ✅ Use existing coordinator — update trainee with selected coordinator_id
+  
     $stmt = $conn->prepare("UPDATE trainee SET coordinator_id = ? WHERE trainee_id = ?");
     $stmt->bind_param("ss", $selectedCoordinatorId, $trainee_id);
     $stmt->execute();
     $stmt->close();
 
 } else {
-    // ✅ No coordinator selected — create new coordinator
+  
     $coordinator_id = uniqid("coord_");
 
     $stmt = $conn->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) VALUES (?, ?, ?, ?, ?, ?)");
@@ -193,13 +192,12 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->execute();
     $stmt->close();
 
-    // ✅ Update trainee with new coordinator_id
+   
     $stmt = $conn->prepare("UPDATE trainee SET coordinator_id = ? WHERE trainee_id = ?");
     $stmt->bind_param("ss", $coordinator_id, $trainee_id);
     $stmt->execute();
     $stmt->close();
 
-    // 🔽 LOG new coordinator creation
 logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $first_name);
 logAudit(
     $pdo,
@@ -227,8 +225,8 @@ if ($coordinator_picture_path) {
 
 
 
-logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $user_id);
-//Final message and redirect
+logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $first_name);
+
 echo "<script>
     alert('Profile saved successfully.');
     window.location.href = 'dashboardv2.php';
@@ -280,7 +278,7 @@ body {
   max-height: 100vh;
   overflow-y: auto;
    position: relative;
-  z-index: 1; /* ensure card content is above the image */
+  z-index: 1;
 }
 
 .content {
@@ -495,7 +493,7 @@ h2 {
   }
   #schedulePicker input[type="checkbox"] {
     vertical-align: middle;
-    margin: 0; /* remove default margin for cleaner alignment */
+    margin: 0; 
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -516,13 +514,13 @@ h2 {
     padding: 0.2rem 0.4rem;
     font-size: 0.85rem;
     box-sizing: border-box;
-    width: 90px; /* constrain width to prevent overflow */
+    width: 90px; 
     cursor: pointer;
   }
   #scheduleContainer {
     position: relative;
     max-width: 100%;
-    position: relative; /* Make container a positioned parent */
+    position: relative; 
   }
   #schedule {
     cursor: pointer;
@@ -542,8 +540,8 @@ h2 {
   height:460px; 
   opacity: 0.3; 
   z-index: 0; 
-  object-fit: cover; /* Keep the image aspect ratio */
-  object-position: top right; /* Show the upper-right part of the image */
+  object-fit: cover; 
+  object-position: top right; 
 }
 
 .avatar-img {
@@ -561,9 +559,9 @@ h2 {
   font-size: 12px;
   padding: 10px;
   color: gray;
-  width: 100%; /* Optional: full width */
+  width: 100%; 
   border-radius: 6px;
-  border: 1px solid #1f8f59; /* <-- fixed this line */
+  border: 1px solid #1f8f59; 
 }
 
 
@@ -838,10 +836,7 @@ document.getElementById('coordinator_picture').addEventListener('change', functi
         });
     }
 
-    // Initial check on page load
     toggleCoordinatorInputs();
-
-    // Change event
     coordinatorSelect.addEventListener("change", toggleCoordinatorInputs);
 });
 
