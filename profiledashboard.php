@@ -15,6 +15,13 @@ try {
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
 }
+
+$stmt = $pdo->prepare("SELECT username FROM users WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$sys_user = $user['username'] ?? 'unknown_user';
+
+require_once 'logger.php';
 // Fetch current trainee info (if exists)
 $stmt = $pdo->prepare("SELECT * FROM trainee WHERE user_id = ?");
 $stmt->execute([$user_id]);
@@ -107,18 +114,54 @@ if (!empty($coordId) && $coordId !== $coordinator_id) {
 } else {
   
     if (!empty($coordinator_id)) {
-      
-        $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
-        $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordinator_id]);
+    // Save old data for audit
+    $oldCoordinator = $coordinator;
 
-        $coordId = $coordinator_id;
-    } else {
-       
-        $coordId = uniqid('coord_');
-        $stmt = $pdo->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) 
-                               VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$coordId, $coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath]);
+    $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
+    $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordinator_id]);
+    $coordId = $coordinator_id;
+
+    $oldCoordinator = $coordinator;
+$newCoordinatorValues = [
+    'name' => $coordinatorName,
+    'position' => $coordinatorPosition,
+    'email' => $coordinatorEmail,
+    'phone' => $coordinatorPhone,
+    'profile_picture' => $coordinatorPicturePath
+];
+
+$oldCoordValues = [];
+$changedCoordValues = [];
+
+foreach ($newCoordinatorValues as $key => $newVal) {
+    $oldVal = $oldCoordinator[$key] ?? null;
+    if ($oldVal != $newVal) {
+        $changedCoordValues[$key] = $newVal;
+        $oldCoordValues[$key] = $oldVal;
     }
+}
+
+if (!empty($changedCoordValues)) {
+    logTransaction($pdo, $user_id, $user_name, "Updated Coordinator Info", $sys_user);
+    logAudit($pdo, $user_id, "Update Coordinator", json_encode($changedCoordValues), json_encode($oldCoordValues), $sys_user);
+}
+
+
+} else {
+    $coordId = uniqid('coord_');
+    $stmt = $pdo->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) 
+                        VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$coordId, $coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath]);
+
+    logTransaction($pdo, $user_id, $user_name, "Created Coordinator", $sys_user);
+    logAudit($pdo, $user_id, "Create Coordinator", json_encode([
+        'name' => $coordinatorName,
+        'position' => $coordinatorPosition,
+        'email' => $coordinatorEmail,
+        'phone' => $coordinatorPhone
+    ]), null, $sys_user);
+}
+
 }
 
     if ($trainee) {
@@ -155,6 +198,42 @@ if (!empty($coordId) && $coordId !== $coordinator_id) {
         $departmentId,
         $user_id
     ]);
+// Prepare new values
+$newValues = [
+    'first_name' => $firstName,
+    'surname' => $surname,
+    'email' => $email,
+    'school' => $school,
+    'phone_number' => $phoneNumber,
+    'address' => $address,
+    'schedule_days' => $scheduleDays,
+    'schedule_start' => $scheduleStart,
+    'schedule_end' => $scheduleEnd,
+    'required_hours' => $requiredHours,
+    'profile_picture' => $traineePicturePath,
+    'coordinator_id' => $coordId,
+    'department_id' => $departmentId
+];
+
+// Compare changes
+$oldValues = [];
+$changedValues = [];
+
+foreach ($newValues as $key => $newVal) {
+    $oldVal = $trainee[$key] ?? null;
+    if ($oldVal != $newVal) {
+        $changedValues[$key] = $newVal;
+        $oldValues[$key] = $oldVal;
+    }
+}
+
+// Log only if there are changes
+if (!empty($changedValues)) {
+    logTransaction($pdo, $user_id, $user_name, "Updated Trainee Profile", $sys_user);
+    logAudit($pdo, $user_id, "Update Trainee", json_encode($changedValues), json_encode($oldValues), $sys_user);
+}
+
+
     } else {
         $fullSchedule = $scheduleDays . ' (' . $scheduleStart . '-' . $scheduleEnd . ')';
 

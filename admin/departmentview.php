@@ -58,7 +58,7 @@ while ($trainee = $traineeResult->fetch_assoc()) {
     // Store data for table
    $traineeData[] = [
   'trainee_id' => $trainee['trainee_id'],
-  'name' => $trainee['first_name'] . ' ' . $trainee['surname'],
+  'name' => ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname'])),
   'school' => $trainee['school'],
   'required' => $required,
   'completed' => $completed_hours,

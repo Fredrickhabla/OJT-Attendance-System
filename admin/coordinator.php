@@ -27,7 +27,7 @@ if ($coordinatorResult->num_rows > 0) {
         $address = "N/A";
 
         while ($trainee = $traineeResult->fetch_assoc()) {
-            $trainees[] = $trainee['name'];
+            $trainees[] = ucwords(strtolower($trainee['name']));
             if ($address === "N/A" && !empty($trainee['school'])) {
                 $address = $trainee['school'];
             }

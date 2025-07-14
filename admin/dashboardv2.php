@@ -323,9 +323,9 @@ if (isset($_POST['export_excel'])) {
           scales: {
             y: {
               beginAtZero: true,
-              max: 20,
+              max: 100,
               ticks: {
-                stepSize: 5,
+                stepSize: 20,
                 callback: value => value + '%'
               },
               grid: {

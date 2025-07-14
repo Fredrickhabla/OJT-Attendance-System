@@ -82,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         move_uploaded_file($_FILES['coordinator_picture']['tmp_name'], $coordinator_picture_path);
     }
 
+
     $first_name = trim($_POST['firstName'] ?? '');
     $surname = trim($_POST['surname'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -106,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
-  
+ 
     $stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
     $stmt->bind_param("s", $user_id);
     $stmt->execute();

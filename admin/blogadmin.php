@@ -642,7 +642,8 @@ border-radius: 4px;
     <option value="?trainee_id=all" <?= $filter === 'all' ? 'selected' : '' ?>>All Trainees</option>
     <?php while($trainee = $trainee_result->fetch_assoc()): ?>
       <option value="?trainee_id=<?= $trainee['trainee_id'] ?>&department_id=<?= $department_filter ?>" <?= $filter === $trainee['trainee_id'] ? 'selected' : '' ?>>
-        <?= htmlspecialchars($trainee['first_name'] . ' ' . $trainee['surname']) ?>
+       <?= htmlspecialchars(ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname']))) ?>
+
       </option>
     <?php endwhile; ?>
   </select>

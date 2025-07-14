@@ -48,11 +48,14 @@ if ($traineeRow = $traineeResult->fetch_assoc()) {
     }
     $userQuery->close();
 
-    // ✅ Log the DTR download
-    $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    logTransaction($pdo, $user_id, $full_name, "Downloaded Daily Time Record", $username);
+    // ✅ Log only if user explicitly downloaded the DTR
+    if (isset($_GET['download']) && $_GET['download'] === 'dtr') {
+        $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        logTransaction($pdo, $user_id, $full_name, "Downloaded Daily Time Record", $username);
+    }
 }
+
 $traineeQuery->close();
 
 if ($trainee_id) {
