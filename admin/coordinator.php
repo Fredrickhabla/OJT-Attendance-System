@@ -8,7 +8,7 @@ $conn = new mysqli($host, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+require_once 'logger.php';
 $coordinatorQuery = "SELECT * FROM coordinator";
 $coordinatorResult = $conn->query($coordinatorQuery);
 

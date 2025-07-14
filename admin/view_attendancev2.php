@@ -6,7 +6,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
-
+require_once 'logger.php';
 // Fetch attendance records joined with user full name
 $stmt = $pdo->query("
     SELECT ar.*, CONCAT(u.first_name, ' ', u.surname) AS full_name

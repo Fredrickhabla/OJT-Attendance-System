@@ -1,87 +1,185 @@
 <?php
+ob_start();
 session_start();
 
-// Connect to database
 $conn = new mysqli("127.0.0.1", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 require_once 'logger.php';
+require_once 'auth_helper.php';
 $error = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+// ✅ Handle "Quick Login" button using rememberme cookie
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['quick_login']) && isset($_COOKIE['rememberme'])) {
+    [$identifier, $token] = explode(':', $_COOKIE['rememberme']);
 
-    // Admin hardcoded check
-    if ($username === "admin" && $password === "admin2314") {
-        $_SESSION['user_id'] = "admin";
-        $_SESSION['full_name'] = "Admin";
-        $_SESSION['role'] = "admin";
-        header("Location: admin/dashboardv2.php");
-        exit();
-    }
-
-    // Check if user exists in `users` table
-    $stmt = $conn->prepare("SELECT user_id, name, password_hashed, role, is_approved FROM users WHERE username = ?");
-
-    $stmt->bind_param("s", $username);
+    $stmt = $conn->prepare("SELECT user_id, name, remember_token, role FROM users WHERE remember_identifier = ?");
+    $stmt->bind_param("s", $identifier);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-    $stmt->bind_result($user_id, $name, $hashed_password, $role, $is_approved);
-    $stmt->fetch();
+        $stmt->bind_result($user_id, $name, $hashedToken, $role);
+        $stmt->fetch();
 
-    if (password_verify($password, $hashed_password)) {
-    // Admin or Student role check
-    if ($role === 'admin' && $is_approved !== 'Y') {
-        $error = "Please wait until your admin account is approved.";
-        logAudit($conn, $user_id, "Sign In Blocked - Unapproved Admin", "-", "-", $username, 'N');
-    } else {
-        $_SESSION['user_id'] = $user_id;
-        $_SESSION['username'] = $username;
-        $_SESSION['role'] = $role;
+        if (password_verify($token, $hashedToken)) {
+            $_SESSION["user_id"] = $user_id;
+            $_SESSION["full_name"] = $name;
+            $_SESSION["role"] = $role;
 
-        logTransaction($conn, $user_id, $name, "User signed in successfully", $username);
+            logTransaction($conn, $user_id, $name, "User quick-logged in via remembered_username", $user_id);
 
-        if ($role === 'student') {
-            $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
-            $checkTrainee->bind_param("s", $user_id);
-            $checkTrainee->execute();
-            $checkTrainee->store_result();
-
-            if ($checkTrainee->num_rows > 0) {
-                header("Location: dashboardv2.php");
+            if ($role === "admin") {
+                header("Location: admin/dashboardv2.php");
             } else {
-                header("Location: profile.php");
+                header("Location: dashboardv2.php");
             }
-
-            $checkTrainee->close();
-        } else if ($role === 'admin') {
-            header("Location: admin/dashboardv2.php");
+            exit();
+        } else {
+            $error = "Quick login failed. Please log in manually.";
         }
-
-        exit();
     }
-
-    } else {
-        $error = "Invalid username or password.";
-        logAudit($conn, $user_id, "Sign In Failed", "-", "-", $username, 'N');
-    }
-} else {
-    $error = "Invalid username or password.";
-    logAudit($conn, "N/A", "Sign In Failed", "-", "-", $username, 'N');
-}
-
-
     $stmt->close();
 }
 
-$conn->close();
+// 🔐 Disable full auto-login for now
+// You can re-enable this if needed by moving this block after all POST handling
+
+// 🔓 Handle standard login form
+// 🔓 Handle standard login form (with cookie fallback)
+if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+    $rememberMe = isset($_POST['remember']);
+
+    if (empty($password) && isset($_COOKIE['rememberme'])) {
+        // If no password but cookie exists, try cookie login
+        [$identifier, $token] = explode(':', $_COOKIE['rememberme']);
+
+        $stmt = $conn->prepare("SELECT user_id, name, remember_token, role FROM users WHERE username = ? AND remember_identifier = ?");
+        $stmt->bind_param("ss", $username, $identifier);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 1) {
+            $stmt->bind_result($user_id, $name, $hashedToken, $role);
+            $stmt->fetch();
+
+            if (password_verify($token, $hashedToken)) {
+                $_SESSION["user_id"] = $user_id;
+                $_SESSION["username"] = $username;
+                $_SESSION["role"] = $role;
+
+                logTransaction($conn, $user_id, $name, "User logged in via cookie with empty password", $username);
+
+                if ($role === "admin") {
+                    header("Location: admin/dashboardv2.php");
+                } else {
+                    header("Location: dashboardv2.php");
+                }
+                exit();
+            } else {
+                $error = "Remember Me token invalid. Please enter your password.";
+            }
+        } else {
+            $error = "No valid Remember Me token found for this user.";
+        }
+
+        $stmt->close();
+    } else {
+        // ➕ Proceed with normal password-based login
+        if ($username === "admin" && $password === "admin2314") {
+            $_SESSION['user_id'] = "admin";
+            $_SESSION['full_name'] = "Admin";
+            $_SESSION['role'] = "admin";
+
+            if ($rememberMe) {
+                setcookie("remembered_username", "admin", time() + (30 * 24 * 60 * 60), "/", "", false, true);
+            }
+
+            header("Location: admin/dashboardv2.php");
+            exit();
+        }
+
+        $stmt = $conn->prepare("SELECT user_id, name, password_hashed, role, is_approved FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 1) {
+            $stmt->bind_result($user_id, $name, $hashed_password, $role, $is_approved);
+            $stmt->fetch();
+
+            if (password_verify($password, $hashed_password)) {
+                if ($role === 'admin' && $is_approved !== 'Y') {
+                    $error = "Please wait until your admin account is approved.";
+                    logAudit($conn, $user_id, "Sign In Blocked - Unapproved Admin", "-", "-", $username, 'N');
+                } else {
+                    $_SESSION['user_id'] = $user_id;
+                    $_SESSION['username'] = $username;
+                    $_SESSION['role'] = $role;
+
+                    logTransaction($conn, $user_id, $name, "User signed in successfully", $username);
+
+                    if ($rememberMe) {
+                        $identifier = bin2hex(random_bytes(20));
+                        $token = generateRandomToken(64);
+                        $hashedToken = password_hash($token, PASSWORD_DEFAULT);
+
+                        $updateStmt = $conn->prepare("UPDATE users SET remember_identifier = ?, remember_token = ? WHERE user_id = ?");
+                        $updateStmt->bind_param("sss", $identifier, $hashedToken, $user_id);
+                        $updateStmt->execute();
+                        $updateStmt->close();
+
+                        setRememberMeCookie($identifier, $token);
+                        setcookie("remembered_username", $username, time() + (30 * 24 * 60 * 60), "/", "", false, true);
+                    }
+
+                    if ($role === 'student') {
+                        $checkTrainee = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
+                        $checkTrainee->bind_param("s", $user_id);
+                        $checkTrainee->execute();
+                        $checkTrainee->store_result();
+
+                        if ($checkTrainee->num_rows > 0) {
+                            header("Location: dashboardv2.php");
+                        } else {
+                            header("Location: profile.php");
+                        }
+
+                        $checkTrainee->close();
+                    } else {
+                        header("Location: admin/dashboardv2.php");
+                    }
+                    exit();
+                }
+            } else {
+                $error = "Invalid username or password.";
+                logAudit($conn, $user_id, "Sign In Failed", "-", "-", $username, 'N');
+            }
+        } else {
+            $error = "Invalid username or password.";
+            logAudit($conn, "N/A", "Sign In Failed", "-", "-", $username, 'N');
+        }
+
+        $stmt->close();
+    }
+}
 ?>
 
-
+<?php
+$cookie_username = '';
+if (isset($_COOKIE['rememberme'])) {
+    // This assumes you store the username separately or match the identifier with DB
+    // For now we'll just allow it through JS with existing value
+    $cookie_parts = explode(':', $_COOKIE['rememberme']);
+    if (count($cookie_parts) === 2) {
+        $cookie_username = $_COOKIE['remembered_username'] ?? '';
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -279,13 +377,13 @@ h1.acerojt {
         </div>
       <?php endif; ?>
 
-      <form method="POST" action="">
+      <form method="POST" action="" autocomplete="on">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required />
+        <input type="text" id="username" name="username" autocomplete="username" required />
 
         <label for="password">Password</label>
         <div style="position: relative;">
-          <input type="password" id="password" name="password" required style="padding-right: 40px;" />
+          <input type="password" id="password" name="password" autocomplete="current-password"  style="padding-right: 40px;" />
           <span class="eye-toggle" onclick="togglePassword()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
             <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
             <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
@@ -293,34 +391,60 @@ h1.acerojt {
         </div>
 
         <div class="remember">
-          <input class="checkbox" type="checkbox" id="remember" />
+          <input class="checkbox" type="checkbox" id="remember" name="remember" />
           <label for="remember">Remember me for 30 days</label>
         </div>
 
         <a href="forgot_password.php" class="forgot">Forgot Password?</a>
         <button type="submit" class="signin-button">Sign in</button>
       </form>
+      
+
     </div>
   </div>
 
   <script>
-    function togglePassword() {
-      const input = document.getElementById('password');
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
+  function togglePassword() {
+    const input = document.getElementById('password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
 
-    document.querySelectorAll('a.transition, button.transition').forEach(el => {
-      el.addEventListener('click', function (e) {
-        e.preventDefault();
-        const href = el.getAttribute('href') || el.dataset.href;
-        document.body.classList.add('fade-out');
-        setTimeout(() => {
-          window.location.href = href;
-        }, 600);
-      });
+  document.querySelectorAll('a.transition, button.transition').forEach(el => {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      const href = el.getAttribute('href') || el.dataset.href;
+      document.body.classList.add('fade-out');
+      setTimeout(() => {
+        window.location.href = href;
+      }, 600);
     });
+  });
 
-    
-  </script>
+ document.addEventListener("DOMContentLoaded", () => {
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+
+  const rememberedUsername = <?= json_encode($cookie_username) ?>;
+
+  function togglePasswordField() {
+    const enteredUsername = usernameInput.value.trim();
+
+    if (enteredUsername && rememberedUsername && enteredUsername === rememberedUsername) {
+      passwordInput.disabled = true;
+      passwordInput.removeAttribute("required");
+      passwordInput.style.backgroundColor = "#f0f0f0"; // Optional dimming
+      passwordInput.value = "";
+    } else {
+      passwordInput.disabled = false;
+      passwordInput.setAttribute("required", "required");
+      passwordInput.style.backgroundColor = ""; // Reset style
+    }
+  }
+
+  usernameInput.addEventListener("input", togglePasswordField);
+  togglePasswordField(); // run once on load in case autofilled
+});
+</script>
+
 </body>
 </html>

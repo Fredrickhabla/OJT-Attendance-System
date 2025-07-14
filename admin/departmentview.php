@@ -520,7 +520,7 @@ tbody tr:hover {
     <!-- Back Icon Link -->
     <a href="department.php" class="back-home" style="
         text-decoration: none;
-        color: #28a745;
+        color:rgb(255, 255, 255);
         font-size: 24px;
     ">
         <i class="fa fa-arrow-circle-left"></i>

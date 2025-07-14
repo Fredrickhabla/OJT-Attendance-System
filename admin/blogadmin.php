@@ -3,7 +3,7 @@ $conn = new mysqli("localhost", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+require_once 'logger.php';
 // Filters
 $filter = $_GET['trainee_id'] ?? 'all';
 $department_filter = $_GET['department_id'] ?? 'all';

@@ -4,6 +4,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
+
+require_once 'logger.php';
 ?>
 
 <!DOCTYPE html>

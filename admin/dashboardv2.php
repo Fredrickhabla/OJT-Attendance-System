@@ -4,6 +4,7 @@ $dbname = "ojtformv3";
 $username = "root";
 $password = "";
 
+
 try {
     $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -19,7 +20,7 @@ try {
 } catch (PDOException $e) {
     die("DB Error: " . $e->getMessage());
 }
-
+require_once 'logger.php';
 
 if (isset($_POST['export_excel'])) {
     try {
