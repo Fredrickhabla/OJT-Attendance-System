@@ -18,10 +18,12 @@ $id = $_GET['id'] ?? '';
 $id = trim($id); // Keep it as string
 
 // Updated SQL + binding
-$sql = "SELECT t.*, u.email 
+$sql = "SELECT t.*, u.email, d.name AS department_name
         FROM trainee t
         LEFT JOIN users u ON t.user_id = u.user_id
+        LEFT JOIN departments d ON t.department_id = d.department_id
         WHERE t.trainee_id = ?";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $id);  // ← "s" for string
 $stmt->execute();
@@ -113,6 +115,7 @@ $trainee = [
     "schedule" => $schedule,
     "required_hours" => (int) $row["required_hours"] ?? 0,
     "completed_hours" => isset($row["completed_hours"]) ? (int) $row["completed_hours"] : 20,
+    "department_name" => $row["department_name"] ?? "Not Assigned",
 ];
 
 ?>
@@ -446,6 +449,8 @@ $trainee = [
             <div class="info-row"><b>Phone Number:</b> <?= htmlspecialchars($trainee['phone']) ?></div>
             <div class="info-row"><b>Address:</b> <?= htmlspecialchars($trainee['address']) ?></div>
             <div class="info-row"><b>Schedule:</b> <?= htmlspecialchars($trainee['schedule']) ?></div>
+            <div class="info-row"><b>Department:</b> <?= htmlspecialchars($trainee['department_name']) ?></div>
+
           </div>
 
           <!-- Right: Progress Tracker -->
