@@ -38,12 +38,20 @@ if ($traineeRow = $traineeResult->fetch_assoc()) {
     $email = $traineeRow["email"];
     $profile_picture = !empty($traineeRow["profile_picture"]) ? $traineeRow["profile_picture"] : $profile_picture;
 
-        // Log the download of DTR
+    $username = "UnknownUsername";
+    $userQuery = $conn->prepare("SELECT username FROM users WHERE user_id = ?");
+    $userQuery->bind_param("s", $user_id);
+    $userQuery->execute();
+    $userResult = $userQuery->get_result();
+    if ($userRow = $userResult->fetch_assoc()) {
+        $username = $userRow["username"];
+    }
+    $userQuery->close();
+
+    // ✅ Log the DTR download
     $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    logTransaction($pdo, $user_id, $full_name, "Downloaded Daily Time Record", $full_name);
-
+    logTransaction($pdo, $user_id, $full_name, "Downloaded Daily Time Record", $username);
 }
 $traineeQuery->close();
 

@@ -1,22 +1,37 @@
 <?php
 session_start();
 
-// Redirect if not logged in
+
 if (!isset($_SESSION["user_id"])) {
     header("Location: indexv2.php");
     exit();
 }
 
-// Get user_id from session
+
 $user_id = $_SESSION["user_id"];
 
-// Connect to database
+
 $conn = new mysqli("localhost", "root", "", "ojtformv3");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch trainee's name and email using user_id
+require_once 'logger.php';
+
+$username = "unknown_user";
+$userQuery = $conn->prepare("SELECT username FROM users WHERE user_id = ?");
+$userQuery->bind_param("s", $user_id);
+$userQuery->execute();
+$userResult = $userQuery->get_result();
+if ($userRow = $userResult->fetch_assoc()) {
+    $username = $userRow["username"];
+}
+$userQuery->close();
+
+$pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+
 $full_name = "User"; // Default fallback
 $email = "";
 
@@ -33,7 +48,6 @@ if ($trainee_info) {
     $raw_picture = trim($trainee_info['profile_picture']);
     $local_path = $raw_picture; 
 
-    // ✅ Check both value and if file actually exists on disk
     if (!empty($raw_picture) && file_exists($local_path)) {
         $profile_picture = $local_path;
     } else {
@@ -57,7 +71,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     
 
-    // ✅ Get trainee_id from user_id
     $trainee_id = null;
     $trainee_query = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
     $trainee_query->bind_param("s", $user_id);
@@ -70,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Trainee not found for the current user.";
     }
 
-    // ✅ Handle file upload
+
     $signature_path = "";
     if (empty($error) && !empty($_FILES["signature"]["name"])) {
         $upload_dir = "uploads/";
@@ -88,12 +101,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // ✅ Save attendance
+
     if (empty($error)) {
         $attendance_id = 'attendance_' . time() . bin2hex(random_bytes(2));
 
         if (strlen($time_in) === 5) {
-    $time_in .= ":00"; // Make it HH:MM:SS
+    $time_in .= ":00"; 
 }
 if (strlen($time_out) === 5) {
     $time_out .= ":00";
@@ -104,6 +117,26 @@ if (strlen($time_out) === 5) {
 
         if ($stmt->execute()) {
             $success = "Attendance submitted successfully.";
+
+       
+logTransaction(
+    $pdo,
+    $user_id,
+    $full_name,
+    "Submitted attendance for $date ($hours hrs)",
+    $username
+);
+
+
+logAudit(
+    $pdo,
+    $user_id,
+    "Add Attendance",
+    "Date: $date, Time In: $time_in, Time Out: $time_out, Hours: $hours, Work: $work_description",
+    "-",
+    $username
+);
+
 
         } else {
             $error = "Error saving attendance: " . $stmt->error;
@@ -143,7 +176,6 @@ $conn->close();
   overflow: hidden;
 }
 
-/* Sidebar */
 .sidebar {
   width: 300px;
   background: #44830f;
@@ -385,7 +417,7 @@ $conn->close();
 }
 #signature {
   width: 118%;
-  height: 50px; /* Same height as work_description box */
+  height: 50px;
   padding: 10px;
   font-size: 15px;
   border: 2px solid #3b8c2a;
@@ -420,7 +452,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const timeIn = timeInInput.value;
     const timeOut = timeOutInput.value;
 
-    // 💡 Show values in console
+  
     console.log("Time In:", timeIn);
     console.log("Time Out:", timeOut);
 
@@ -432,7 +464,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const [inHour, inMin] = timeIn.split(":").map(Number);
     const [outHour, outMin] = timeOut.split(":").map(Number);
 
-    // 💡 Check if the parsed numbers are valid
+    
     if (
       isNaN(inHour) || isNaN(inMin) ||
       isNaN(outHour) || isNaN(outMin)
@@ -442,11 +474,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Construct date objects
+   
     const inDate = new Date(2000, 0, 1, inHour, inMin);
     const outDate = new Date(2000, 0, 1, outHour, outMin);
 
-    // Handle overnight shift
+
     if (outDate < inDate) {
       outDate.setDate(outDate.getDate() + 1);
     }
@@ -462,7 +494,6 @@ document.addEventListener("DOMContentLoaded", function () {
   timeInInput.addEventListener("input", calculateHours);
   timeOutInput.addEventListener("input", calculateHours);
 
-  // If inputs are pre-filled
   calculateHours();
 });
 </script>
@@ -472,7 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </head>
 <body>
 <div class="dashboard">
-  <!-- Sidebar -->
+
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
