@@ -1,3 +1,44 @@
+<?php
+session_start();
+$conn = new mysqli("localhost", "root", "", "ojtformv3");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = $_SESSION['user_id'] ?? null;
+
+    if (!$user_id) {
+        die("User not logged in.");
+    }
+
+    $name = $_POST['name'] ?? '';
+    $position = $_POST['position'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $profile_picture = ''; // For now, leave empty or default
+
+    $coordinator_id = 'coord_' . uniqid();
+
+    $stmt = $conn->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssss", $coordinator_id, $name, $position, $email, $phone, $profile_picture, $user_id);
+
+    if ($stmt->execute()) {
+        header("Location: coorddashboard.php");
+        exit;
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,28 +216,30 @@
           <button class="insert-photo-btn">Insert Photo</button>
         </div>
 
-        <form class="form">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" />
-          </div>
-          <div class="form-group">
-            <label for="position">Position</label>
-            <input type="text" id="position" />
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" />
-          </div>
-          <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" />
-          </div>
+        <form class="form" method="POST">
 
-          <div class="form-actions">
-            <button type="submit" class="save-btn">Save</button>
-          </div>
-        </form>
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required/>
+  </div>
+  <div class="form-group">
+    <label for="position">Position</label>
+    <input type="text" id="position" name="position" required/>
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required/>
+  </div>
+  <div class="form-group">
+    <label for="phone">Phone</label>
+    <input type="tel" id="phone" name="phone" required/>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="save-btn">Save</button>
+  </div>
+</form>
+
       </div>
     </div>
   </div>

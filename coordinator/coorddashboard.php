@@ -24,8 +24,8 @@ $coordinator_id = $coor['coordinator_id'];
 $full_name = $coor['name'];
 $email = $coor['email'];
 $profile_picture = !empty($coor['profile_picture']) 
-    ? $coor['profile_picture'] 
-    : '../images/placeholder.jpg';
+    ? '/ojtform/' . $coor['profile_picture'] 
+    : '/ojtform/images/placeholder.jpg';
 
 
 
@@ -544,7 +544,7 @@ tbody tr:hover {
           <line x1="8" y1="2" x2="8" y2="22"/>
           <line x1="16" y1="2" x2="16" y2="22"/>
         </svg>
-        ATTENDANCE FORM
+        DTR MONITORING
       </a>
     </li>
     <li>
@@ -572,7 +572,7 @@ tbody tr:hover {
 </nav>
       <hr class="separator" />
       <div class="logout">
- <a href="logout.php" class="logout-link">
+ <a href="ojtform/logout.php" class="logout-link">
     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
