@@ -113,9 +113,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
                         }
 
                         $checkTrainee->close();
-                    } else {
-                        header("Location: admin/dashboardv2.php");
-                    }
+                    } elseif ($role === 'coordinator') {
+    $checkCoordinator = $conn->prepare("SELECT * FROM coordinator WHERE user_id = ?");
+    $checkCoordinator->bind_param("s", $user_id);
+    $checkCoordinator->execute();
+    $result = $checkCoordinator->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        // Fields to check for completeness
+        $requiredFields = ['name', 'position', 'email', 'phone', 'profile_picture'];
+
+        $isComplete = true;
+        foreach ($requiredFields as $field) {
+            if (empty($row[$field])) {
+                $isComplete = false;
+                break;
+            }
+        }
+
+        if ($isComplete) {
+            header("Location: coordinator/coorddashboard.php");
+        } else {
+            header("Location: coordinator/coordprofile.php");
+        }
+    } else {
+        // No coordinator record found; redirect to profile setup
+        header("Location: coordinator/coordprofile.php");
+    }
+
+    $checkCoordinator->close();
+}
+
+
                     exit();
                 }
             } else {
