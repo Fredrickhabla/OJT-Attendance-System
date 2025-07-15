@@ -475,7 +475,7 @@ if ($coordinatorResult->num_rows > 0) {
       <p><span class="label">Position:</span> <?= $coor['position'] ?></p>
       <p><span class="label">Email:</span> <?= $coor['email'] ?></p>
       <p><span class="label">Phone:</span> <?= $coor['phone'] ?></p>
-      <p><span class="label">Address:</span> <?= $coor['address'] ?></p>
+      <p><span class="label">School:</span> <?= $coor['address'] ?></p>
     </div>
 
     <div class="trainees">
@@ -515,7 +515,7 @@ if ($coordinatorResult->num_rows > 0) {
         <input type="text" name="phone" id="edit_phone">
       </div>
       <div>
-        <label>Address:</label>
+        <label>School:</label>
         <input type="text" name="address" id="edit_address" disabled>
       </div>
         <div style="display: flex; gap: 20px;">

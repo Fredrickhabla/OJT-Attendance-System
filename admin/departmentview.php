@@ -515,7 +515,8 @@ tbody tr:hover {
 ">
 
     <!-- Department Name -->
-    <span><?= htmlspecialchars($dept['name']) ?></span>
+    <span><?= htmlspecialchars($coor['name']) ?></span>
+
 
     <!-- Back Icon Link -->
     <a href="department.php" class="back-home" style="

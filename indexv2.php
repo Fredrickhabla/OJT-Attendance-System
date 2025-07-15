@@ -11,44 +11,7 @@ require_once 'logger.php';
 require_once 'auth_helper.php';
 $error = "";
 
-// ✅ Handle "Quick Login" button using rememberme cookie
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['quick_login']) && isset($_COOKIE['rememberme'])) {
-    [$identifier, $token] = explode(':', $_COOKIE['rememberme']);
 
-    $stmt = $conn->prepare("SELECT user_id, name, remember_token, role FROM users WHERE remember_identifier = ?");
-    $stmt->bind_param("s", $identifier);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $name, $hashedToken, $role);
-        $stmt->fetch();
-
-        if (password_verify($token, $hashedToken)) {
-            $_SESSION["user_id"] = $user_id;
-            $_SESSION["full_name"] = $name;
-            $_SESSION["role"] = $role;
-
-            logTransaction($conn, $user_id, $name, "User quick-logged in via remembered_username", $user_id);
-
-            if ($role === "admin") {
-                header("Location: admin/dashboardv2.php");
-            } else {
-                header("Location: dashboardv2.php");
-            }
-            exit();
-        } else {
-            $error = "Quick login failed. Please log in manually.";
-        }
-    }
-    $stmt->close();
-}
-
-// 🔐 Disable full auto-login for now
-// You can re-enable this if needed by moving this block after all POST handling
-
-// 🔓 Handle standard login form
-// 🔓 Handle standard login form (with cookie fallback)
 if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
@@ -72,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
                 $_SESSION["username"] = $username;
                 $_SESSION["role"] = $role;
 
-                logTransaction($conn, $user_id, $name, "User logged in via cookie with empty password", $username);
+                logTransaction($conn, $user_id, $name, "User logged in via cookie", $username);
 
                 if ($role === "admin") {
                     header("Location: admin/dashboardv2.php");
@@ -432,17 +395,17 @@ h1.acerojt {
     if (enteredUsername && rememberedUsername && enteredUsername === rememberedUsername) {
       passwordInput.disabled = true;
       passwordInput.removeAttribute("required");
-      passwordInput.style.backgroundColor = "#f0f0f0"; // Optional dimming
-      passwordInput.value = "";
+      passwordInput.style.backgroundColor = "#dbd8d8ff"; // Optional dimming
+      passwordInput.value = ".............";
     } else {
       passwordInput.disabled = false;
       passwordInput.setAttribute("required", "required");
-      passwordInput.style.backgroundColor = ""; // Reset style
+      passwordInput.style.backgroundColor = ""; 
     }
   }
 
   usernameInput.addEventListener("input", togglePasswordField);
-  togglePasswordField(); // run once on load in case autofilled
+  togglePasswordField();
 });
 </script>
 
