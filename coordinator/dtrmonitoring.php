@@ -1,7 +1,15 @@
-<?php
-session_start(); // Required to use $_SESSION
 
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
+<?php
+session_start(); // Make sure session is started
+$host = "localhost";
+$username = "root";
+$password = "";
+$database = "ojtformv3";
+
+// Create connection
+$conn = new mysqli($host, $username, $password, $database);
+
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -11,7 +19,6 @@ $user_id = $_SESSION['user_id'] ?? null;
 if (!$user_id) {
     die("User not logged in.");
 }
-
 
 $coorResult = $conn->query("SELECT coordinator_id, name, email, profile_picture FROM coordinator WHERE user_id = '$user_id'");
 
@@ -26,56 +33,56 @@ $profile_picture = !empty($coor['profile_picture'])
     ? '/ojtform/' . $coor['profile_picture'] 
     : '/ojtform/images/placeholder.jpg';
 
+// Step 1: Get coordinator_id for the logged-in user
+$coordinator_id = null;
+$stmt = $conn->prepare("SELECT coordinator_id, name FROM coordinator WHERE user_id = ?");
+$stmt->bind_param("s", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$totalTrainees = 0;
-$completed = 0;
-$ongoing = 0;
+$coor = $result->fetch_assoc(); // contains name and coordinator_id
+$coordinator_id = $coor['coordinator_id'] ?? null;
 
-$traineeData = [];
+if (!$coordinator_id) {
+    die("Coordinator not found for this user.");
+}
 
-$perPage = 10;
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
-$offset = ($page - 1) * $perPage;
+// Step 2: Get trainees for this coordinator
+$sql = "SELECT t.*, u.email 
+        FROM trainee t
+        LEFT JOIN users u ON t.user_id = u.user_id
+        WHERE t.coordinator_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $coordinator_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$countResult = $conn->query("SELECT COUNT(*) AS total FROM trainee WHERE coordinator_id = '$coordinator_id'");
-$totalRows = $countResult->fetch_assoc()['total'];
-$totalPages = ceil($totalRows / $perPage);
+$trainees = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $fullName = ucwords(strtolower($row["first_name"] . ' ' . $row["surname"]));
+        $fullAddress = $row["address"];
 
-$traineeResult = $conn->query("SELECT * FROM trainee WHERE coordinator_id = '$coordinator_id' LIMIT $perPage OFFSET $offset");
-
-if ($traineeResult) {
-    while ($trainee = $traineeResult->fetch_assoc()) {
-        $trainee_id = $trainee['trainee_id'];
-        $required = $trainee['required_hours'];
-
-        // Get completed hours
-        $attendanceQuery = $conn->query("SELECT SUM(hours) AS total_hours FROM attendance_record WHERE trainee_id = '$trainee_id'");
-        $attendance = $attendanceQuery->fetch_assoc();
-        $completed_hours = floatval($attendance['total_hours'] ?? 0);
-
-        // Determine status
-        $status = ($completed_hours >= $required) ? 'Completed' : 'Ongoing';
-
-        if ($status === 'Completed') {
-            $completed++;
+        if (preg_match('/(?:\b|^)([\w\s]+),?\s+([\w\s]+)$/', $fullAddress, $matches)) {
+            $district = ucwords(strtolower(trim($matches[1])));
+            $city = ucwords(strtolower(trim($matches[2])));
+            $shortAddress = "$district, $city";
         } else {
-            $ongoing++;
+            $shortAddress = ucwords(strtolower($fullAddress));
         }
 
-        $totalTrainees++;
-
-        // Store data
-        $traineeData[] = [
-            'trainee_id' => $trainee['trainee_id'],
-            'name' => ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname'])),
-            'school' => $trainee['school'],
-            'required' => $required,
-            'completed' => $completed_hours,
-            'status' => $status,
-            'remarks' => $trainee['remarks'] ?? ''
+        $trainees[] = [
+            "trainee_id" => $row["trainee_id"], 
+            "name" => $fullName,
+            "email" => $row["email"],
+            "phone" => $row["phone_number"],
+            "address" => $shortAddress,
+            "image" => !empty($row["profile_picture"]) ? "/ojtform/" . $row["profile_picture"] : "/ojtform/images/placeholder.jpg"
         ];
     }
 }
+
+
 ?>
 
 
@@ -394,6 +401,93 @@ tbody tr:hover {
   animation: fadeIn 0.2s ease-in-out;
 }
 
+ .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      margin-left: 20px;
+      margin-right: 20px;
+      margin-top: 10px;
+    }
+    .trainee-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trainee-box {
+  background-color: white;
+  border: 2px solid #166534;
+  border-radius: 12px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  margin: 0px;
+  text-align: center;
+
+  opacity: 0;
+  animation: fadeSlideIn 0.6s ease-out forwards;
+  animation-fill-mode: forwards;
+
+  transform: translateY(40px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.trainee-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+    .trainee-box:nth-child(1) { animation-delay: 0.1s; }
+.trainee-box:nth-child(2) { animation-delay: 0.2s; }
+.trainee-box:nth-child(3) { animation-delay: 0.3s; }
+.trainee-box:nth-child(4) { animation-delay: 0.4s; }
+.trainee-box:nth-child(5) { animation-delay: 0.5s; }
+.trainee-box:nth-child(6) { animation-delay: 0.6s; }
+
+    .trainee-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 12px;
+      object-fit: cover;
+    }
+    .trainee-name {
+      margin-bottom: 6px;
+      color: #166534;
+      line-height: 5px;
+    }
+    .trainee-email {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .trainee-btn {
+      background-color: #166534;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .trainee-contact {
+      font-size: 16px;
+      color: #444;
+      margin-top: 20px;
+    }
+
 /* Modal Box */
 .modal-box {
   background-color: #fff;
@@ -599,130 +693,21 @@ tbody tr:hover {
 </div>
 
 
-    <div class="main">
+   <main class="main">
+      <div class="trainee-grid">
+       
+        <?php foreach ($trainees as $id => $trainee): ?>
+          <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
 
-   <section class="cards">
-  <div class="card">
-    <!--  Trainee Icon -->
-  
-<svg xmlns="http://www.w3.org/2000/svg" height="60px" class="icon" viewBox="0 0 24 24" fill="#16a34a">
-  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-</svg>
-
-    <span class="card-label"><?= $totalTrainees ?> Trainee</span>
-  </div>
-
-  <div class="card">
-   
-    <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="1 4 1 10 7 10" />
-      <polyline points="23 20 23 14 17 14" />
-      <path d="M20.49 9A9 9 0 0 0 5.51 5M3 14a9 9 0 0 0 15.49 4" />
-    </svg>
-    <span class="card-label"><?= $ongoing ?> Ongoing</span>
-  </div>
-
-  <div class="card">
-   
-    <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 12l2 2l4 -4" />
-      <circle cx="12" cy="12" r="10" />
-    </svg>
-    <span class="card-label"><?= $completed ?> Completed</span>
-  </div>
-</section>
-
-<div class="table-section">
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>School</th>
-        <th>Required Time</th>
-        <th>Completed Time</th>
-        <th>Status</th>
-        <th>Remarks</th>
-      </tr>
-    </thead>
-    <tbody>
-<tbody>
-<?php
-$rowCount = 0;
-foreach ($traineeData as $trainee):
-  $rowCount++;
-?>
-  <tr class="trainee-row" data-name="<?= htmlspecialchars($trainee['name']) ?>" data-id="<?= $trainee['trainee_id'] ?>">
-  <td><?= htmlspecialchars($trainee['name']) ?></td>
-  <td><?= htmlspecialchars($trainee['school']) ?></td>
-  <td><?= $trainee['required'] ?></td>
-  <td><?= $trainee['completed'] ?></td>
-  <td><span class="badge <?= $trainee['status'] ?>"><?= $trainee['status'] ?></span></td>
-  <td><?= htmlspecialchars($trainee['remarks']) ?></td>
-
-</tr>
-
-<?php endforeach; ?>
-
-<?php
-for ($i = $rowCount; $i < 8; $i++):
-?>
-  <tr>
-    <td colspan="6" style="height: 50px; color: #aaa; text-align: center;">— Empty Slot —</td>
-  </tr>
-<?php endfor; ?>
-
-</tbody>
-
-  </table>
-
-  <div style="padding: 1rem; text-align: center;">
-  <?php if ($totalPages > 1): ?>
-    <?php if ($page > 1): ?>
-      <a href="?coordinator_id=<?= $coordinator_id ?>&page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
-    <?php endif; ?>
-
-    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-      <?php if ($p == $page): ?>
-        <strong><?= $p ?></strong>
-      <?php else: ?>
-        <a href="?coordinator_id=<?= $coordinator_id ?>&page=<?= $p ?>" style="margin: 0 5px;"><?= $p ?></a>
-      <?php endif; ?>
-    <?php endfor; ?>
-
-    <?php if ($page < $totalPages): ?>
-      <a href="?coordinator_id=<?= $coordinator_id ?>&page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
-    <?php endif; ?>
-  <?php endif; ?>
-</div>
-
-</div>
-
-
-<!-- Remarks Modal -->
-<div id="remarksModal" class="modal-overlay">
-  <div class="modal-box">
-    <h2 class="modal-title">Add Remarks</h2>
-    <p class="modal-subtitle">For: <span id="traineeName" class="highlighted-name"></span></p>
-
-    <form action="save_remarks.php" method="POST">
-      <input type="hidden" name="trainee_id" id="traineeId">
-       <input type="hidden" name="coordinator_id" value="<?= htmlspecialchars($coordinator_id) ?>">
-
-      
-      <textarea 
-        name="remarks" 
-        placeholder="Type your remarks here..." 
-        class="remarks-textarea" 
-        required
-      ></textarea>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn-submit">Save</button>
-        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
+            <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
+            <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
+            <a href="traineeview.php?id=<?= urlencode($trainee['trainee_id']) ?>"><button class="trainee-btn">View Profile</button></a>
+            <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
+          </div>
+        <?php endforeach; ?>
       </div>
-    </form>
-  </div>
-</div>
+    </main>
 
 
 <script>
