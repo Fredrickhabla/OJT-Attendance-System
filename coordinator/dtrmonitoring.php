@@ -26,7 +26,8 @@ if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
 
     // Calculate total hours
     $interval = $timeIn->diff($timeOut);
-    $totalHours = $interval->h + ($interval->i / 60); // hours + minutes converted to hours
+    $totalHours = (int)($interval->h + ($interval->i / 60));
+
 
     $records[] = [
         'date' => $row['date'],
@@ -637,6 +638,88 @@ tbody tr:hover {
     }
   }
 
+.modalh2{
+    font-size: 1.5rem;
+    color: #14532d;
+    margin-bottom: 12px;
+    margin-left:6px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 80%;
+  max-height: 85%;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 24px 32px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.25s ease-out;
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  color: #14532d;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-table-container {
+  overflow-x: auto;
+}
+
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.modal-table thead {
+  background-color: #166534;
+  color: white;
+  font-weight: bold;
+}
+
+.modal-table th,
+.modal-table td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-table tbody tr:hover {
+  background-color: #f0fdf4;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
 
   </style>
@@ -752,29 +835,30 @@ tbody tr:hover {
     </main>
 
     <!-- DTR Modal -->
-<div id="dtrModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-     background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center;">
-
-
-  <div style="background: #fff; padding: 20px; border-radius: 10px; width: 80%; max-height: 80%; overflow-y: auto;">
-   <h2 id="modalTitle">Trainee DTR</h2>
-    <table border="1" cellpadding="8" cellspacing="0" width="100%" id="dtrTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Time In</th>
-          <th>Time Out</th>
-          <th>Total Hours</th>
-        </tr>
-      </thead>
-      <tbody id="dtrBody">
- 
-      </tbody>
-    </table>
-    <br>
-    <button class = "trainee-btn" onclick="closeDTRModal()">Close</button>
+<div id="dtrModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2 id="modalTitle" class="modal-title">Trainee DTR</h2>
+    <div class="modal-table-container">
+      <table id="dtrTable" class="modal-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time In</th>
+            <th>Time Out</th>
+            <th>Total Hours</th>
+          </tr>
+        </thead>
+        <tbody id="dtrBody">
+          <!-- Data will be injected here -->
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+      <button class="trainee-btn" onclick="closeDTRModal()">Close</button>
+    </div>
   </div>
 </div>
+
 
 
 <script>
@@ -788,7 +872,7 @@ document.addEventListener('DOMContentLoaded', function () {
     button.addEventListener('click', () => {
       const traineeId = button.getAttribute('data-trainee-id');
       const traineeName = button.closest('.trainee-box').querySelector('.trainee-name').textContent;
-      document.getElementById('modalTitle').textContent = traineeName + "'s DTR";
+      document.getElementById('modalTitle').textContent = traineeName + "'s Daily Time Record (DTR)";
 
       fetch('?fetch_dtr=1&trainee_id=' + traineeId)
         .then(response => {
