@@ -1,6 +1,47 @@
-
 <?php
+
+if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
+    header('Content-Type: application/json');
+
+    $conn = new mysqli("localhost", "root", "", "ojtformv3");
+
+    if ($conn->connect_error) {
+        http_response_code(500);
+        echo json_encode(["error" => "DB connection failed"]);
+        exit;
+    }
+
+    $trainee_id = $_GET['trainee_id'];
+
+    $stmt = $conn->prepare("SELECT date, time_in, time_out FROM attendance_record WHERE trainee_id = ?");
+
+    $stmt->bind_param("s", $trainee_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $records = [];
+    while ($row = $result->fetch_assoc()) {
+        $timeIn = new DateTime($row['time_in']);
+    $timeOut = new DateTime($row['time_out']);
+
+    // Calculate total hours
+    $interval = $timeIn->diff($timeOut);
+    $totalHours = $interval->h + ($interval->i / 60); // hours + minutes converted to hours
+
+    $records[] = [
+        'date' => $row['date'],
+        'time_in' => $row['time_in'],
+        'time_out' => $row['time_out'],
+        'total_hours' => number_format($totalHours, 2)
+    ];
+}
+
+    echo json_encode($records);
+    exit;
+}
+
 session_start(); // Make sure session is started
+
 $host = "localhost";
 $username = "root";
 $password = "";
@@ -15,11 +56,15 @@ if ($conn->connect_error) {
 }
 
 
+
+
+
 $user_id = $_SESSION['user_id'] ?? null;
 if (!$user_id) {
     die("User not logged in.");
 }
 
+// Get coordinator details
 $coorResult = $conn->query("SELECT coordinator_id, name, email, profile_picture FROM coordinator WHERE user_id = '$user_id'");
 
 if (!$coorResult || $coorResult->num_rows === 0) {
@@ -33,7 +78,7 @@ $profile_picture = !empty($coor['profile_picture'])
     ? '/ojtform/' . $coor['profile_picture'] 
     : '/ojtform/images/placeholder.jpg';
 
-// Step 1: Get coordinator_id for the logged-in user
+// Get trainees
 $coordinator_id = null;
 $stmt = $conn->prepare("SELECT coordinator_id, name FROM coordinator WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
@@ -47,7 +92,6 @@ if (!$coordinator_id) {
     die("Coordinator not found for this user.");
 }
 
-// Step 2: Get trainees for this coordinator
 $sql = "SELECT t.*, u.email 
         FROM trainee t
         LEFT JOIN users u ON t.user_id = u.user_id
@@ -64,7 +108,7 @@ if ($result->num_rows > 0) {
         $fullAddress = $row["address"];
 
         if (preg_match('/(?:\b|^)([\w\s]+),?\s+([\w\s]+)$/', $fullAddress, $matches)) {
-            $district = ucwords(strtolower(trim($matches[1])));
+            $district = ucwords(strtolower(trim($matches[1]))); 
             $city = ucwords(strtolower(trim($matches[2])));
             $shortAddress = "$district, $city";
         } else {
@@ -84,9 +128,6 @@ if ($result->num_rows > 0) {
 
 
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -347,14 +388,14 @@ th, td {
 
 tbody td {
   line-height: 1.4;
-  white-space: nowrap;  /* Prevent wrapping */
-  height: 50px;          /* Fixed row height */
+  white-space: nowrap;  
+  height: 50px;         
   vertical-align: middle;
 }
 
 
 tbody tr {
-  border-bottom: 1px solid #d1d5db; /* light gray line */
+  border-bottom: 1px solid #d1d5db; 
 }
 
 /* Hover effect */
@@ -702,27 +743,86 @@ tbody tr:hover {
             <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
             <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
             <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
-            <a href="traineeview.php?id=<?= urlencode($trainee['trainee_id']) ?>"><button class="trainee-btn">View Profile</button></a>
+            <button class="trainee-btn" data-trainee-id="<?= $trainee['trainee_id'] ?>">View DTR</button>
+
             <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
           </div>
         <?php endforeach; ?>
       </div>
     </main>
 
+    <!-- DTR Modal -->
+<div id="dtrModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+     background: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center;">
+
+
+  <div style="background: #fff; padding: 20px; border-radius: 10px; width: 80%; max-height: 80%; overflow-y: auto;">
+   <h2 id="modalTitle">Trainee DTR</h2>
+    <table border="1" cellpadding="8" cellspacing="0" width="100%" id="dtrTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time In</th>
+          <th>Time Out</th>
+          <th>Total Hours</th>
+        </tr>
+      </thead>
+      <tbody id="dtrBody">
+ 
+      </tbody>
+    </table>
+    <br>
+    <button class = "trainee-btn" onclick="closeDTRModal()">Close</button>
+  </div>
+</div>
+
 
 <script>
-function closeModal() {
-  document.getElementById('remarksModal').style.display = 'none';
+function closeDTRModal() {
+  document.getElementById('dtrModal').style.display = 'none';
+  document.getElementById('dtrBody').innerHTML = '';
 }
 
-document.querySelectorAll('.trainee-row').forEach(row => {
-  row.addEventListener('click', () => {
-    const name = row.getAttribute('data-name');
-    const id = row.getAttribute('data-id');
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.trainee-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const traineeId = button.getAttribute('data-trainee-id');
+      const traineeName = button.closest('.trainee-box').querySelector('.trainee-name').textContent;
+      document.getElementById('modalTitle').textContent = traineeName + "'s DTR";
 
-    document.getElementById('traineeName').innerText = name;
-    document.getElementById('traineeId').value = id;
-    document.getElementById('remarksModal').style.display = 'flex';
+      fetch('?fetch_dtr=1&trainee_id=' + traineeId)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('dtrBody');
+          tbody.innerHTML = '';
+
+          if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No attendance records found.</td></tr>';
+          } else {
+            data.forEach(record => {
+              const row = `<tr>
+                <td>${record.date}</td>
+                <td>${record.time_in}</td>
+                <td>${record.time_out}</td>
+                <td>${record.total_hours}</td>
+              </tr>`;
+              tbody.innerHTML += row;
+            });
+          }
+
+          document.getElementById('dtrModal').style.display = 'flex';
+        })
+        .catch(error => {
+          console.error('Fetch Error:', error);
+        });
+    });
   });
 });
+
+
 </script>
