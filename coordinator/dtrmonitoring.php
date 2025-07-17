@@ -24,7 +24,7 @@ if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
         $timeIn = new DateTime($row['time_in']);
     $timeOut = new DateTime($row['time_out']);
 
-    // Calculate total hours
+   
     $interval = $timeIn->diff($timeOut);
     $totalHours = (int)($interval->h + ($interval->i / 60));
 
@@ -760,7 +760,7 @@ tbody tr:hover {
       </a>
     </li>
     <li>
-      <a href="profiledashboard.php">
+      <a href="coordupdate.php">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 0 0-3-3.87"/>
