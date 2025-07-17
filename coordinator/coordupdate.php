@@ -526,3 +526,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 
+<script>
+document.getElementById('profile_picture').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            const avatarImg = document.querySelector('.avatar-img');
+
+           
+            if (avatarImg) {
+                avatarImg.src = event.target.result;
+            } else {
+               
+                const newImg = document.createElement('img');
+                newImg.src = event.target.result;
+                newImg.className = 'avatar-img';
+                newImg.style.width = '100px';
+                newImg.style.height = '100px';
+                newImg.style.borderRadius = '50%';
+                newImg.style.objectFit = 'cover';
+
+                const avatarDiv = document.querySelector('.avatar');
+                avatarDiv.innerHTML = ''; 
+                avatarDiv.appendChild(newImg);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+</script>
