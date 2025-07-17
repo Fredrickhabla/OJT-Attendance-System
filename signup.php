@@ -21,6 +21,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($name && $username && $email && $pass) {
         try {
+
+            $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
+            $checkStmt->execute([$username]);
+            $existingUserCount = $checkStmt->fetchColumn();
+
+            if ($existingUserCount > 0) {
+                echo "<script>alert('Username already taken. Please choose another one.'); history.back();</script>";
+                exit;
+            }
+            
             $user_id = uniqid("user_");
             $hashedPassword = password_hash($pass, PASSWORD_DEFAULT);
 

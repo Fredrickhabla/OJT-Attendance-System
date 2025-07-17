@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
 
         $stmt->close();
     } else {
-        // ➕ Proceed with normal password-based login
+     
         if ($username === "admin" && $password === "admin2314") {
             $_SESSION['user_id'] = "admin";
             $_SESSION['full_name'] = "Admin";
@@ -84,7 +84,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
                     $_SESSION['username'] = $username;
                     $_SESSION['role'] = $role;
 
-                    logTransaction($conn, $user_id, $name, "User signed in successfully", $username);
+                 
+$full_name = $name;
+
+if ($role === 'student') {
+    $stmt = $conn->prepare("SELECT CONCAT(first_name, ' ', surname) AS full_name FROM trainee WHERE user_id = ?");
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($student_name);
+    if ($stmt->fetch()) {
+        $full_name = $student_name;
+    }
+    $stmt->close();
+} elseif ($role === 'coordinator') {
+    $stmt = $conn->prepare("SELECT name FROM coordinator WHERE user_id = ?");
+    $stmt->bind_param("s", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($coordinator_name);
+    if ($stmt->fetch()) {
+        $full_name = $coordinator_name;
+    }
+    $stmt->close();
+}
+
+logTransaction($conn, $user_id, $full_name, "User signed in successfully", $username);
 
                     if ($rememberMe) {
                         $identifier = bin2hex(random_bytes(20));
@@ -120,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
     $result = $checkCoordinator->get_result();
 
     if ($row = $result->fetch_assoc()) {
-        // Fields to check for completeness
+      
         $requiredFields = ['name', 'position', 'email', 'phone', 'profile_picture'];
 
         $isComplete = true;
@@ -137,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
             header("Location: coordinator/coordprofile.php");
         }
     } else {
-        // No coordinator record found; redirect to profile setup
+      
         header("Location: coordinator/coordprofile.php");
     }
 
@@ -164,8 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
 <?php
 $cookie_username = '';
 if (isset($_COOKIE['rememberme'])) {
-    // This assumes you store the username separately or match the identifier with DB
-    // For now we'll just allow it through JS with existing value
+   
     $cookie_parts = explode(':', $_COOKIE['rememberme']);
     if (count($cookie_parts) === 2) {
         $cookie_username = $_COOKIE['remembered_username'] ?? '';

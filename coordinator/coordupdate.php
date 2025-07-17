@@ -53,15 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE user_id = '$user_id'";
 
     if ($conn->query($updateQuery)) {
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
-    } else {
+    echo "<script>alert('Profile updated successfully.'); window.location.href = '" . $_SERVER['PHP_SELF'] . "';</script>";
+    exit;
+} else {
         echo "<p>Error updating coordinator: " . $conn->error . "</p>";
     }
 }
 
-
- 
 ?>
 
 <!DOCTYPE html>
@@ -315,6 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
+
     .insert-photo-btn:hover {
       background-color: #065f46;
       
@@ -471,7 +470,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <span>Profile</span>
 
 </div>
-
 
 <div class="maincontainer">
     <div class="card">

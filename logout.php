@@ -9,37 +9,53 @@ if (isset($_SESSION["user_id"])) {
         $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE user_id = ?");
+        $roleStmt = $pdo->prepare("SELECT role, name, username FROM users WHERE user_id = ?");
         $roleStmt->execute([$user_id]);
         $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
 
-        $role = $userData['role'] ?? 'unknown';
-        $username = $userData['username'] ?? 'UnknownUser';
+        if ($userData) {
+    $role = $userData['role'] ?? 'unknown';
+    $username = $userData['username'] ?? 'UnknownUser';
 
+    if ($role === 'admin') {
+    if (!empty($userData['name']) && trim($userData['name']) !== '') {
+        $full_name = trim($userData['name']);
+    } else {
+        $full_name = $username;
+    }
+}
 
-        if ($role === 'student') {
-            $stmt = $pdo->prepare("
-                SELECT CONCAT(first_name, ' ', surname) AS full_name
-                FROM trainee
-                WHERE user_id = ?
-            ");
-        } elseif ($role === 'coordinator') {
-            $stmt = $pdo->prepare("
-                SELECT name AS full_name
-                FROM coordinator
-                WHERE user_id = ?
-            ");
-        } else {
-            $full_name = "Unknown Role";
-        }
+    elseif ($role === 'student') {
+        $stmt = $pdo->prepare("
+            SELECT CONCAT(first_name, ' ', surname) AS full_name
+            FROM trainee
+            WHERE user_id = ?
+        ");
+        $stmt->execute([$user_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $full_name = $row['full_name'] ?? 'Unknown Name';
 
-        if (isset($stmt)) {
-            $stmt->execute([$user_id]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $full_name = $row['full_name'] ?? 'Unknown Name';
-        }
+    } elseif ($role === 'coordinator') {
+        $stmt = $pdo->prepare("
+            SELECT name AS full_name
+            FROM coordinator
+            WHERE user_id = ?
+        ");
+        $stmt->execute([$user_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $full_name = $row['full_name'] ?? 'Unknown Name';
+    } else {
+        $full_name = 'Unknown Role';
+    }
+} else {
+    $role = 'unknown';
+    $username = 'UnknownUser';
+    $full_name = 'Unknown Name';
+}
+
 
         logTransaction($pdo, $user_id, $full_name, "Logged out", $username);
+
     } catch (PDOException $e) {
         
     }
@@ -56,5 +72,8 @@ if (ini_get("session.use_cookies")) {
 }
 session_destroy();
 
+
 header("Location: indexv2.php");
 exit;
+
+?>

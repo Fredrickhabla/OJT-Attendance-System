@@ -6,6 +6,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$profile_picture = ''; // Declare at top for later use
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION['user_id'] ?? null;
 
@@ -17,7 +19,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $position = $_POST['position'] ?? '';
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
-    $profile_picture = ''; // For now, leave empty or default
+
+     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+    // Save to ojtform/uploads/coordinators/
+    $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
+    $relativePath = "uploads/coordinators/" . $uploadFileName;
+    $absolutePath = __DIR__ . "/../" . $relativePath;
+
+    // Move the uploaded file
+    if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
+        $profile_picture = $relativePath; // ✅ Assign to variable to be saved
+    }
+}
+
+
 
     $coordinator_id = 'coord_' . uniqid();
 
@@ -36,8 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 $conn->close();
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -80,11 +93,11 @@ $conn->close();
       padding: 20px;
     }
 
-    .avatar-wrapper {
+      .avatar-wrapper {
       position: relative;
       display: flex;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
 
     .avatar {
@@ -106,6 +119,7 @@ $conn->close();
       align-items: center;
       justify-content: center;
     }
+
 
     .icon {
       width: 48px;
@@ -201,47 +215,66 @@ $conn->close();
         <h2 class="h2coord">Coordinator Profile</h2>
       </div>
       <div class="card-content">
-        <div class="avatar-wrapper">
-          <div class="avatar">
-            <div class="avatar-fallback">
-              <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0M4.5 20.25h15"/>
-              </svg>
-              
-            </div>
-            
+
+        <form class="form" method="POST" enctype="multipart/form-data">
+          <div class="avatar-wrapper">
+            <?php if (!empty($profile_picture)): ?>
+              <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Avatar" class="avatar" />
+            <?php else: ?>
+              <img src="/ojtform/images/placeholder.jpg" alt="Avatar Placeholder" class="avatar" />
+
+            <?php endif; ?>
+
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;" />
+            <button type="button" class="insert-photo-btn" onclick="document.getElementById('profile_picture').click();">Insert Photo</button>
           </div>
-          <button class="insert-photo-btn">Insert Photo</button>
-        </div>
 
-        <form class="form" method="POST">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required/>
+          </div>
+          <div class="form-group">
+            <label for="position">Position</label>
+            <input type="text" id="position" name="position" required/>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required/>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" required/>
+          </div>
 
-  <div class="form-group">
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" required/>
-  </div>
-  <div class="form-group">
-    <label for="position">Position</label>
-    <input type="text" id="position" name="position" required/>
-  </div>
-  <div class="form-group">
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required/>
-  </div>
-  <div class="form-group">
-    <label for="phone">Phone</label>
-    <input type="tel" id="phone" name="phone" required/>
-  </div>
-
-  <div class="form-actions">
-    <button type="submit" class="save-btn">Save</button>
-  </div>
-</form>
+          <div class="form-actions">
+            <button type="submit" class="save-btn">Save</button>
+          </div>
+        </form>
 
       </div>
     </div>
   </div>
 </body>
 </html>
+<script>
+  const input = document.getElementById('profile_picture');
+  const avatarWrapper = document.querySelector('.avatar-wrapper');
+
+  input.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+      const img = document.createElement('img');
+      img.className = 'avatar';
+      img.src = URL.createObjectURL(file);
+
+      // Clear fallback or previous image
+      const fallback = avatarWrapper.querySelector('.avatar-fallback');
+      if (fallback) fallback.remove();
+
+      const existingImg = avatarWrapper.querySelector('img.avatar');
+      if (existingImg) existingImg.remove();
+
+      avatarWrapper.insertBefore(img, avatarWrapper.querySelector('.insert-photo-btn'));
+    }
+  });
+</script>

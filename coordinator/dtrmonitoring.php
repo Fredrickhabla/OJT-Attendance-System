@@ -818,22 +818,23 @@ tbody tr:hover {
 
 
    <main class="main">
-      <div class="trainee-grid">
-       
-        <?php foreach ($trainees as $id => $trainee): ?>
-          <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
-
-            <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
-            <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
-            <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
-            <button class="trainee-btn" data-trainee-id="<?= $trainee['trainee_id'] ?>">View DTR</button>
-
-            <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
-          </div>
-        <?php endforeach; ?>
+      <?php if (empty($trainees)): ?>
+  <div style="text-align:center; font-size: 1.2rem; color: #888; padding: 40px;">
+    No trainees assigned to you yet.
+  </div>
+<?php else: ?>
+  <div class="trainee-grid">
+    <?php foreach ($trainees as $id => $trainee): ?>
+      <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
+        <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
+        <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
+        <p class="trainee-email"><?= htmlspecialchars($trainee['email']) ?></p>
+        <button class="trainee-btn" data-trainee-id="<?= $trainee['trainee_id'] ?>">View DTR</button>
+        <p class="trainee-contact"><?= htmlspecialchars($trainee['phone']) ?> | <?= htmlspecialchars($trainee['address']) ?></p>
       </div>
-    </main>
-
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
     <!-- DTR Modal -->
 <div id="dtrModal" class="modal-overlay" style="display: none;">
   <div class="modal-content">
