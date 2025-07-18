@@ -24,7 +24,6 @@ $user_id = $_SESSION["user_id"];
 $post_id = $_POST["post_id"];
 $sys_user = $_SESSION["username"] ?? 'system_user';
 
-// Get trainee info
 $stmt = $conn->prepare("SELECT trainee_id, first_name, surname FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -39,7 +38,6 @@ if (!$trainee) {
 $trainee_id = $trainee["trainee_id"];
 $full_name = $trainee["first_name"] . " " . $trainee["surname"];
 
-// Get existing blog post info (for logging)
 $stmt = $conn->prepare("SELECT title, content FROM blog_posts WHERE post_id = ? AND trainee_id = ?");
 $stmt->bind_param("ii", $post_id, $trainee_id);
 $stmt->execute();
@@ -53,12 +51,11 @@ if (!$old_post) {
 
 $old_value = "Title: " . $old_post["title"] . "\nContent: " . $old_post["content"];
 
-// Proceed with delete
 $stmt = $conn->prepare("DELETE FROM blog_posts WHERE post_id = ? AND trainee_id = ?");
 $stmt->bind_param("ii", $post_id, $trainee_id);
 
 if ($stmt->execute()) {
-    // Log transaction and audit
+
     logTransaction($conn, $user_id, $full_name, "Deleted blog post ID $post_id", $sys_user);
     logAudit($conn, $user_id, "Delete Blog", "", $old_value, $sys_user);
 
