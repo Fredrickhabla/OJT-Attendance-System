@@ -4,7 +4,6 @@ $username = "root";
 $password = "";
 $database = "ojtformv3";
 
-// Create DB connection
 $conn = new mysqli($host, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -13,11 +12,11 @@ if ($conn->connect_error) {
 $trainee_id = $_POST['trainee_id'] ?? '';
 
 if (!empty($trainee_id)) {
-    // First, delete related records
+   
     $conn->query("DELETE FROM attendance_record WHERE trainee_id = '$trainee_id'");
-    $conn->query("DELETE FROM blog_posts WHERE trainee_id = '$trainee_id'"); // 💡 Add this line
+    $conn->query("DELETE FROM blog_posts WHERE trainee_id = '$trainee_id'"); 
 
-    // Now delete the trainee record
+   
     $deleteTrainee = $conn->prepare("DELETE FROM trainee WHERE trainee_id = ?");
     $deleteTrainee->bind_param("s", $trainee_id);
 

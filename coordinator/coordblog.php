@@ -216,7 +216,7 @@ $result = $stmt->get_result();
       margin-right: 8px;
     }
 
-    .content {
+     .content {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -558,7 +558,13 @@ border-radius: 4px;
 }
 
 .main {
-  overflow-y: auto;
+   flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      background-image: linear-gradient(to top left, #f0f2f5, #ffffff);
+      overflow-y: auto;
 }
 
 
@@ -688,7 +694,13 @@ border-radius: 4px;
 
         <!-- Blog Cards -->
         <div class="blog-list" id="blogList">
-          <?php while($row = $result->fetch_assoc()): ?>
+          <?php if ($result->num_rows === 0): ?>
+  <p style="text-align:center; font-size: 1.2rem; color: #888; padding: 40px;">
+    No assigned trainees yet or no blog posts available.
+  </p>
+<?php else: ?>
+  <?php while($row = $result->fetch_assoc()): ?>
+
   <div class="blog-card" data-content='<?= htmlspecialchars($row["content"], ENT_QUOTES) ?>'>
     <div class="blog-info">
       <div class="avatar"><?= strtoupper(substr($row['first_name'], 0, 1)) ?></div>
@@ -716,8 +728,10 @@ border-radius: 4px;
             </svg></button>
     </div>
   </div>
-<?php endwhile; ?>
+  
 
+<?php endwhile; ?>
+<?php endif; ?>
 <div class="pagination">
   <?php if ($page > 1): ?>
     <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>

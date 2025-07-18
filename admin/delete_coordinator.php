@@ -1,5 +1,4 @@
 <?php
-// delete_coordinator.php
 
 $host = "localhost";
 $username = "root";
@@ -12,7 +11,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check that coordinator_id was provided in GET
 if (isset($_GET["coordinator_id"])) {
     $coordinator_id = trim($_GET["coordinator_id"]);
 
