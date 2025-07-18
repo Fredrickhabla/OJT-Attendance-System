@@ -42,7 +42,6 @@ if (empty($trainee_ids)) {
 }
 
 $filter = $_GET['trainee_id'] ?? 'all';
-$department_filter = $_GET['department_id'] ?? 'all';
 $search = $_GET['search'] ?? '';
 
 
@@ -56,7 +55,7 @@ $trainee_stmt->bind_param("s", $coordinator_id);
 $trainee_stmt->execute();
 $trainee_result = $trainee_stmt->get_result();
 
-$department_result = $conn->query("SELECT department_id, name FROM departments");
+
 
 
 $searchSql = '';
@@ -87,11 +86,7 @@ if ($filter !== 'all') {
     $countTypes .= 's';
     $countParams[] = $filter;
 }
-if ($department_filter !== 'all') {
-    $countQuery .= " AND t.department_id = ?";
-    $countTypes .= 's';
-    $countParams[] = $department_filter;
-}
+
 if (!empty($search)) {
     $countQuery .= $searchSql;
     $countTypes .= 'sss';
@@ -125,11 +120,7 @@ if ($filter !== 'all') {
     $types .= 's';
     $params[] = $filter;
 }
-if ($department_filter !== 'all') {
-    $query .= " AND t.department_id = ?";
-    $types .= 's';
-    $params[] = $department_filter;
-}
+
 if (!empty($search)) {
     $query .= $searchSql;
     $types .= 'sss';
@@ -322,7 +313,7 @@ $result = $stmt->get_result();
     .content1 {
  flex: 1;
   padding: 32px;
-  background-color: #f9fafb;
+  background-color: #f0f2f5;
   width: 100%;
   height: 100%;
   display: flex;
@@ -355,28 +346,21 @@ $result = $stmt->get_result();
 
   
 }
-
-.search-box {
-  flex: 1;
+.search-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
   position: relative;
-  
-  
 }
 
-.search-box input {
-  width: 100%;
-  padding: 8px 36px;
-  border-radius: 9999px;
-  border: 1px solid #d1d5db;
-}
 
-.icon-left,
-.icon-right {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 14px;
+
+
+.search-icon {
+  width: 20px;
+  height: 20px;
   color: #9ca3af;
+  pointer-events: none;
 }
 
 .icon-left {
@@ -478,6 +462,7 @@ $result = $stmt->get_result();
   display: flex;
   align-items: center;  
   width: 320px; /* or any size */
+  justify-content: right;
 }
 
 .search-input {
@@ -486,6 +471,8 @@ $result = $stmt->get_result();
   border-radius: 9999px;
   border: 1px solid #d1d5db;
   font-size: 14px;
+  justify-content: right;
+  align-items: right;
   
 
 }
@@ -677,36 +664,24 @@ border-radius: 4px;
   <select class="filter-select" onchange="location = this.value;">
     <option value="?trainee_id=all" <?= $filter === 'all' ? 'selected' : '' ?>>All Trainees</option>
     <?php while($trainee = $trainee_result->fetch_assoc()): ?>
-      <option value="?trainee_id=<?= $trainee['trainee_id'] ?>&department_id=<?= $department_filter ?>" <?= $filter === $trainee['trainee_id'] ? 'selected' : '' ?>>
+      <option value="?trainee_id=<?= $trainee['trainee_id'] ?>" <?= $filter === $trainee['trainee_id'] ? 'selected' : '' ?>>
        <?= htmlspecialchars(ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname']))) ?>
 
       </option>
     <?php endwhile; ?>
   </select>
 
-  <!-- Add this below -->
-  <select class="filter-select1" onchange="location = this.value;">
-    <option value="?trainee_id=<?= $filter ?>&department_id=all" <?= $department_filter === 'all' ? 'selected' : '' ?>>All Departments</option>
-    <?php while($dept = $department_result->fetch_assoc()): ?>
-      <option value="?trainee_id=<?= $filter ?>&department_id=<?= $dept['department_id'] ?>" <?= $department_filter === $dept['department_id'] ? 'selected' : '' ?>>
-        <?= htmlspecialchars($dept['name']) ?>
-      </option>
-    <?php endwhile; ?>
-  </select>
-
-          <form method="get" class="search-container" style="display: flex; align-items: center;">
-  <!-- Keep current filter on form submit -->
-  <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($filter) ?>">
-
+  <div class="search-wrapper">
   <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search by name, title, or date..." value="<?= htmlspecialchars($search) ?>">
-  
-  <button type="submit" style="background: none; border: none; cursor: pointer; ">
-    <svg  xmlns="http://www.w3.org/2000/svg" fill="none"
+  <button type="submit" class="search-button">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
          viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
     </svg>
   </button>
+</div>
+
 </form>
 
         </div>
