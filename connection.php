@@ -1,15 +1,14 @@
-<?php 
-	//SQL Connection
-	$Local = 'localhost';
-	$Username = "root";
-	$Password = "";		
-	$DBname = "ojtformv3";		
- 	/*   
-	$Local = 'fdb1034.awardspace.net';
-	$Username = "4470838_ojt";
-	$Password = "lrzpP}-j30ITx2wl";		
-	$DBname = "4470838_ojt";	
-*/
-	$Connection = mysqli_connect($Local, $Username, $Password, $DBname);
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$database = "ojtformv3";
 
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 ?>

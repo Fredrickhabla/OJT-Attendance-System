@@ -9,12 +9,7 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 
-
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
+require_once 'connection.php';
 
 $stmt = $conn->prepare("SELECT trainee_id, first_name, surname, email, profile_picture FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
@@ -32,7 +27,7 @@ $full_name = $trainee['first_name'] . ' ' . $trainee['surname'];
 $email = $trainee['email'];
 $profile_picture = !empty($trainee['profile_picture']) 
     ? $trainee['profile_picture'] 
-    : "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
+    : "/ojtform/images/placeholder.jpg";
 
 $trainee_id = $trainee["trainee_id"];
 

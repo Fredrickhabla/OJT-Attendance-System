@@ -10,11 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 // Optional fallback for full_name
 $full_name = isset($_SESSION["full_name"]) ? $_SESSION["full_name"] : "User";
 
-// Connect to database
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'connection.php';
 
 $success = "";
 $error = "";

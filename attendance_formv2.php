@@ -11,10 +11,7 @@ if (!isset($_SESSION["user_id"])) {
 $user_id = $_SESSION["user_id"];
 
 
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'connection.php';
 
 require_once 'logger.php';
 
@@ -51,11 +48,11 @@ if ($trainee_info) {
     if (!empty($raw_picture) && file_exists($local_path)) {
         $profile_picture = $local_path;
     } else {
-        $profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
+        $profile_picture = "/ojtform/images/placeholder.jpg"; 
     }
 } else {
     $full_name = "Unknown Trainee";
-    $profile_picture = "https://cdn-icons-png.flaticon.com/512/9131/9131529.png";
+    $profile_picture = "/ojtform/images/placeholder.jpg"; 
 }
 
 

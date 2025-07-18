@@ -6,15 +6,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Database connection
-$host   = "localhost";
-$dbname = "ojtform";
-$user   = "root";
-$pass   = "";
-
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'connection.php';
 
 $user_id = $_SESSION['user_id'];
 $success = "";

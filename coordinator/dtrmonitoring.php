@@ -812,7 +812,7 @@ tbody tr:hover {
 ">
 
     <!-- Department Name -->
-    <span><?= htmlspecialchars($coor['name']) ?></span>
+    <span>Daily Time Record Monitoring</span>
 
 </div>
 

@@ -9,12 +9,7 @@ if (!isset($_SESSION["user_id"])) {
 
 $user_id = $_SESSION["user_id"];
 
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+require_once 'conn.php';
 
 $stmt = $pdo->prepare("SELECT username FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
@@ -833,7 +828,7 @@ $stmt->execute([
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-section">
-        <img src="<?= !empty($trainee['profile_picture']) ? htmlspecialchars($trainee['profile_picture']) . '?v=' . time() : 'https://cdn-icons-png.flaticon.com/512/9131/9131529.png' ?>" alt="Profile" class="profile-pic" />
+        <img src="<?= !empty($trainee['profile_picture']) ? htmlspecialchars($trainee['profile_picture']) . '?v=' . time() : '/ojtform/images/placeholder.jpg' ?>" alt="Profile" class="profile-pic" />
   <h2><?= htmlspecialchars($user_name) ?></h2>
   <p><?= htmlspecialchars($user_email) ?></p>
       </div>

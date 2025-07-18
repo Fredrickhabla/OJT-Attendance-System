@@ -5,10 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once 'connection.php';
 require_once 'logger.php';
 $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 
@@ -280,6 +277,7 @@ body {
   overflow-y: auto;
    position: relative;
   z-index: 1;
+  margin: 20px;
 }
 
 .content {
@@ -320,7 +318,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 26px;
+  
 }
 
 @media (min-width: 768px) {
