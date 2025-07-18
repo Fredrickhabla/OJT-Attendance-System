@@ -36,12 +36,27 @@ if ($trainee && !empty($trainee['coordinator_id'])) {
 $stmt = $pdo->query("SELECT * FROM coordinator");
 $all_coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Determine if coordinator inputs should be disabled
+$disableCoordinatorInputs = false;
+foreach ($all_coordinators as $coord) {
+    if (
+        $coordinator_id &&
+        $coord['coordinator_id'] == $coordinator_id &&
+        !empty($coord['user_id']) &&
+        $coord['user_id'] != $user_id
+    ) {
+        $disableCoordinatorInputs = true;
+        break;
+    }
+}
+
+
 // Fetch all departments for dropdown
 $stmt = $pdo->query("SELECT * FROM departments WHERE status = 'active'");
 $all_departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
-// Upload trainee photo
+
 $traineePicturePath = null;
 if (isset($_FILES['trainee_picture']) && $_FILES['trainee_picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = 'uploads/trainees/';
@@ -54,12 +69,11 @@ if (isset($_FILES['trainee_picture']) && $_FILES['trainee_picture']['error'] ===
     $traineePicturePath = $uploadPath;
 }
 
-// ✅ Keep the old one if not updated
 if ($traineePicturePath === null && isset($trainee['profile_picture'])) {
     $traineePicturePath = $trainee['profile_picture'];
 }
 
-// Upload coordinator photo
+
 $coordinatorPicturePath = null;
 if (isset($_FILES['coordinator_picture']) && $_FILES['coordinator_picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = 'uploads/coordinators/';
@@ -527,6 +541,8 @@ $stmt->execute([
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
+      align-items: center;
+      justify-content: center;
     }
 
     .name {
@@ -1025,7 +1041,9 @@ $stmt->execute([
                    class="avatar-img">
             </div>
             <label for="coordinator_picture" class="btn"> Insert Photo</label>
-            <input type="file" id="coordinator_picture" name="coordinator_picture" accept="image/*" style="display: none;">
+            <input type="file" id="coordinator_picture" name="coordinator_picture"
+  accept="image/*" style="display: none;" 
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?>>
           </div>
 
           <div class="form-vertical">
@@ -1043,19 +1061,27 @@ $stmt->execute([
 
             <div class="form-group">
               <label for="coordName">Name</label>
-              <input id="coordName" type="text" name="coordName" value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>" required/>
+              <input id="coordName" name="coordName" type="text"
+  value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
             </div>
             <div class="form-group">
               <label for="position">Position</label>
-              <input id="position" type="text" name="position" value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>" required/>
+              <input id="position" name="position" type="text"
+  value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
             </div>
             <div class="form-group">
               <label for="coordEmail">Email</label>
-              <input id="coordEmail" type="email" name="coordEmail" value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>" required/>
+              <input id="coordEmail" name="coordEmail" type="email"
+  value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
             </div>
             <div class="form-group">
               <label for="phone">Phone</label>
-              <input id="phone" type="text" name="phone" value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>" required/>
+              <input id="phone" name="phone" type="text"
+  value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
             </div>
           </div>
 
@@ -1263,3 +1289,8 @@ function submitPasswordChange() {
 
 
 </script>
+<?php if ($disableCoordinatorInputs): ?>
+  <small style="color: gray; font-style: italic;">
+    These fields are disabled because this coordinator is already linked to another user.
+  </small>
+<?php endif; ?>
