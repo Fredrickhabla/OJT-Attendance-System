@@ -5,6 +5,10 @@ $username = "root";
 $password = "";
 $database = "ojtformv3";
 
+// Pagination settings
+
+
+
 // Create connection
 $conn = new mysqli($host, $username, $password, $database);
 
@@ -12,12 +16,23 @@ $conn = new mysqli($host, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+$limit = 12; // Number of trainees per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Count total trainees
+$countSql = "SELECT COUNT(*) as total FROM trainee WHERE active = 'Y'";
+$countResult = $conn->query($countSql);
+$totalTrainees = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalTrainees / $limit);
 require_once 'logger.php';
 // Fetch trainees from database
 $sql = "SELECT t.*, u.email 
         FROM trainee t
         LEFT JOIN users u ON t.user_id = u.user_id
-        WHERE t.active = 'Y'";
+        WHERE t.active = 'Y'
+        LIMIT $limit OFFSET $offset";
 
 $result = $conn->query($sql);
 
@@ -289,6 +304,33 @@ if ($result->num_rows > 0) {
   align-items: center;
   gap: 10px;
 }
+.pagination {
+  justify-content: right;
+  align-items: right;
+}
+.pagination a {
+  padding: 6px 12px;
+  border: 1px solid #166534;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+  justify-content: right;
+  align-items: right;
+}
+
+
+
+.pagination a.active {
+  background-color: #047857;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination a:hover {
+  background-color:rgb(12, 100, 74);
+  color: white;
+}
+
   </style>
 </head>
 <body>
@@ -380,9 +422,28 @@ if ($result->num_rows > 0) {
           </div>
         <?php endforeach; ?>
       </div>
+      <div class="pagination" style="text-align:right; padding: 20px;">
+  <?php if ($page > 1): ?>
+    <a href="?page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
+  <?php endif; ?>
+
+  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?page=<?= $i ?>" style="margin: 0 5px; <?= $i === $page ? 'font-weight: bold;' : '' ?>">
+      <?= $i ?>
+    </a>
+  <?php endfor; ?>
+
+  <?php if ($page < $totalPages): ?>
+    <a href="?page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
+  <?php endif; ?>
+</div>
     </main>
+    
+
   </div>
 </div>
+
+
 
 <script>
   const searchInput = document.getElementById('searchInput');

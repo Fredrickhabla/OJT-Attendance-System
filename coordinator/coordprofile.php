@@ -6,7 +6,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$profile_picture = ''; // Declare at top for later use
+$profile_picture = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION['user_id'] ?? null;
@@ -21,14 +21,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $phone = $_POST['phone'] ?? '';
 
      if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-    // Save to ojtform/uploads/coordinators/
+    
     $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
     $relativePath = "uploads/coordinators/" . $uploadFileName;
     $absolutePath = __DIR__ . "/../" . $relativePath;
 
-    // Move the uploaded file
+
     if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
-        $profile_picture = $relativePath; // ✅ Assign to variable to be saved
+        $profile_picture = $relativePath; 
     }
 }
 
@@ -267,7 +267,6 @@ $conn->close();
       img.className = 'avatar';
       img.src = URL.createObjectURL(file);
 
-      // Clear fallback or previous image
       const fallback = avatarWrapper.querySelector('.avatar-fallback');
       if (fallback) fallback.remove();
 
