@@ -1,8 +1,9 @@
 <?php
 session_start();
 include('connection.php');
+require_once 'logger.php'; // <-- Add this line
 
-// Check admin role
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -11,6 +12,9 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $traineeId = $_POST['trainee_id'] ?? '';
 
+    
+    $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $tmpFile = $_FILES['photo']['tmp_name'];
         $originalName = basename($_FILES['photo']['name']);
@@ -18,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $allowed = ['jpg', 'jpeg', 'png', 'gif', 'jfif'];
 
         if (in_array($ext, $allowed)) {
-            // Make sure the upload directory exists
             $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/ojtform/uploads/';
             $webPathBase = 'uploads/';
 
@@ -26,15 +29,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 mkdir($uploadDir, 0755, true);
             }
 
-            // Always save as uploads/{traineeId}.{ext}
-            $filename = $traineeId . "." . $ext;
+            
+            $filename = $traineeId . "_" . time() . "." . $ext;
             $fullPath = $uploadDir . $filename;
             $webPath = $webPathBase . $filename;
 
+            
+            $oldStmt = $pdo->prepare("SELECT profile_picture FROM trainee WHERE trainee_id = ?");
+            $oldStmt->execute([$traineeId]);
+            $oldPhoto = $oldStmt->fetchColumn();
+
             if (move_uploaded_file($tmpFile, $fullPath)) {
-                // Save relative path in database
+                
                 $stmt = $pdo->prepare("UPDATE trainee SET profile_picture = ? WHERE trainee_id = ?");
                 $stmt->execute([$webPath, $traineeId]);
+
+                
+                $userId = $_SESSION['user_id'] ?? null;
+                $fullname = $_SESSION['username'] ?? 'Unknown User';
+                $transactionUser = $traineeId; 
+
+                if ($userId) {
+                    
+                    logTransaction($pdo, $userId, $fullname, "Updated trainee profile photo", $fullname);
+                    logAudit($pdo, $userId, "Updated trainee profile photo", $webPath, $oldPhoto, $fullname);
+                }
             }
         }
     }
