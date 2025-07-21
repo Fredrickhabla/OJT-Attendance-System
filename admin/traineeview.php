@@ -497,7 +497,7 @@ $trainee = [
 
         <div class="btn-group">
           <button class="action-btn" id="editBtn">Edit Profile</button>
-          <button class="action-btn" id="deleteBtn" style="background:#FF7F7F; color:white;">Delete Profile</button>
+          <button class="action-btn" id="deleteBtn" style="background:#FF7F7F; color:white;">Archive Profile</button>
           <a href="trainee.php"><button class="action-btn" style="background:#ADD8E6; color:white;">Return</button></a>
         </div>
 
@@ -555,11 +555,11 @@ $trainee = [
 <div id="deleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; z-index:999;">
   <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:10px; position:relative; text-align:center;">
     <span id="closeDeleteModal" style="position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer;">&times;</span>
-    <h3>Confirm Delete</h3>
-    <p>Are you sure you want to delete this trainee?</p>
+    <h3>Confirm Archive</h3>
+    <p>Are you sure you want to archive this trainee?</p>
     <form method="POST" action="delete_trainee.php">
       <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($id) ?>">
-      <button type="submit" style="background:red; color:white; padding:10px 20px; border:none; border-radius:5px; margin-right:10px;">Yes, Delete</button>
+      <button type="submit" style="background:red; color:white; padding:10px 20px; border:none; border-radius:5px; margin-right:10px;">Yes, Archive</button>
       <button type="button" id="cancelDelete" style="padding:10px 20px; border:none; border-radius:5px;">Cancel</button>
     </form>
   </div>

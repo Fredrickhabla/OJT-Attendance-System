@@ -16,7 +16,9 @@ require_once 'logger.php';
 // Fetch trainees from database
 $sql = "SELECT t.*, u.email 
         FROM trainee t
-        LEFT JOIN users u ON t.user_id = u.user_id";
+        LEFT JOIN users u ON t.user_id = u.user_id
+        WHERE t.active = 'Y'";
+
 $result = $conn->query($sql);
 
 $trainees = [];
