@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 if ($userId) {
                     
                     logTransaction($pdo, $userId, $fullname, "Updated trainee profile photo", $fullname);
-                    logAudit($pdo, $userId, "Updated trainee profile photo", $webPath, $oldPhoto, $fullname);
+                    logAudit($pdo, $userId, "Updated trainee profile photo [$traineeId]", $webPath, $oldPhoto, $fullname);
                 }
             }
         }

@@ -9,7 +9,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 require_once 'logger.php';
-$coordinatorQuery = "SELECT * FROM coordinator";
+$coordinatorQuery = "SELECT * FROM coordinator WHERE active = 'Y'";
 $coordinatorResult = $conn->query($coordinatorQuery);
 
 $coordinators = [];
@@ -522,8 +522,8 @@ if ($coordinatorResult->num_rows > 0) {
           <button type="submit">Save Changes</button>
           <a href="delete_coordinator.php?coordinator_id=<?= htmlspecialchars($coordinator_id) ?>"
    class="delete-btn"
-   onclick="return confirm('Are you sure you want to delete this coordinator?');">
-   Delete
+   onclick="return confirm('Are you sure you want to archive this coordinator?');">
+   Archive
 </a>
 
 
@@ -538,8 +538,8 @@ if ($coordinatorResult->num_rows > 0) {
 <div id="deleteModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); justify-content:center; align-items:center;">
   <div style="background:white; padding:20px; border-radius:8px; width:400px; position:relative;">
     <span onclick="closeDeleteModal()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold">&times;</span>
-    <h3>Confirm Delete</h3>
-    <p>Are you sure you want to delete this coordinator?</p>
+    <h3>Confirm Archive</h3>
+    <p>Are you sure you want to Archive this coordinator?</p>
 
     <div style="margin-top:15px; font-size:14px; line-height:1.6;">
       <strong>Position:</strong> <span id="delete_position"></span><br>
@@ -553,6 +553,15 @@ if ($coordinatorResult->num_rows > 0) {
     </form>
   </div>
 </div>
+
+<?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
+  <script>
+    window.onload = function() {
+      alert("Coordinator updated successfully!");
+    };
+  </script>
+<?php endif; ?>
+
 
 </body>
 
