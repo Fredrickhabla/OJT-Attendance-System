@@ -57,8 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
     }
-
-    header("Location: traineeview.php?id=" . urlencode($traineeId));
-    exit;
+    
+    header("Location: traineeview.php?id=" . urlencode($traineeId) . "&photo=success");
+exit;
 }
 ?>

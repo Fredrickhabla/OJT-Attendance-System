@@ -614,4 +614,13 @@ window.onclick = function(event) {
 </script>
 <?php endif; ?>
 
+<?php if (isset($_GET['photo']) && $_GET['photo'] === 'success'): ?>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    alert("Trainee photo updated successfully!");
+    history.replaceState(null, null, window.location.pathname + '?id=<?= htmlspecialchars($_GET["id"]) ?>');
+  });
+</script>
+<?php endif; ?>
+
 </html>
