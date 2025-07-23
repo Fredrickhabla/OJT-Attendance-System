@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Redirect if not logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
     exit();
@@ -17,12 +16,12 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $sys_user = $user['username'] ?? 'unknown_user';
 
 require_once 'logger.php';
-// Fetch current trainee info (if exists)
+
 $stmt = $pdo->prepare("SELECT * FROM trainee WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $trainee = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch the associated coordinator info (if trainee exists and has coordinator)
+
 $coordinator = [];
 $coordinator_id = '';
 if ($trainee && !empty($trainee['coordinator_id'])) {
@@ -32,11 +31,11 @@ if ($trainee && !empty($trainee['coordinator_id'])) {
     $coordinator = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Fetch all coordinators for the dropdown
+
 $stmt = $pdo->query("SELECT * FROM coordinator");
 $all_coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Determine if coordinator inputs should be disabled
+
 $disableCoordinatorInputs = false;
 foreach ($all_coordinators as $coord) {
     if (
@@ -50,8 +49,6 @@ foreach ($all_coordinators as $coord) {
     }
 }
 
-
-// Fetch all departments for dropdown
 $stmt = $pdo->query("SELECT * FROM departments WHERE status = 'active'");
 $all_departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -396,7 +393,7 @@ $stmt->execute([
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* change from center to align content from top */
+  align-items: flex-start; 
   padding: 20px;
 }
 .content {
@@ -427,11 +424,10 @@ $stmt->execute([
   .container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Align items to the top */
+  align-items: flex-start; 
   padding: 2rem;
   width: 100%;
-  margin-top: 70px; /* Adjust this value to match your .topbar height */
-  
+  margin-top: 70px; 
 }
 
 
@@ -479,7 +475,7 @@ $stmt->execute([
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
-      padding-top: 2rem; /* Adjust padding to account for the fixed topbar */
+      padding-top: 2rem; 
   
       position: relative;
       overflow: hidden;
@@ -506,7 +502,7 @@ $stmt->execute([
       flex: 1.2;
       overflow-y: auto;
       border-bottom: 1px solid #ddd;
-      justify-content: space-between; /* Makes sure bottom content stays at the bottom */
+      justify-content: space-between; 
   min-height: 100%; 
     }
 
@@ -618,7 +614,7 @@ $stmt->execute([
     display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;   /* Centers horizontally */
+  justify-content: center;   
 
   gap: 1rem;
   margin-left: 6rem;
@@ -725,7 +721,7 @@ $stmt->execute([
       margin-bottom: 0;
     }
 
-    /* Password Change Modal Styles */
+   
 .overlay {
   position: fixed;
   top: 0;
@@ -779,8 +775,8 @@ $stmt->execute([
 }
 .passbtn {
     display: flex;
-  justify-content: center; /* centers the whole checkbox-label in the section */
-  margin-top: 200px;         /* pushes it to the bottom if container is flex-column */
+  justify-content: center; 
+  margin-top: 200px;        
   padding-top: 20px;
  
 
@@ -808,9 +804,9 @@ $stmt->execute([
   font-size: 15px;
   padding: 2px;
   color: gray;
-  width: 100%; /* Optional: full width */
+  width: 100%; 
   border-radius: 6px;
-  border: 1px solid #1f8f59; /* <-- fixed this line */
+  border: 1px solid #1f8f59;
 }
 
 
@@ -818,7 +814,7 @@ $stmt->execute([
 .checkbox-label {
   display: flex;
   align-items: left;
-  gap: 6px; /* Controls spacing between checkbox and text */
+  gap: 6px; 
   font-size: 16px;
   cursor: pointer;
   white-space: nowrap;
@@ -826,14 +822,53 @@ $stmt->execute([
 }
 
 .checkbox-label input[type="checkbox"] {
-  margin: 0;     /* Removes default spacing */
+  margin: 0;  
   padding: 0;
-  transform: scale(1.1); /* Optional: makes the checkbox slightly bigger */
+  transform: scale(1.1); 
 }
 
 .leftholder {
     width: 25%;
 }
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.tooltip-wrapper input[disabled] {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
+.tooltip-text {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+}
+
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .tooltip-text {
+    left: 0;
+    top: 110%;
+    transform: translateY(0);
+  }
+}
+
   </style>
   
 
@@ -1060,34 +1095,56 @@ $stmt->execute([
             </div>
 
             <div class="form-group">
-              <label for="coordName">Name</label>
-              <input id="coordName" name="coordName" type="text"
-  value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
-  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-            </div>
-            <div class="form-group">
-              <label for="position">Position</label>
-              <input id="position" name="position" type="text"
-  value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
-  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-            </div>
-            <div class="form-group">
-              <label for="coordEmail">Email</label>
-              <input id="coordEmail" name="coordEmail" type="email"
-  value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
-  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-            </div>
-            <div class="form-group">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="text"
-  value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
-  <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-            </div>
-          </div>
+  <label for="coordName">Name</label>
+  <div class="tooltip-wrapper">
+    <input id="coordName" name="coordName" type="text"
+      value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
 
-          <div class="actions">
-            <button class="btn" type="submit" id="saveBtn">Save</button>
-          </div>
+<div class="form-group">
+  <label for="position">Position</label>
+  <div class="tooltip-wrapper">
+    <input id="position" name="position" type="text"
+      value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
+
+<div class="form-group">
+  <label for="coordEmail">Email</label>
+  <div class="tooltip-wrapper">
+    <input id="coordEmail" name="coordEmail" type="email"
+      value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
+
+<div class="form-group">
+  <label for="phone">Phone</label>
+  <div class="tooltip-wrapper">
+    <input id="phone" name="phone" type="text"
+      value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn" type="submit" id="saveBtn">Save</button>
+</div>
         </div>
 
       </form>
@@ -1098,7 +1155,7 @@ $stmt->execute([
       </div>
     </div>
 
-    <!-- Overlay Change Password Form -->
+    <!-- Change Password Form -->
 <div id="passwordOverlay" class="overlay" style="display: none;">
   <div class="overlay-content">
     <h2>Change Password</h2>
@@ -1169,30 +1226,30 @@ $stmt->execute([
     scheduleEndInput.value = endTimeInput.value;
   }
 
-  // Toggle picker visibility
+
   scheduleInput.addEventListener('click', () => {
     schedulePicker.style.display = schedulePicker.style.display === 'block' ? 'none' : 'block';
   });
 
-  // Hide picker when clicking outside
+
   document.addEventListener('click', e => {
     if (!scheduleInput.contains(e.target) && !schedulePicker.contains(e.target)) {
       schedulePicker.style.display = 'none';
     }
   });
 
-  // Update display on any change
+  
   dayCheckboxes.forEach(cb => cb.addEventListener('change', updateScheduleInput));
   startTimeInput.addEventListener('input', updateScheduleInput);
   endTimeInput.addEventListener('input', updateScheduleInput);
 
-  // Sync hidden fields on form submit
+
   document.querySelector('form').addEventListener('submit', syncScheduleToHiddenInputs);
 
-  // Initial display update
+  
   updateScheduleInput();
 
-  // Preview trainee photo
+  
   document.getElementById('trainee_picture').addEventListener('change', function(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('trainee-preview');
@@ -1205,7 +1262,7 @@ $stmt->execute([
     }
   });
 
-  // Preview coordinator photo
+ 
   document.getElementById('coordinator_picture').addEventListener('change', function(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('coordinator-preview');
@@ -1223,21 +1280,21 @@ $stmt->execute([
   const savedStart = scheduleStartInput.value;
   const savedEnd = scheduleEndInput.value;
 
-  // Set checkboxes
+ 
   dayCheckboxes.forEach(cb => {
     if (savedDays.includes(cb.value)) {
       cb.checked = true;
     }
   });
 
-  // Set times
+
   if (savedStart) startTimeInput.value = savedStart;
   if (savedEnd) endTimeInput.value = savedEnd;
 
   updateScheduleInput();
 });
 
-// Show/Hide Overlay using checkbox
+
 const togglePasswordCheckbox = document.getElementById("togglePasswordForm");
 
 togglePasswordCheckbox.addEventListener("change", () => {
@@ -1245,13 +1302,13 @@ togglePasswordCheckbox.addEventListener("change", () => {
   overlay.style.display = togglePasswordCheckbox.checked ? "flex" : "none";
 });
 
-// Close password form (and uncheck checkbox)
+
 function closePasswordForm() {
   document.getElementById("passwordOverlay").style.display = "none";
   document.getElementById("togglePasswordForm").checked = false;
 }
 
-// Handle Password Submission
+
 function submitPasswordChange() {
   const current = document.getElementById("currentPassword").value;
   const newPass = document.getElementById("newPassword").value;
@@ -1267,7 +1324,7 @@ function submitPasswordChange() {
     return;
   }
 
-  // Send to PHP
+  
   fetch("change_password.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1286,7 +1343,23 @@ function submitPasswordChange() {
 }
 
 
+document.querySelectorAll('.tooltip-wrapper input[disabled]').forEach(input => {
+    const tooltip = input.parentElement.querySelector('.tooltip-text');
 
+    input.addEventListener('mousemove', (e) => {
+      if (tooltip) {
+        tooltip.style.left = (e.pageX + 10) + 'px';
+        tooltip.style.top = (e.pageY + 10) + 'px';
+        tooltip.style.opacity = 1;
+      }
+    });
+
+    input.addEventListener('mouseleave', () => {
+      if (tooltip) {
+        tooltip.style.opacity = 0;
+      }
+    });
+  });
 
 </script>
 <?php if ($disableCoordinatorInputs): ?>
