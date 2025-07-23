@@ -1,9 +1,18 @@
 <?php
-session_start(); // Required to use $_SESSION
+session_start(); 
 
 require_once '../connection.php';
 
+$timeout_duration = 900; 
 
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 $user_id = $_SESSION['user_id'] ?? null;
 if (!$user_id) {
     die("User not logged in.");
@@ -50,7 +59,7 @@ if ($traineeResult) {
         $attendance = $attendanceQuery->fetch_assoc();
         $completed_hours = floatval($attendance['total_hours'] ?? 0);
 
-        // Determine status
+     
         $status = ($completed_hours >= $required) ? 'Completed' : 'Ongoing';
 
         if ($status === 'Completed') {
@@ -61,7 +70,7 @@ if ($traineeResult) {
 
         $totalTrainees++;
 
-        // Store data
+       
         $traineeData[] = [
             'trainee_id' => $trainee['trainee_id'],
             'name' => ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname'])),
@@ -273,7 +282,7 @@ if ($traineeResult) {
 
 .card {
   flex: 1;
-  border: 2px solid #16a34a; /* Tailwind's green-600 */
+  border: 2px solid #16a34a;
   padding: 1.5rem;
   text-align: center;
   display: flex;
@@ -311,13 +320,13 @@ table {
   border: 2px solid #16a34a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-   border-radius: 8px;        /* ← Rounded corners */
+   border-radius: 8px;        
   overflow: hidden;  
   height: 100%;
 
 }
 
-/* Table header row */
+
 thead {
   background-color:rgb(68, 131, 15);
   color: white;
@@ -327,7 +336,7 @@ thead {
 }
 
 
-/* Table cells */
+
 th, td {
   padding: 12px 16px;
   text-align: left;
@@ -337,22 +346,22 @@ th, td {
 
 tbody td {
   line-height: 1.4;
-  white-space: nowrap;  /* Prevent wrapping */
-  height: 50px;          /* Fixed row height */
+  white-space: nowrap;  
+  height: 50px;         
   vertical-align: middle;
 }
 
 
 tbody tr {
-  border-bottom: 1px solid #d1d5db; /* light gray line */
+  border-bottom: 1px solid #d1d5db;
 }
 
-/* Hover effect */
+
 tbody tr:hover {
   background-color: #f0fdf4;
 }
 
-/* Status badges */
+
 .badge {
   padding: 0.3rem 0.7rem;
   border-radius: 9999px;
@@ -378,7 +387,7 @@ tbody tr:hover {
 }
 
 .modal-overlay {
-  display: none; /* Keep this */
+  display: none; 
   position: fixed;
   top: 0; 
   left: 0;
@@ -391,7 +400,7 @@ tbody tr:hover {
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* Modal Box */
+
 .modal-box {
   background-color: #fff;
   padding: 24px;
@@ -402,7 +411,7 @@ tbody tr:hover {
   animation: slideDown 0.25s ease-out;
 }
 
-/* Title and Subtitle */
+
 .modal-title {
   font-size: 1.5rem;
   color: #14532d;
@@ -420,7 +429,7 @@ tbody tr:hover {
   color: #15803d;
 }
 
-/* Textarea */
+
 .remarks-textarea {
   width: 100%;
   padding: 12px;
@@ -434,7 +443,7 @@ tbody tr:hover {
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Action Buttons */
+
 .modal-actions {
   margin-top: 18px;
   display: flex;
@@ -471,7 +480,7 @@ tbody tr:hover {
   background-color: #d1d5db;
 }
 
-/* Animations */
+
 @keyframes slideDown {
   from {
     transform: translateY(-15px);
@@ -738,3 +747,4 @@ document.querySelectorAll('.trainee-row').forEach(row => {
   });
 });
 </script>
+<script src="/ojtform/autologout.js"></script>

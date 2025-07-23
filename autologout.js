@@ -1,13 +1,13 @@
 // autoLogout.js
 
-let idleTimeLimit = 900000;
+let idleTimeLimit = 10000;
 let idleTimer;
 let hasLoggedOut = false;
 
 function logoutUser() {
   if (hasLoggedOut) return;
   hasLoggedOut = true;
-  window.location.href = "logout.php";
+  window.location.href = "/ojtform/logout.php";
 }
 
 function resetIdleTimer() {
@@ -25,6 +25,6 @@ resetIdleTimer();
 window.addEventListener("beforeunload", function (event) {
   if (!hasLoggedOut && (!document.activeElement || document.activeElement.tagName === "BODY")) {
     hasLoggedOut = true;
-    navigator.sendBeacon("logout.php");
+    navigator.sendBeacon("/ojtform/logout.php");
   }
 });

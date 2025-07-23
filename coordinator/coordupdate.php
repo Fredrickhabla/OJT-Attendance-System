@@ -1,6 +1,15 @@
 <?php
-session_start(); // Required to use $_SESSION
+session_start(); 
+$timeout_duration = 900; 
 
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 require_once '../connection.php';
 
 $user_id = $_SESSION['user_id'] ?? null;
@@ -28,22 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $conn->real_escape_string($_POST['email']);
     $phone = $conn->real_escape_string($_POST['phone']);
 
-    // Handle image upload BEFORE redirect
+   
     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-    // Save to ojtform/uploads/
+   
     $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
     $relativePath = "uploads/coordinators/" . $uploadFileName;
     $absolutePath = __DIR__ . "/../" . $relativePath;
 
-    // Move the uploaded file to ojtform/uploads/
     if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
-        // Save the relative path only (e.g., "uploads/photo.jpg")
+        
         $conn->query("UPDATE coordinator SET profile_picture = '$relativePath' WHERE user_id = '$user_id'");
     }
 }
 
 
-    // Update other fields
+
     $updateQuery = "UPDATE coordinator 
                     SET name = '$name', position = '$position', email = '$email', phone = '$phone'
                     WHERE user_id = '$user_id'";
@@ -552,3 +560,4 @@ document.getElementById('profile_picture').addEventListener('change', function (
     }
 });
 </script>
+<script src="/ojtform/autologout.js"></script>

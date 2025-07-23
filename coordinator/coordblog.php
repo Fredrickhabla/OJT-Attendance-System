@@ -2,6 +2,17 @@
 session_start();
 require_once '../connection.php';
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 $user_id = $_SESSION['user_id'] ?? null;
 
 if (!$user_id) {
@@ -313,9 +324,9 @@ $result = $stmt->get_result();
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* spacing between filters and blog-list */
+  gap: 24px; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* Disable scroll here */
+  overflow: hidden; 
   border-radius: 8px;
 }
 
@@ -366,14 +377,14 @@ $result = $stmt->get_result();
   right: 12px;
 }
 
-/* Blog Cards */
+
 .blog-list {
    flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-right: 8px; /* optional: space for scrollbar */
+  padding-right: 8px; 
   
 }
 
@@ -450,13 +461,13 @@ $result = $stmt->get_result();
   color: #10b981;
 }
 
-/* New Search Container */
+
 .search-container {
     margin-left: auto;
    position: relative;
   display: flex;
   align-items: center;  
-  width: 320px; /* or any size */
+  width: 320px; 
   justify-content: right;
 }
 
@@ -644,7 +655,7 @@ border-radius: 4px;
     <div class="topbar">Blogs</div>
     <div class="main">
 
-    <!-- Place this INSIDE .main div, AFTER the <section> -->
+
 <template id="editorTemplate">
   <div class="bond-paper editor-container">
     <div class="editor-header">
@@ -687,7 +698,7 @@ border-radius: 4px;
 
         </div>
 
-        <!-- Blog Cards -->
+       
         <div class="blog-list" id="blogList">
           <?php if ($result->num_rows === 0): ?>
   <p style="text-align:center; font-size: 1.2rem; color: #888; padding: 40px;">
@@ -774,7 +785,7 @@ border-radius: 4px;
       }
     });
 
-    // Attach to all edit buttons
+   
     document.querySelectorAll(".edit-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         openEditor(this.closest(".blog-card"));
@@ -788,17 +799,17 @@ border-radius: 4px;
   const title = card.querySelector(".blog-title").innerText;
   const content = card.getAttribute("data-content") || "";
 
-  // Save current main content
+ 
   const mainDiv = document.querySelector(".main");
   originalMainHTML = mainDiv.innerHTML;
 
-  // Clone the editor template and insert it
+  
   const template = document.getElementById("editorTemplate");
   const clone = template.content.cloneNode(true);
-  mainDiv.innerHTML = ''; // clear it first
+  mainDiv.innerHTML = ''; 
   mainDiv.appendChild(clone);
 
-  // Re-initialize Quill in the newly added editor
+  
   quill = new Quill("#quillEditor", {
     theme: "snow",
     placeholder: "Write your blog content...",
@@ -815,7 +826,7 @@ border-radius: 4px;
     }
   });
 
-  // Set values
+
   document.getElementById("editorTitle").value = title;
   quill.root.innerHTML = content;
 }
@@ -830,22 +841,22 @@ border-radius: 4px;
     return;
   }
 
-  // Update the blog card in memory (visual only)
+  
   currentEditCard.querySelector(".blog-title").innerText = newTitle;
   currentEditCard.setAttribute("data-content", newContent);
 
-  // Restore original main content
+
   const mainDiv = document.querySelector(".main");
   mainDiv.innerHTML = originalMainHTML;
 
-  // 🔁 Re-attach edit button events again
+ 
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       openEditor(this.closest(".blog-card"));
     });
   });
 
-  // TODO: Save to server via AJAX if needed
+  
 }
 
 
@@ -853,7 +864,7 @@ function cancelEdit() {
   const mainDiv = document.querySelector(".main");
   mainDiv.innerHTML = originalMainHTML;
 
-  // 🔁 Re-attach the event listeners after restoring the content
+  
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       openEditor(this.closest(".blog-card"));
@@ -872,16 +883,16 @@ document.addEventListener("DOMContentLoaded", function () {
     xhr.open("GET", `blogadmin.php?trainee_id=${traineeId}&search=${encodeURIComponent(searchValue)}`, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
-        // Extract the updated blog list section
+     
         const parser = new DOMParser();
         const doc = parser.parseFromString(xhr.responseText, "text/html");
         const newBlogList = doc.querySelector("#blogList");
 
-        // Replace only the blog list
+
         if (newBlogList) {
           document.getElementById("blogList").innerHTML = newBlogList.innerHTML;
 
-          // Re-attach the edit button event listeners
+    
           document.querySelectorAll(".edit-btn").forEach(btn => {
             btn.addEventListener("click", function () {
               openEditor(this.closest(".blog-card"));
@@ -895,5 +906,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-
+<script src="/ojtform/autologout.js"></script>
 </html>

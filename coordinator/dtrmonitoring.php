@@ -2,8 +2,18 @@
 
 if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     header('Content-Type: application/json');
-
+    
     require_once '../connection.php';
+        $timeout_duration = 900; 
+
+    if (isset($_SESSION['LAST_ACTIVITY']) &&
+      (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+        session_unset();
+        session_destroy();
+        header("Location: /ojtform/indexv2.php?timeout=1"); 
+        exit;
+    }
+    $_SESSION['LAST_ACTIVITY'] = time();
 
     $trainee_id = $_GET['trainee_id'];
 
@@ -35,20 +45,9 @@ if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     exit;
 }
 
-session_start(); // Make sure session is started
+session_start(); 
 
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "ojtformv3";
-
-// Create connection
-$conn = new mysqli($host, $username, $password, $database);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require_once '../connection.php';
 
 
 
@@ -59,7 +58,7 @@ if (!$user_id) {
     die("User not logged in.");
 }
 
-// Get coordinator details
+
 $coorResult = $conn->query("SELECT coordinator_id, name, email, profile_picture FROM coordinator WHERE user_id = '$user_id'");
 
 if (!$coorResult || $coorResult->num_rows === 0) {
@@ -73,14 +72,14 @@ $profile_picture = !empty($coor['profile_picture'])
     ? '/ojtform/' . $coor['profile_picture'] 
     : '/ojtform/images/placeholder.jpg';
 
-// Get trainees
+
 $coordinator_id = null;
 $stmt = $conn->prepare("SELECT coordinator_id, name FROM coordinator WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$coor = $result->fetch_assoc(); // contains name and coordinator_id
+$coor = $result->fetch_assoc(); 
 $coordinator_id = $coor['coordinator_id'] ?? null;
 
 if (!$coordinator_id) {
@@ -319,7 +318,7 @@ if ($result->num_rows > 0) {
 
 .card {
   flex: 1;
-  border: 2px solid #16a34a; /* Tailwind's green-600 */
+  border: 2px solid #16a34a; 
   padding: 1.5rem;
   text-align: center;
   display: flex;
@@ -357,13 +356,13 @@ table {
   border: 2px solid #16a34a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-   border-radius: 8px;        /* ← Rounded corners */
+   border-radius: 8px;      
   overflow: hidden;  
   height: 100%;
 
 }
 
-/* Table header row */
+
 thead {
   background-color:rgb(68, 131, 15);
   color: white;
@@ -373,7 +372,7 @@ thead {
 }
 
 
-/* Table cells */
+
 th, td {
   padding: 12px 16px;
   text-align: left;
@@ -393,12 +392,12 @@ tbody tr {
   border-bottom: 1px solid #d1d5db; 
 }
 
-/* Hover effect */
+
 tbody tr:hover {
   background-color: #f0fdf4;
 }
 
-/* Status badges */
+
 .badge {
   padding: 0.3rem 0.7rem;
   border-radius: 9999px;
@@ -424,7 +423,7 @@ tbody tr:hover {
 }
 
 .modal-overlay {
-  display: none; /* Keep this */
+  display: none; 
   position: fixed;
   top: 0; 
   left: 0;
@@ -524,7 +523,7 @@ tbody tr:hover {
       margin-top: 20px;
     }
 
-/* Modal Box */
+
 .modal-box {
   background-color: #fff;
   padding: 24px;
@@ -535,7 +534,7 @@ tbody tr:hover {
   animation: slideDown 0.25s ease-out;
 }
 
-/* Title and Subtitle */
+
 .modal-title {
   font-size: 1.5rem;
   color: #14532d;
@@ -553,7 +552,7 @@ tbody tr:hover {
   color: #15803d;
 }
 
-/* Textarea */
+
 .remarks-textarea {
   width: 100%;
   padding: 12px;
@@ -567,7 +566,7 @@ tbody tr:hover {
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Action Buttons */
+
 .modal-actions {
   margin-top: 18px;
   display: flex;
@@ -604,7 +603,7 @@ tbody tr:hover {
   background-color: #d1d5db;
 }
 
-/* Animations */
+
 @keyframes slideDown {
   from {
     transform: translateY(-15px);
@@ -854,7 +853,7 @@ tbody tr:hover {
   </div>
 </div>
 
-
+<script src="/ojtform/autologout.js"></script>
 
 <script>
 function closeDTRModal() {
