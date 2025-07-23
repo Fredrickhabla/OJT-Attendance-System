@@ -196,7 +196,7 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->execute();
     $stmt->close();
 
-logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator: $coord_name", $first_name);
+logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator", $first_name);
 logAudit(
     $pdo,
     $user_id,
@@ -207,7 +207,7 @@ logAudit(
         "email" => $coord_email,
         "phone" => $coord_phone
     ]),
-    null,
+    "-",
     $first_name
 );
 }

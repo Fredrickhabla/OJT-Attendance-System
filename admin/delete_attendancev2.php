@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
 // Only admin can delete
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {

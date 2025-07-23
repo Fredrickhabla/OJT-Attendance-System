@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
@@ -190,7 +190,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </nav>
     </div>
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i> Logout
       </a>
     </div>

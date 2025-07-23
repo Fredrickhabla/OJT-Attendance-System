@@ -1,8 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 
 $dept_id = $_GET['dept_id'] ?? null;
 
@@ -494,7 +491,7 @@ tbody tr:hover {
       </nav>
     </div>
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>

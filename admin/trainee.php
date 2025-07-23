@@ -1,21 +1,17 @@
 <?php
 
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "ojtformv3";
+include('../connection.php');
 
-// Pagination settings
+$timeout_duration = 10; 
 
-
-
-// Create connection
-$conn = new mysqli($host, $username, $password, $database);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
 }
+$_SESSION['LAST_ACTIVITY'] = time();
 
 $limit = 12; // Number of trainees per page
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
@@ -382,7 +378,7 @@ if ($result->num_rows > 0) {
     </nav>
 
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>

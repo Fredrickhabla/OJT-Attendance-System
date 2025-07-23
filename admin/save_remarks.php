@@ -1,8 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 
 $trainee_id = $_POST['trainee_id'];
 $remarks = $conn->real_escape_string($_POST['remarks']);

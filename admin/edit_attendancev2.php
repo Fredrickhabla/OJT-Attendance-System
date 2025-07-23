@@ -1,8 +1,8 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
-// Check session role
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;

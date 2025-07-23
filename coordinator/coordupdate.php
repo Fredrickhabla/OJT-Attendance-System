@@ -1,11 +1,7 @@
 <?php
 session_start(); // Required to use $_SESSION
 
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
+require_once '../connection.php';
 
 $user_id = $_SESSION['user_id'] ?? null;
 if (!$user_id) {

@@ -2,6 +2,19 @@
 session_start();
 require_once 'connection.php';
 
+
+$timeout_duration = 10; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); // redirect after timeout
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
+
 $user_id = $_SESSION["user_id"] ?? null;
 if (!$user_id) {
     die("No session user_id found.");
@@ -643,7 +656,8 @@ document.getElementById("downloadBtn").addEventListener("click", function () {
 
 
 
-</script>
 
+</script>
+<script src="autologout.js"></script>
 
 </html>

@@ -1,16 +1,5 @@
 <?php
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "ojtformv3";
-
-// Create connection
-$conn = new mysqli($host, $username, $password, $database);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 require_once 'logger.php';
 
 // Get trainee ID from URL
@@ -420,6 +409,11 @@ $trainee = [
       </a>
 
     </nav>
+    <div class="logout">
+      <a href="/ojtform/logout.php">
+        <i class="bi bi-box-arrow-right"></i>   Logout
+      </a>
+    </div>
   </aside>
     
   <!-- Main Content -->

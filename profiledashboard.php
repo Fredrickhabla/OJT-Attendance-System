@@ -1,8 +1,19 @@
 <?php
 session_start();
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 if (!isset($_SESSION["user_id"])) {
-    header("Location: index.php");
+    header("Location: indexv2.php");
     exit();
 }
 
@@ -1361,7 +1372,10 @@ document.querySelectorAll('.tooltip-wrapper input[disabled]').forEach(input => {
     });
   });
 
+
+
 </script>
+<script src="autologout.js"></script>
 <?php if ($disableCoordinatorInputs): ?>
   <small style="color: gray; font-style: italic;">
     These fields are disabled because this coordinator is already linked to another user.

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     header("Location: index.php");

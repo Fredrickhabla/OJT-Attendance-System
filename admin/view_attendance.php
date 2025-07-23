@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     header("Location: index.php");
@@ -64,7 +64,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <a href="manage_users.php" class="btn btn-outline-primary btn-sm me-2">
         <i class="bi bi-people-fill"></i> Manage Users
       </a>
-      <a href="logout.php" class="btn btn-danger btn-sm">
+      <a href="/ojtform/logout.php" class="btn btn-danger btn-sm">
         <i class="bi bi-box-arrow-right"></i> Logout
       </a>
     </div>

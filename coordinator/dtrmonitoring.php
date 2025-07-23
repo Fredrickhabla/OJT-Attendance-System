@@ -3,13 +3,7 @@
 if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     header('Content-Type: application/json');
 
-    $conn = new mysqli("localhost", "root", "", "ojtformv3");
-
-    if ($conn->connect_error) {
-        http_response_code(500);
-        echo json_encode(["error" => "DB connection failed"]);
-        exit;
-    }
+    require_once '../connection.php';
 
     $trainee_id = $_GET['trainee_id'];
 

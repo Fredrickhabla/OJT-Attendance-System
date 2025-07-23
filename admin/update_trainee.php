@@ -1,10 +1,10 @@
 <?php
 session_start();
 require_once 'logger.php';
+include('../connection.php');
+include('../conn.php');
 
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-$pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");

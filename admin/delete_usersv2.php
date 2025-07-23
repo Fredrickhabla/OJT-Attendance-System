@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php');
+include('../conn.php');
 
 // Check if the admin is logged in
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {

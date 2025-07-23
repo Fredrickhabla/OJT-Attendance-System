@@ -2,9 +2,9 @@
 session_start();
 require_once 'logger.php';
 
-$conn = new mysqli('localhost', 'root', '', 'ojtformv3');
-$pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+include('../connection.php');
+include('../conn.php');
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['coordinator_id'] ?? '';

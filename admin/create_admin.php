@@ -1,6 +1,6 @@
 <?php
 // Use the same connection file
-include('connection.php');
+include('../conn.php');
 
 // Credentials
 $username = 'admin';

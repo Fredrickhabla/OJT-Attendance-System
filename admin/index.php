@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('connection.php'); // Optional, in case you need DB for other features
+include('../conn.php'); // Optional, in case you need DB for other features
 
 if (isset($_SESSION['user_id']) || isset($_SESSION['ValidAdmin'])) {
     header('Location: dashboardv2.php');

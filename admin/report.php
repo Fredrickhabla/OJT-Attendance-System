@@ -256,7 +256,7 @@ require_once 'logger.php';
       </nav>
     </div>
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>

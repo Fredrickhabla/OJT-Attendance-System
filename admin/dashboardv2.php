@@ -1,26 +1,23 @@
 <?php
-$host = "localhost";
-$dbname = "ojtformv3";
-$username = "root";
-$password = "";
+require_once '../conn.php';
 
+$stmtTrainee = $pdo->query("SELECT COUNT(*) FROM trainee");
+$traineeCount = $stmtTrainee->fetchColumn();
 
-try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Count trainees
-    $stmtTrainee = $conn->query("SELECT COUNT(*) FROM trainee");
-    $traineeCount = $stmtTrainee->fetchColumn();
-
-    // Count coordinators
-    $stmtCoordinator = $conn->query("SELECT COUNT(*) FROM coordinator");
-    $coordinatorCount = $stmtCoordinator->fetchColumn();
-
-} catch (PDOException $e) {
-    die("DB Error: " . $e->getMessage());
-}
+$stmtCoordinator = $pdo->query("SELECT COUNT(*) FROM coordinator");
+$coordinatorCount = $stmtCoordinator->fetchColumn();
 require_once 'logger.php';
+
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 
 if (isset($_POST['export_excel'])) {
     try {
@@ -268,7 +265,7 @@ if (isset($_POST['export_excel'])) {
     </nav>
 
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>
@@ -346,8 +343,12 @@ if (isset($_POST['export_excel'])) {
           }
         }
       });
-    </script>
 
+
+
+
+    </script>
+<script src="/ojtform/autologout.js"></script>
   </main>
 </div>
 

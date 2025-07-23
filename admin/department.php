@@ -1,8 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 
 $departments = $conn->query("SELECT * FROM departments WHERE status = 'active'");
 ?>
@@ -247,7 +244,7 @@ width: 100%;
     </nav>
 
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>

@@ -1,24 +1,21 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "ojtformv3");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 require_once 'logger.php';
-// Filters
+
 $filter = $_GET['trainee_id'] ?? 'all';
 $department_filter = $_GET['department_id'] ?? 'all';
 $search = $_GET['search'] ?? '';
 
-// Pagination
+
 $limit = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Dropdowns
+
 $trainee_result = $conn->query("SELECT trainee_id, first_name, surname FROM trainee");
 $department_result = $conn->query("SELECT department_id, name FROM departments");
 
-// Prepare search query
+
 $searchSql = '';
 $searchParam = '';
 if (!empty($search)) {
@@ -30,7 +27,7 @@ if (!empty($search)) {
     $searchParam = "%" . $search . "%";
 }
 
-// Build base COUNT query
+
 $countQuery = "SELECT COUNT(*) as total 
                FROM blog_posts bp 
                LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id 
@@ -56,7 +53,7 @@ if (!empty($search)) {
     array_push($countParams, $searchParam, $searchParam, $searchParam);
 }
 
-// Execute COUNT
+
 $countStmt = $conn->prepare($countQuery);
 if ($countTypes) {
     $countStmt->bind_param($countTypes, ...$countParams);
@@ -66,7 +63,7 @@ $countResult = $countStmt->get_result();
 $totalBlogs = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalBlogs / $limit);
 
-// Build main SELECT query
+
 $query = "SELECT bp.*, t.first_name, t.surname, d.name AS department_name 
           FROM blog_posts bp 
           LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id 
@@ -609,7 +606,7 @@ border-radius: 4px;
       </nav>
     </div>
     <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>
@@ -626,7 +623,7 @@ border-radius: 4px;
     <div class="editor-header">
       <span class="editor-title">Blog</span>
       <div class="editor-actions">
-        <button onclick="saveBlog()" class="save-btn">Save & Exit</button>
+        
         <button onclick="cancelEdit()" class="cancel-btn">Cancel</button>
       </div>
     </div>
@@ -800,40 +797,11 @@ border-radius: 4px;
   quill.root.innerHTML = content;
 }
 
-
-  function saveBlog() {
-  const newTitle = document.getElementById("editorTitle").value;
-  const newContent = quill.root.innerHTML;
-
-  if (!newTitle || !newContent) {
-    alert("Both title and content are required.");
-    return;
-  }
-
-  // Update the blog card in memory (visual only)
-  currentEditCard.querySelector(".blog-title").innerText = newTitle;
-  currentEditCard.setAttribute("data-content", newContent);
-
-  // Restore original main content
-  const mainDiv = document.querySelector(".main");
-  mainDiv.innerHTML = originalMainHTML;
-
-  // 🔁 Re-attach edit button events again
-  document.querySelectorAll(".edit-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      openEditor(this.closest(".blog-card"));
-    });
-  });
-
-  // TODO: Save to server via AJAX if needed
-}
-
-
 function cancelEdit() {
   const mainDiv = document.querySelector(".main");
   mainDiv.innerHTML = originalMainHTML;
 
-  // 🔁 Re-attach the event listeners after restoring the content
+  
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.addEventListener("click", function () {
       openEditor(this.closest(".blog-card"));
@@ -852,16 +820,16 @@ document.addEventListener("DOMContentLoaded", function () {
     xhr.open("GET", `blogadmin.php?trainee_id=${traineeId}&search=${encodeURIComponent(searchValue)}`, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
-        // Extract the updated blog list section
+      
         const parser = new DOMParser();
         const doc = parser.parseFromString(xhr.responseText, "text/html");
         const newBlogList = doc.querySelector("#blogList");
 
-        // Replace only the blog list
+        
         if (newBlogList) {
           document.getElementById("blogList").innerHTML = newBlogList.innerHTML;
 
-          // Re-attach the edit button event listeners
+         
           document.querySelectorAll(".edit-btn").forEach(btn => {
             btn.addEventListener("click", function () {
               openEditor(this.closest(".blog-card"));

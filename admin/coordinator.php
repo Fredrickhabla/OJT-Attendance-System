@@ -1,13 +1,5 @@
 <?php
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "ojtformv3";
-
-$conn = new mysqli($host, $username, $password, $database);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include('../connection.php');
 require_once 'logger.php';
 $coordinatorQuery = "SELECT * FROM coordinator WHERE active = 'Y'";
 $coordinatorResult = $conn->query($coordinatorQuery);
@@ -432,7 +424,7 @@ if ($coordinatorResult->num_rows > 0) {
     </nav>
 
      <div class="logout">
-      <a href="logout.php">
+      <a href="/ojtform/logout.php">
         <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>
