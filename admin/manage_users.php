@@ -2,6 +2,17 @@
 session_start();
 include('../conn.php');
 
+$timeout_duration = 10; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     header("Location: index.php");
     exit;
@@ -138,3 +149,4 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </body>
 </html>
+<script src="/ojtform/autologout.js"></script>

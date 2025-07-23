@@ -2,6 +2,17 @@
 session_start();
 include('../conn.php');
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -254,3 +265,4 @@ if (!$user) {
 </div>
 </body>
 </html>
+<script src="/ojtform/autologout.js"></script>

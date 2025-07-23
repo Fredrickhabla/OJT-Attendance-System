@@ -1,5 +1,15 @@
 <?php
 include('../connection.php');
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 
 $departments = $conn->query("SELECT * FROM departments WHERE status = 'active'");
 ?>
@@ -273,3 +283,4 @@ width: 100%;
 
 </body>
 </html>
+<script src="/ojtform/autologout.js"></script>

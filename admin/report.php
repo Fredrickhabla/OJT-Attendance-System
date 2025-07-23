@@ -5,6 +5,17 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     exit;
 }
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 require_once 'logger.php';
 ?>
 
@@ -283,3 +294,4 @@ require_once 'logger.php';
 
 </body>
 </html>
+<script src="/ojtform/autologout.js"></script>

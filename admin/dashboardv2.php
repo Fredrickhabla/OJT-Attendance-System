@@ -1,6 +1,15 @@
 <?php
 require_once '../conn.php';
 
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 $stmtTrainee = $pdo->query("SELECT COUNT(*) FROM trainee");
 $traineeCount = $stmtTrainee->fetchColumn();
 
@@ -9,15 +18,6 @@ $coordinatorCount = $stmtCoordinator->fetchColumn();
 require_once 'logger.php';
 
 $timeout_duration = 900; 
-
-if (isset($_SESSION['LAST_ACTIVITY']) &&
-   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
-    session_unset();
-    session_destroy();
-    header("Location: indexv2.php?timeout=1"); 
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time();
 
 if (isset($_POST['export_excel'])) {
     try {

@@ -2,6 +2,17 @@
 include('../connection.php');
 require_once 'logger.php';
 
+$timeout_duration = 10; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 $filter = $_GET['trainee_id'] ?? 'all';
 $department_filter = $_GET['department_id'] ?? 'all';
 $search = $_GET['search'] ?? '';
@@ -843,5 +854,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-
+<script src="/ojtform/autologout.js"></script>
 </html>

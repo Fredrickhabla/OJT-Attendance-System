@@ -2,6 +2,17 @@
 include('../connection.php');
 require_once 'logger.php';
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 // Get trainee ID from URL
 $id = $_GET['id'] ?? '';
 $id = trim($id); // Keep it as string
@@ -115,6 +126,7 @@ $trainee = [
 <head>
   <meta charset="UTF-8" />
   <title>View Trainee - <?= htmlspecialchars($trainee['name']) ?></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -173,6 +185,28 @@ $trainee = [
       margin-right: 8px;
     }
 
+    .logout {
+      margin-top: auto;
+    }
+
+    .logout a {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #2c6b11;
+    }
+
+    .bi {
+      margin-right: 6px;
+    }
+
     .acerlogo {
       text-align: center;
       font-size: 20px;
@@ -207,8 +241,6 @@ $trainee = [
       text-align: center;
       width: 1000px;
       max-width: 100%;
-
-      /* Updated to column flex so button group can be below */
       display: flex;
       flex-direction: column;
       gap: 40px;
@@ -616,5 +648,5 @@ window.onclick = function(event) {
   });
 </script>
 <?php endif; ?>
-
+<script src="/ojtform/autologout.js"></script>
 </html>

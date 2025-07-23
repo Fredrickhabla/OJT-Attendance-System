@@ -15,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
     $rememberMe = isset($_POST['remember']);
 
     if (empty($password) && isset($_COOKIE['rememberme'])) {
-        // If no password but cookie exists, try cookie login
         [$identifier, $token] = explode(':', $_COOKIE['rememberme']);
 
         $stmt = $conn->prepare("SELECT user_id, name, remember_token, role FROM users WHERE username = ? AND remember_identifier = ?");
@@ -202,6 +201,7 @@ if (isset($_COOKIE['rememberme'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Acer OJT Sign In</title>
   <link rel="stylesheet" href="styles.css" />
+ 
 </head>
 
 <style>

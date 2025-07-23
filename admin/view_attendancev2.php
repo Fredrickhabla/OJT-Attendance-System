@@ -2,12 +2,23 @@
 session_start();
 include('../conn.php');
 
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
 require_once 'logger.php';
-// Fetch attendance records joined with user full name
+
 $stmt = $pdo->query("
     SELECT ar.*, CONCAT(u.first_name, ' ', u.surname) AS full_name
     FROM attendance_record ar
@@ -326,6 +337,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     });
   });
 </script>
-
+<script src="/ojtform/autologout.js"></script>
 </body>
 </html>
