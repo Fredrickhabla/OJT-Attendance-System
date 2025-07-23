@@ -59,7 +59,7 @@ if ($traineeRow = $traineeResult->fetch_assoc()) {
     }
     $userQuery->close();
 
-    // ✅ Log only if user explicitly downloaded the DTR
+
     if (isset($_GET['download']) && $_GET['download'] === 'dtr') {
         $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -244,6 +244,9 @@ body {
   
 }
 
+.card-wide {
+  border-radius: 8px;
+}
 
 .card.short-card {
   height: 40%;
@@ -260,10 +263,14 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  border-radius: 8px;
 }
 .table-wrapper {
-   max-height: 100%;
-    overflow-y: auto;
+  min-height: 94%; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  border-radius: 8px;
 }
 
 .card {
@@ -302,6 +309,7 @@ body {
      width: 100%;
     border-collapse: collapse;
     height: 100%;
+    border-radius: 8px;
 }
 
 .dtr-table th,
@@ -309,6 +317,7 @@ body {
    padding: 8px;
     border: 1px solid #ddd;
     text-align: left;
+    
 }
 
 .dtr-table th {
@@ -590,17 +599,28 @@ const attendanceEvents = data
 
   const tableBody = document.querySelector('#dtrTable tbody');
 
- data.forEach(entry => {
+if (data.length === 0) {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td>${userName}</td>
-    <td>${entry.date}</td>
-    <td>${entry.time_in || "&nbsp;"}</td>
-    <td>${entry.time_out || "&nbsp;"}</td>
-    <td>${entry.hours || "&nbsp;"}</td>
+    <td colspan="5" style="text-align: center; padding: 50px 15px; color: #888; font-style: italic; border-radius: 8px;">
+      No attendance record yet.
+    </td>
   `;
   tableBody.appendChild(row);
-});
+} else {
+  data.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${userName}</td>
+      <td>${entry.date}</td>
+      <td>${entry.time_in || "&nbsp;"}</td>
+      <td>${entry.time_out || "&nbsp;"}</td>
+      <td>${entry.hours || "&nbsp;"}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
 
   function drawProgressCircle(canvasId, completedHours, totalHours) {
   const canvas = document.getElementById(canvasId);

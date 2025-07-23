@@ -441,19 +441,21 @@ h1.acerojt {
   const rememberedUsername = <?= json_encode($cookie_username) ?>;
 
   function togglePasswordField() {
-    const enteredUsername = usernameInput.value.trim();
+  const enteredUsername = usernameInput.value.trim();
 
-    if (enteredUsername && rememberedUsername && enteredUsername === rememberedUsername) {
-      passwordInput.disabled = true;
-      passwordInput.removeAttribute("required");
-      passwordInput.style.backgroundColor = "#dbd8d8ff"; // Optional dimming
-      passwordInput.value = ".............";
-    } else {
-      passwordInput.disabled = false;
-      passwordInput.setAttribute("required", "required");
-      passwordInput.style.backgroundColor = ""; 
-    }
+  if (enteredUsername && rememberedUsername && enteredUsername === rememberedUsername) {
+    passwordInput.disabled = true;
+    passwordInput.removeAttribute("required");
+    passwordInput.style.backgroundColor = "#dbd8d8ff";
+    passwordInput.value = ".............";
+  } else {
+    passwordInput.disabled = false;
+    passwordInput.setAttribute("required", "required");
+    passwordInput.style.backgroundColor = "";
+    passwordInput.value = ""; 
   }
+}
+
 
   usernameInput.addEventListener("input", togglePasswordField);
   togglePasswordField();

@@ -1,6 +1,6 @@
 // autoLogout.js
 
-let idleTimeLimit = 10000;
+let idleTimeLimit = 90000;
 let idleTimer;
 let hasLoggedOut = false;
 
