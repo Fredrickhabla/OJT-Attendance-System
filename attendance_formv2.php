@@ -39,7 +39,7 @@ $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
-$full_name = "User"; // Default fallback
+$full_name = "User"; 
 $email = "";
 
 $stmt = $conn->prepare("SELECT first_name, surname, email, profile_picture FROM trainee WHERE user_id = ?");
@@ -448,6 +448,44 @@ $conn->close();
   margin-bottom: 40px;
 }
 
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.tooltip-wrapper input {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
+.tooltip-text {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+}
+
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .tooltip-text {
+    left: 0;
+    top: 110%;
+    transform: translateY(0);
+  }
+}
+
   </style>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -502,7 +540,27 @@ document.addEventListener("DOMContentLoaded", function () {
   timeOutInput.addEventListener("input", calculateHours);
 
   calculateHours();
+
+  document.querySelectorAll('.tooltip-wrapper input ').forEach(input => {
+    const tooltip = input.parentElement.querySelector('.tooltip-text');
+
+    input.addEventListener('mousemove', (e) => {
+      if (tooltip) {
+        tooltip.style.left = (e.pageX + 10) + 'px';
+        tooltip.style.top = (e.pageY + 10) + 'px';
+        tooltip.style.opacity = 1;
+      }
+    });
+
+    input.addEventListener('mouseleave', () => {
+      if (tooltip) {
+        tooltip.style.opacity = 0;
+      }
+    });
+  });
 });
+
+
 </script>
 
 
@@ -605,7 +663,12 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div>
           <label for="hours">No. of Hours</label>
-          <input type="number" id="hours" name="hours" readonly />
+          <div class="tooltip-wrapper">
+  <input type="number" id="hours" name="hours" readonly required>
+  <span class="tooltip-text">Automatically calculated based on Time In and Time Out.</span>
+</div>
+
+
         </div>
         <div class="time-pair-row">
           <div class="time-small">
