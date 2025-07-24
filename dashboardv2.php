@@ -267,10 +267,12 @@ body {
   border-radius: 8px;
 }
 .table-wrapper {
-  display: block;
+  
   border-radius: 8px;
   overflow-y: auto;
   max-height: 100%;
+
+
 }
 
 .card {
