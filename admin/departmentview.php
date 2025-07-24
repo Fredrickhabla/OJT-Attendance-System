@@ -40,7 +40,7 @@ $totalPages = ceil($totalRows / $perPage);
 
 
 // Get trainees for this department
-$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id' LIMIT $perPage OFFSET $offset");
+$traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id' AND active = 'Y' LIMIT $perPage OFFSET $offset");
 
 while ($trainee = $traineeResult->fetch_assoc()) {
     $trainee_id = $trainee['trainee_id'];

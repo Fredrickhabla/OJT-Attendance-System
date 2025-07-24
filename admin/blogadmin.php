@@ -2,7 +2,7 @@
 include('../connection.php');
 require_once 'logger.php';
 
-$timeout_duration = 10; 
+$timeout_duration = 900; 
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
