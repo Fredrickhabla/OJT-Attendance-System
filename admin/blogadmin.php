@@ -79,7 +79,7 @@ $query = "SELECT bp.*, t.first_name, t.surname, d.name AS department_name
           FROM blog_posts bp 
           LEFT JOIN trainee t ON bp.trainee_id = t.trainee_id 
           LEFT JOIN departments d ON t.department_id = d.department_id 
-          WHERE 1=1";
+          WHERE 1=1 and t.active = 'Y'";
 
 $types = '';
 $params = [];
@@ -702,15 +702,7 @@ border-radius: 4px;
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
             </svg></button>
-      <button class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-trash-2">
-              <path d="M3 6h18" />
-              <path d="M19 6l-1 14H6L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-              <path d="M9 6V4h6v2" />
-            </svg></button>
+      
     </div>
   </div>
 <?php endwhile; ?>
@@ -770,7 +762,7 @@ border-radius: 4px;
     });
   });
 
-  function openEditor(card) {
+ function openEditor(card) {
   currentEditCard = card;
 
   const title = card.querySelector(".blog-title").innerText;
@@ -786,10 +778,15 @@ border-radius: 4px;
   mainDiv.innerHTML = ''; // clear it first
   mainDiv.appendChild(clone);
 
-  // Re-initialize Quill in the newly added editor
+  // Set the title and disable input
+  const titleInput = document.getElementById("editorTitle");
+  titleInput.value = title;
+  titleInput.readOnly = true; // <-- just disables typing, keeps style
+
+  // Initialize Quill with toolbar, but read-only
   quill = new Quill("#quillEditor", {
     theme: "snow",
-    placeholder: "Write your blog content...",
+    readOnly: true, // <-- this disables editing
     modules: {
       toolbar: [
         [{ header: [1, 2, 3, false] }],
@@ -803,10 +800,10 @@ border-radius: 4px;
     }
   });
 
-  // Set values
-  document.getElementById("editorTitle").value = title;
+  // Set content
   quill.root.innerHTML = content;
 }
+
 
 function cancelEdit() {
   const mainDiv = document.querySelector(".main");

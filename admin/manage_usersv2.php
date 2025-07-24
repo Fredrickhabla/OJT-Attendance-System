@@ -211,8 +211,8 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   <a href="edit_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-primary">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
-                    <i class="bi bi-trash"></i>
+                  <a href="delete_usersv2.php?user_id=<?= $user['user_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to arhive?');">
+                    <i class="bi bi-archive"></i>
                   </a>
                 </td>
               </tr>
