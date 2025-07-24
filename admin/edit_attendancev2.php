@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('../conn.php');
+require_once 'logger.php';
 
 $timeout_duration = 900; 
 
@@ -43,19 +44,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $time_out = $_POST['time_out'] ?? '';
     $hours = $_POST['hours'] ?? '';
     $work_description = $_POST['work_description'] ?? '';
-    $signature_path = $record['signature']; // keep existing path by default
+    $signature_path = $record['signature']; // default to old
 
-    // Handle file upload if a new signature is uploaded
+    // Handle signature upload
     if (isset($_FILES['signature']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/ojtform/uploads/';
-
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
-
         $filename = time() . '_' . basename($_FILES['signature']['name']);
         $fullTargetPath = $uploadDir . $filename;
-        $webPath = 'uploads/' . $filename; // this goes in DB
+        $webPath = 'uploads/' . $filename;
 
         if (move_uploaded_file($_FILES['signature']['tmp_name'], $fullTargetPath)) {
             $signature_path = $webPath;
@@ -64,12 +63,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Proceed with update if there's no error and all required fields are filled
+    // Proceed with update if valid
     if (!$error && $date && $time_in && $time_out && $hours) {
+        // Save old values for audit
+        $old_values_array = [
+            'date' => $record['date'],
+            'time_in' => $record['time_in'],
+            'time_out' => $record['time_out'],
+            'hours' => $record['hours'],
+            'work_description' => $record['work_description'],
+            'signature' => $record['signature']
+        ];
+
+        // Perform update
         $update = $pdo->prepare("UPDATE attendance_record SET date=?, time_in=?, time_out=?, hours=?, work_description=?, signature=? WHERE attendance_id=?");
         if ($update->execute([$date, $time_in, $time_out, $hours, $work_description, $signature_path, $attendance_id])) {
             $success = "Record updated successfully.";
-            // Refresh the record
+
+            // Get admin info
+            $admin_id = $_SESSION['user_id'] ?? 'unknown';
+            $admin_name = $_SESSION['username'] ?? 'Unknown Admin';
+
+            // Log transaction
+            logTransaction($pdo, $admin_id, $admin_name, "Updated attendance record ID: $attendance_id", $admin_name);
+
+            // New values for comparison
+            $new_values_array = [
+                'date' => $date,
+                'time_in' => $time_in,
+                'time_out' => $time_out,
+                'hours' => $hours,
+                'work_description' => $work_description,
+                'signature' => $signature_path
+            ];
+
+            // Detect changes
+            $changed_old = [];
+            $changed_new = [];
+
+            foreach ($old_values_array as $field => $old_val) {
+                $new_val = $new_values_array[$field];
+                if ($old_val != $new_val) {
+                    $changed_old[$field] = $old_val;
+                    $changed_new[$field] = $new_val;
+                }
+            }
+
+            // Log changes
+            if (!empty($changed_old)) {
+                logAudit(
+                    $pdo,
+                    $admin_id,
+                    "Edit Attendance Record: $attendance_id",
+                    json_encode($changed_new),
+                    json_encode($changed_old),
+                    $admin_name,
+                    'Y'
+                );
+            }
+
+            // Refresh current record
             $stmt->execute([$attendance_id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
@@ -79,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please fill in all required fields.";
     }
 }
+
 ?>
 
 

@@ -41,7 +41,6 @@ require_once 'logger.php';
     .container {
       display: flex;
       height: 100vh;
-      
     }
 
     .sidebar {
@@ -82,7 +81,7 @@ require_once 'logger.php';
       border-radius: 4px;
       transition: 0.2s;
     }
-
+    
     .nav a:hover {
       background-color: #14532d;
     }
