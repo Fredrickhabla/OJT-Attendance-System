@@ -3,7 +3,7 @@ session_start();
 require_once 'connection.php';
 
 
-$timeout_duration = 10; 
+$timeout_duration = 900; 
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
@@ -246,6 +246,7 @@ body {
 
 .card-wide {
   border-radius: 8px;
+  height: 100%;
 }
 
 .card.short-card {
@@ -262,15 +263,14 @@ body {
  flex: 1.7;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 400px;
   border-radius: 8px;
 }
 .table-wrapper {
-  min-height: 94%; 
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
+  display: block;
   border-radius: 8px;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .card {
@@ -308,8 +308,10 @@ body {
 .dtr-table {
      width: 100%;
     border-collapse: collapse;
-    height: 100%;
+    
     border-radius: 8px;
+    max-height: 100%;
+    
 }
 
 .dtr-table th,
@@ -317,6 +319,7 @@ body {
    padding: 8px;
     border: 1px solid #ddd;
     text-align: left;
+    
     
 }
 
@@ -328,6 +331,7 @@ body {
 
 .dtr-table tbody tr:hover {
   background-color: #f9f9f9;
+  max-height: 100%;
 }
 
 .card.tall-card {
@@ -602,7 +606,7 @@ const attendanceEvents = data
 if (data.length === 0) {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td colspan="5" style="text-align: center; padding: 50px 15px; color: #888; font-style: italic; border-radius: 8px;">
+    <td colspan="5" style="text-align: center; padding: 220px 50px; color: #888; font-style: italic; border-radius: 8px;">
       No attendance record yet.
     </td>
   `;
