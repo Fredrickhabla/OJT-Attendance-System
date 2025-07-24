@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('../conn.php');
+include('../logger.php');
 
 // Check if the admin is logged in
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -8,6 +9,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+$sys_user = $_SESSION['user_id'] ?? 'unknown';
+$sys_name = $_SESSION['username'] ?? 'Unknown Admin';
 // Get the user_id from the query string
 $user_id = $_GET['user_id'] ?? null;
 if (!$user_id) {
@@ -25,17 +28,32 @@ if (!$user) {
     exit;
 }
 
-// If you store a profile picture or other file, delete it here
-// (Remove this part if you don't have a file to delete)
-/*
-if (!empty($user['profile_picture']) && file_exists($user['profile_picture'])) {
-    unlink($user['profile_picture']);
-}
-*/
+$old_status = $user['active'];
+$fullname = $user['name'] ?? 'N/A';
 
-// Delete the user
-$delete = $pdo->prepare("DELETE FROM users WHERE user_id = ?");
-$delete->execute([$user_id]);
+// Archive the user by setting active to 'N'
+$archive = $pdo->prepare("UPDATE users SET active = 'N' WHERE user_id = ?");
+$success = $archive->execute([$user_id]);
+
+// Log the transaction
+logTransaction(
+    $pdo,
+    $sys_user,
+    $sys_name,
+    "User archived: $user_id.",
+    $sys_name
+);
+
+// Log the audit
+logAudit(
+    $pdo,
+    $sys_user,
+    "Archive User: $user_id",
+    "active = 'N'",
+    "active = '$old_status'",
+    $sys_name,
+    $success ? 'Y' : 'N'
+);
 
 // Redirect back to the user management page
 header("Location: manage_usersv2.php");

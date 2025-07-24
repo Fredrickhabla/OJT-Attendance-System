@@ -18,7 +18,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     exit;
 }
 
-$stmt = $pdo->query("SELECT * FROM users ORDER BY user_id DESC");
+$stmt = $pdo->query("SELECT * FROM users WHERE active = 'Y' ORDER BY user_id DESC");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -257,6 +257,9 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     });
   });
 </script>
+<?php if (isset($_GET['update']) && $_GET['update'] === 'success'): ?>
+  <script>alert("User updated successfully!");</script>
+<?php endif; ?>
 
 </body>
 </html>

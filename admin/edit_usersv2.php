@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('../conn.php');
+require_once '../logger.php';
 
 $timeout_duration = 900; 
 
@@ -45,10 +46,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name) || empty($username)) {
         $error = "Name and Username are required.";
     } else {
+        // Compare old vs new values
+        $old_values = [];
+        $new_values = [];
+
+        $fields = [
+            'name' => $name,
+            'username' => $username,
+            'password_hashed' => $password_hashed,
+            'role' => $role,
+            'email' => $email,
+            'created_at' => $created_at,
+            'is_approved' => $is_approved
+        ];
+
+        foreach ($fields as $key => $new_value) {
+            $old_value = $user[$key];
+            if ($old_value != $new_value) {
+                $old_values[$key] = $old_value;
+                $new_values[$key] = $new_value;
+            }
+        }
+
+    
         $stmt = $pdo->prepare("UPDATE users SET name = ?, username = ?, password_hashed = ?, role = ?, email = ?, created_at = ?, is_approved = ? WHERE user_id = ?");
         $stmt->execute([$name, $username, $password_hashed, $role, $email, $created_at, $is_approved, $user_id]);
-        header("Location: manage_usersv2.php");
-        exit;
+
+        if (!empty($new_values)) {
+            $admin_id = $_SESSION['user_id'] ?? 'unknown';
+            $admin_name = $_SESSION['username'] ?? 'Unknown Admin';
+
+            logTransaction($pdo, $admin_id, $admin_name, "Updated user account: $user_id", $admin_name);
+            logAudit($pdo, $user_id, "Update User Account: $user_id", json_encode($new_values), json_encode($old_values), $admin_name, 'Y');
+        }
+
+        header("Location: manage_usersv2.php?update=success");
+exit;
     }
 }
 
