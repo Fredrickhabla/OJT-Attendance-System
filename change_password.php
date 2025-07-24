@@ -51,7 +51,11 @@ try {
     logTransaction($pdo, $user_id, $user['name'], "Changed Password", $sys_user);
     logAudit($pdo, $user_id, "Change Password", json_encode($newInputValues), json_encode($oldInputValues), $sys_user);
 
-    echo "Password changed successfully.";
+    echo "<script>
+    alert('Password changed successfully.');
+    window.location.href = document.referrer;
+</script>";
+
 } catch (PDOException $e) {
     echo "Database error: " . $e->getMessage(); 
 }

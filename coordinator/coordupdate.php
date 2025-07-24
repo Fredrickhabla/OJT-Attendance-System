@@ -472,6 +472,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Department Name -->
     <span>Profile</span>
+    <button onclick="openPasswordModal()" style="padding: 6px 12px; font-size: 14px; background-color: transparent; color: white; border-radius: 6px; border: 1px solid white; cursor: pointer;">
+        Manage Password
+    </button>
 
 </div>
 
@@ -524,8 +527,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </form>
 
+
       </div>
     </div>
+
+    <!-- Password Modal -->
+<div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 9999;">
+
+  <div style="background: white; padding: 30px; border-radius: 10px; width: 400px; position: relative;">
+    <h3 style="margin-bottom: 20px; text-align: center;">Change Password</h3>
+    <form method="POST" action="/ojtform/change_password.php">
+      <div class="form-group">
+        <label for="current_password">Current Password</label>
+        <input type="password" name="current" required />
+      </div>
+      <div class="form-group">
+        <label for="new_password">New Password</label>
+        <input type="password" name="new" required />
+      </div>
+      <div class="form-group">
+        <label for="confirm_password">Confirm New Password</label>
+        <input type="password" name="confirm" required />
+      </div>
+      <div class="form-actions" style="margin-top: 20px;">
+        <button type="submit" class="save-btn">Save</button>
+        <button type="button" onclick="closePasswordModal()" style="margin-left: 10px; padding: 10px 20px; border-radius: 999px; background-color: #ccc; border: none; cursor: pointer;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
   </div>
 
 <script>
@@ -559,5 +591,21 @@ document.getElementById('profile_picture').addEventListener('change', function (
         reader.readAsDataURL(file);
     }
 });
+
+ function openPasswordModal() {
+    document.getElementById('passwordModal').style.display = 'flex';
+  }
+
+  function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+  }
+
+  // Optional: Close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('passwordModal');
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
 </script>
 <script src="/ojtform/autologout.js"></script>
