@@ -1,6 +1,14 @@
 <?php
-include('../connection.php');
+session_start(); 
+
 require_once 'logger.php';
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+include('../connection.php');
 
 $timeout_duration = 900; 
 
@@ -12,7 +20,6 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time();
-
 // Get trainee ID from URL
 $id = $_GET['id'] ?? '';
 $id = trim($id); // Keep it as string
@@ -648,5 +655,5 @@ window.onclick = function(event) {
   });
 </script>
 <?php endif; ?>
-<script src="/ojtform/autologout.js"></script>
 </html>
+<script src="/ojtform/autologout.js"></script>

@@ -1,5 +1,15 @@
 <?php
+session_start();
+
 include('../connection.php');
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
 $timeout_duration = 900; 
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
@@ -17,41 +27,33 @@ if (!$dept_id) {
     die("No department selected.");
 }
 
-// Get department name
 $deptResult = $conn->query("SELECT name FROM departments WHERE department_id = '$dept_id'");
 $dept = $deptResult->fetch_assoc();
 
-// Initialize counters
 $totalTrainees = 0;
 $completed = 0;
 $ongoing = 0;
 
-$traineeData = []; // store full info for table
+$traineeData = []; 
 
-// Pagination settings
 $perPage = 10;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $perPage;
 
-// Count total trainees in this department
 $countResult = $conn->query("SELECT COUNT(*) AS total FROM trainee WHERE department_id = '$dept_id'");
 $totalRows = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRows / $perPage);
 
-
-// Get trainees for this department
 $traineeResult = $conn->query("SELECT * FROM trainee WHERE department_id = '$dept_id' AND active = 'Y' LIMIT $perPage OFFSET $offset");
 
 while ($trainee = $traineeResult->fetch_assoc()) {
     $trainee_id = $trainee['trainee_id'];
     $required = $trainee['required_hours'];
 
-    // Get completed hours from attendance_record
     $attendanceQuery = $conn->query("SELECT SUM(hours) AS total_hours FROM attendance_record WHERE trainee_id = '$trainee_id'");
     $attendance = $attendanceQuery->fetch_assoc();
     $completed_hours = floatval($attendance['total_hours'] ?? 0);
 
-    // Determine status
     $status = ($completed_hours >= $required) ? 'Completed' : 'Ongoing';
 
     if ($status === 'Completed') {
@@ -62,7 +64,6 @@ while ($trainee = $traineeResult->fetch_assoc()) {
 
     $totalTrainees++;
 
-    // Store data for table
    $traineeData[] = [
   'trainee_id' => $trainee['trainee_id'],
   'name' => ucwords(strtolower($trainee['first_name'] . ' ' . $trainee['surname'])),

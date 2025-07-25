@@ -1,7 +1,10 @@
 <?php
 session_start();
 require_once 'connection.php';
-
+if (!isset($_SESSION["user_id"])) {
+    header("Location: indexv2.php");
+    exit();
+}
 
 $timeout_duration = 900; 
 

@@ -1,5 +1,14 @@
 <?php
+session_start(); 
 include('../connection.php');
+require_once 'logger.php';
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
 $timeout_duration = 900; 
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
@@ -270,15 +279,18 @@ width: 100%;
   </div>
 
   <div class="main-content">
-    <div class="card-wrapper">
-      <?php while ($row = $departments->fetch_assoc()): ?>
-        <div class="card" onclick="window.location.href='departmentview.php?dept_id=<?= $row['department_id'] ?>';" style="cursor: pointer;">
+  <div class="card-wrapper">
+    <?php while ($row = $departments->fetch_assoc()): ?>
+      <a href="departmentview.php?dept_id=<?= urlencode($row['department_id']) ?>" style="text-decoration: none; color: inherit;">
+        <div class="card" style="cursor: pointer;">
           <i class="<?= htmlspecialchars($row['icon_class'] ?? 'fas fa-building') ?> icon"></i>
           <span class="label"><?= htmlspecialchars($row['name']) ?></span>
         </div>
-      <?php endwhile; ?>
-    </div>
+      </a>
+    <?php endwhile; ?>
   </div>
+</div>
+
 </div>
 
 </body>
