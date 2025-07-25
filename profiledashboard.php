@@ -985,13 +985,18 @@ $stmt->execute([
     <input type="checkbox" id="togglePasswordForm">Change Password</label>
 </div>
 </div>
-      </div>
+
+    
+
+          
+          
+        </div>
 
         <!-- Middle Section -->
         <div class="middle-section">
           <h2>Profile Settings</h2>
           <div class="form-grid">
-            <div class="form-group">
+             <div class="form-group">
               <label for="firstName">First Name</label>
               <input id="firstName" type="text" name="firstName" value="<?= htmlspecialchars($trainee['first_name'] ?? '') ?>" required/>
             </div>
@@ -1031,8 +1036,8 @@ $stmt->execute([
                   <label><input type="checkbox" name="days" value="F"> F</label>
                 </div>
               <input type="hidden" name="schedule_days" id="schedule_days" value="<?= htmlspecialchars($trainee['schedule_days'] ?? '') ?>" />
-              <input type="hidden" name="schedule_start" id="schedule_start" value="<?= htmlspecialchars($trainee['schedule_start'] ?? '') ?>" />
-              <input type="hidden" name="schedule_end" id="schedule_end" value="<?= htmlspecialchars($trainee['schedule_end'] ?? '') ?>" />
+<input type="hidden" name="schedule_start" id="schedule_start" value="<?= htmlspecialchars($trainee['schedule_start'] ?? '') ?>" />
+<input type="hidden" name="schedule_end" id="schedule_end" value="<?= htmlspecialchars($trainee['schedule_end'] ?? '') ?>" />
 
                 <div>
                   <label class="time-label" for="startTime">Start:
@@ -1053,19 +1058,21 @@ $stmt->execute([
             </div>
 
             <div class="form-group">
-              <label for="department">Department</label>
-              <select id="department" name="department" class = "big-select" required>
-                <option value="">-- Choose Department --</option>
-                <?php foreach ($all_departments as $dept): ?>
-                  <option value="<?= htmlspecialchars($dept['department_id']) ?>" 
-                    <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($dept['name']) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+  <label for="department">Department</label>
+  <select id="department" name="department" class = "big-select" required>
+    <option value="">-- Choose Department --</option>
+    <?php foreach ($all_departments as $dept): ?>
+      <option value="<?= htmlspecialchars($dept['department_id']) ?>" 
+        <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+        <?= htmlspecialchars($dept['name']) ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
+</div>
 
           </div>
+
+        </div>
 
         <!-- Right Section -->
         <div class="right-section">
@@ -1081,9 +1088,9 @@ $stmt->execute([
             </div>
             <label for="coordinator_picture" class="btn"> Insert Photo</label>
             <input type="file" id="coordinator_picture" name="coordinator_picture"
-              accept="image/*" style="display: none;" 
-              <?= $disableCoordinatorInputs ? 'disabled' : '' ?>>
-                      </div>
+  accept="image/*" style="display: none;" 
+  <?= $disableCoordinatorInputs ? 'disabled' : '' ?>>
+          </div>
 
           <div class="form-vertical">
             <div class="form-group">
@@ -1099,90 +1106,90 @@ $stmt->execute([
             </div>
 
             <div class="form-group">
-            <label for="coordName">Name</label>
-            <div class="tooltip-wrapper">
-              <input id="coordName" name="coordName" type="text"
-                value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
-                <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-              <?php if ($disableCoordinatorInputs): ?>
-                <span class="tooltip-text">You cannot update an existing user coordinator.</span>
-              <?php endif; ?>
-            </div>
-          </div>
+  <label for="coordName">Name</label>
+  <div class="tooltip-wrapper">
+    <input id="coordName" name="coordName" type="text"
+      value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
 
-          <div class="form-group">
-            <label for="position">Position</label>
-            <div class="tooltip-wrapper">
-              <input id="position" name="position" type="text"
-                value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
-                <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-              <?php if ($disableCoordinatorInputs): ?>
-                <span class="tooltip-text">You cannot update an existing user coordinator.</span>
-              <?php endif; ?>
-            </div>
-          </div>
+<div class="form-group">
+  <label for="position">Position</label>
+  <div class="tooltip-wrapper">
+    <input id="position" name="position" type="text"
+      value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
 
-          <div class="form-group">
-            <label for="coordEmail">Email</label>
-            <div class="tooltip-wrapper">
-              <input id="coordEmail" name="coordEmail" type="email"
-                value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
-                <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-              <?php if ($disableCoordinatorInputs): ?>
-                <span class="tooltip-text">You cannot update an existing user coordinator.</span>
-              <?php endif; ?>
-            </div>
-          </div>
+<div class="form-group">
+  <label for="coordEmail">Email</label>
+  <div class="tooltip-wrapper">
+    <input id="coordEmail" name="coordEmail" type="email"
+      value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
 
-          <div class="form-group">
-            <label for="phone">Phone</label>
-            <div class="tooltip-wrapper">
-              <input id="phone" name="phone" type="text"
-                value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
-                <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
-              <?php if ($disableCoordinatorInputs): ?>
-                <span class="tooltip-text">You cannot update an existing user coordinator.</span>
-              <?php endif; ?>
-            </div>
-          </div>
+<div class="form-group">
+  <label for="phone">Phone</label>
+  <div class="tooltip-wrapper">
+    <input id="phone" name="phone" type="text"
+      value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+    <?php if ($disableCoordinatorInputs): ?>
+      <span class="tooltip-text">You cannot update an existing user coordinator.</span>
+    <?php endif; ?>
+  </div>
+</div>
 
-          <div class="actions">
-            <button class="btn" type="submit" id="saveBtn">Save</button>
-          </div>
-                  </div>
+<div class="actions">
+  <button class="btn" type="submit" id="saveBtn">Save</button>
+</div>
+        </div>
 
-                </form>
-              </div>
-            </div>
-          </div>
+      </form>
+    </div>
+  </div>
+</div>
 
       </div>
     </div>
 
     <!-- Change Password Form -->
-    <div id="passwordOverlay" class="overlay" style="display: none;">
-      <div class="overlay-content">
-        <h2>Change Password</h2>
-        <form id="passwordForm">
-          <div class="form-group">
-            <label for="currentPassword">Current Password</label>
-            <input type="password" id="currentPassword" name="currentPassword" required>
-          </div>
-          <div class="form-group">
-            <label for="newPassword">New Password</label>
-            <input type="password" id="newPassword" name="newPassword" required>
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">Confirm New Password</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn" onclick="submitPasswordChange()">Update</button>
-            <button type="button" class="btn cancel" onclick="closePasswordForm()">Cancel</button>
-          </div>
-        </form>
+<div id="passwordOverlay" class="overlay" style="display: none;">
+  <div class="overlay-content">
+    <h2>Change Password</h2>
+    <form id="passwordForm">
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <input type="password" id="currentPassword" name="currentPassword" required>
       </div>
-    </div>
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" id="newPassword" name="newPassword" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" onclick="submitPasswordChange()">Update</button>
+        <button type="button" class="btn cancel" onclick="closePasswordForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
       <script>
@@ -1364,6 +1371,8 @@ document.querySelectorAll('.tooltip-wrapper input[disabled]').forEach(input => {
       }
     });
   });
+
+
 
 </script>
 <script src="autologout.js"></script>
