@@ -580,13 +580,24 @@ if ($coordinatorResult->num_rows > 0) {
   const coordinatorCards = document.querySelectorAll('.coordinator-card');
 
   searchInput.addEventListener('input', function () {
-    const query = this.value.toLowerCase();
+  const query = this.value.toLowerCase();
 
-    coordinatorCards.forEach(card => {
-      const name = card.querySelector('h2').textContent.toLowerCase();
-      card.style.display = name.includes(query) ? 'flex' : 'none';
-    });
+  coordinatorCards.forEach(card => {
+    const name = card.querySelector('h2').textContent.toLowerCase();
+
+    // Get all trainee names inside this card
+    const traineeItems = card.querySelectorAll('.trainee-item');
+    const traineeNames = Array.from(traineeItems).map(item =>
+      item.textContent.toLowerCase()
+    );
+
+    // Check if coordinator name or any trainee name matches the query
+    const match = name.includes(query) || traineeNames.some(t => t.includes(query));
+
+    card.style.display = match ? 'flex' : 'none';
   });
+});
+
 
   function openEditModal(id, name, position, email, phone, address, image) {
   document.getElementById('editModal').style.display = 'flex';
