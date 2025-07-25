@@ -661,7 +661,6 @@ border-radius: 4px;
     <div class="editor-header">
       <span class="editor-title">Blog</span>
       <div class="editor-actions">
-        <button onclick="saveBlog()" class="save-btn">Save & Exit</button>
         <button onclick="cancelEdit()" class="cancel-btn">Cancel</button>
       </div>
     </div>
@@ -684,15 +683,12 @@ border-radius: 4px;
   </select>
 
   <div class="search-wrapper">
-  <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search by name, title, or date..." value="<?= htmlspecialchars($search) ?>">
-  <button type="submit" class="search-button">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-         viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
-    </svg>
-  </button>
+  <input type="text" id="searchInput" class="search-input" 
+         placeholder="Search by name, title, or date..." 
+         value="<?= htmlspecialchars($search) ?>">
 </div>
+
+
 
 </form>
 
@@ -723,15 +719,7 @@ border-radius: 4px;
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
             </svg></button>
-      <button class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-trash-2">
-              <path d="M3 6h18" />
-              <path d="M19 6l-1 14H6L5 6" />
-              <path d="M10 11v6" />
-              <path d="M14 11v6" />
-              <path d="M9 6V4h6v2" />
-            </svg></button>
+      
     </div>
   </div>
   
@@ -785,7 +773,7 @@ border-radius: 4px;
       }
     });
 
-   
+    // Attach to all edit buttons
     document.querySelectorAll(".edit-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         openEditor(this.closest(".blog-card"));
@@ -793,26 +781,31 @@ border-radius: 4px;
     });
   });
 
-  function openEditor(card) {
+ function openEditor(card) {
   currentEditCard = card;
 
   const title = card.querySelector(".blog-title").innerText;
   const content = card.getAttribute("data-content") || "";
 
- 
+  // Save current main content
   const mainDiv = document.querySelector(".main");
   originalMainHTML = mainDiv.innerHTML;
 
-  
+  // Clone the editor template and insert it
   const template = document.getElementById("editorTemplate");
   const clone = template.content.cloneNode(true);
-  mainDiv.innerHTML = ''; 
+  mainDiv.innerHTML = ''; // clear it first
   mainDiv.appendChild(clone);
 
-  
+  // Set the title and disable input
+  const titleInput = document.getElementById("editorTitle");
+  titleInput.value = title;
+  titleInput.readOnly = true; // <-- just disables typing, keeps style
+
+  // Initialize Quill with toolbar, but read-only
   quill = new Quill("#quillEditor", {
     theme: "snow",
-    placeholder: "Write your blog content...",
+    readOnly: true, // <-- this disables editing
     modules: {
       toolbar: [
         [{ header: [1, 2, 3, false] }],
@@ -827,36 +820,7 @@ border-radius: 4px;
   });
 
 
-  document.getElementById("editorTitle").value = title;
   quill.root.innerHTML = content;
-}
-
-
-  function saveBlog() {
-  const newTitle = document.getElementById("editorTitle").value;
-  const newContent = quill.root.innerHTML;
-
-  if (!newTitle || !newContent) {
-    alert("Both title and content are required.");
-    return;
-  }
-
-  
-  currentEditCard.querySelector(".blog-title").innerText = newTitle;
-  currentEditCard.setAttribute("data-content", newContent);
-
-
-  const mainDiv = document.querySelector(".main");
-  mainDiv.innerHTML = originalMainHTML;
-
- 
-  document.querySelectorAll(".edit-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      openEditor(this.closest(".blog-card"));
-    });
-  });
-
-  
 }
 
 
@@ -880,19 +844,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchValue = searchInput.value;
 
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", `blogadmin.php?trainee_id=${traineeId}&search=${encodeURIComponent(searchValue)}`, true);
+    xhr.open("GET", `coordblog.php?trainee_id=${traineeId}&search=${encodeURIComponent(searchValue)}`, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
-     
         const parser = new DOMParser();
         const doc = parser.parseFromString(xhr.responseText, "text/html");
         const newBlogList = doc.querySelector("#blogList");
 
-
         if (newBlogList) {
           document.getElementById("blogList").innerHTML = newBlogList.innerHTML;
 
-    
+        
           document.querySelectorAll(".edit-btn").forEach(btn => {
             btn.addEventListener("click", function () {
               openEditor(this.closest(".blog-card"));
@@ -904,6 +866,7 @@ document.addEventListener("DOMContentLoaded", function () {
     xhr.send();
   });
 });
+
 
 </script>
 <script src="/ojtform/autologout.js"></script>
