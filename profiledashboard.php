@@ -985,12 +985,7 @@ $stmt->execute([
     <input type="checkbox" id="togglePasswordForm">Change Password</label>
 </div>
 </div>
-
-    
-
-          
-          
-        </div>
+      </div>
 
         <!-- Middle Section -->
         <div class="middle-section">
@@ -1058,21 +1053,19 @@ $stmt->execute([
             </div>
 
             <div class="form-group">
-  <label for="department">Department</label>
-  <select id="department" name="department" class = "big-select" required>
-    <option value="">-- Choose Department --</option>
-    <?php foreach ($all_departments as $dept): ?>
-      <option value="<?= htmlspecialchars($dept['department_id']) ?>" 
-        <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
-        <?= htmlspecialchars($dept['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
-</div>
+              <label for="department">Department</label>
+              <select id="department" name="department" class = "big-select" required>
+                <option value="">-- Choose Department --</option>
+                <?php foreach ($all_departments as $dept): ?>
+                  <option value="<?= htmlspecialchars($dept['department_id']) ?>" 
+                    <?= (isset($trainee['department_id']) && $trainee['department_id'] == $dept['department_id']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($dept['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
 
           </div>
-
-        </div>
 
         <!-- Right Section -->
         <div class="right-section">
