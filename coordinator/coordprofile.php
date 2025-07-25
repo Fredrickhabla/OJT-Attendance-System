@@ -2,7 +2,7 @@
 session_start();
 require_once '../connection.php';
 
-$profile_picture = '';
+$profile_picture = null;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION['user_id'] ?? null;

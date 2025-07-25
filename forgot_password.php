@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     .container {
       width: 100%;
-      max-width: 1280px;
+      max-width: 1060px;
       background-color: white;
       overflow: hidden;
       box-shadow: 0 30px 40px 5px rgba(0, 0, 0, 0.4);

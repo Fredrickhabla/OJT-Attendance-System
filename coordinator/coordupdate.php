@@ -388,8 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <!-- Sidebar -->
   <aside class="sidebar">
       <div class="profile-section">
-  <img src="/ojtform/<?= htmlspecialchars($coor['profile_picture']) ?>" alt="Profile"  class="profile-pic"/>
-
+  <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Profile" class="profile-pic" />
   <h2><?= htmlspecialchars($full_name) ?></h2>
   <p><?= htmlspecialchars($email) ?></p>
 </div>
@@ -488,18 +487,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="avatar-wrapper">
           <div class="avatar">
   <?php if (!empty($coor['profile_picture'])): ?>
-    <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Avatar" class="avatar-img" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
-    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;" />
+  <img src="/ojtform/<?= htmlspecialchars($coor['profile_picture']) ?>" alt="Avatar" class="avatar-img" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+<?php else: ?>
+  <img src="/ojtform/images/placeholder.jpg" alt="Avatar Placeholder" class="avatar-img" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+<?php endif; ?>
 
-     <button type="button" class="insert-photo-btn" onclick="document.getElementById('profile_picture').click();">Insert Photo</button>
+<input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;" />
+<button type="button" class="insert-photo-btn" onclick="document.getElementById('profile_picture').click();">Insert Photo</button>
 
-  <?php else: ?>
-    <div class="avatar-fallback">
-      <svg class="icon" xmlns="http://www.w3.org/2000/svg" ...>
-        <!-- your fallback SVG icon -->
-      </svg>
-    </div>
-  <?php endif; ?>
+
 </div>
         </div>
 
