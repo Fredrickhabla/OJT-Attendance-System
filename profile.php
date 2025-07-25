@@ -829,15 +829,24 @@ document.getElementById('coordinator_picture').addEventListener('change', functi
 
     function toggleCoordinatorInputs() {
         const isExistingSelected = coordinatorSelect.value !== "";
+
         coordInputs.forEach(input => {
             input.readOnly = isExistingSelected;
             input.disabled = isExistingSelected;
+
+            
+            if (isExistingSelected) {
+                input.title = "You can't edit an existing user coordinator";
+            } else {
+                input.title = "Fill in this field if you don't select an existing coordinator";
+            }
         });
     }
 
-    toggleCoordinatorInputs();
+    toggleCoordinatorInputs(); 
     coordinatorSelect.addEventListener("change", toggleCoordinatorInputs);
 });
+
 
   
 </script>

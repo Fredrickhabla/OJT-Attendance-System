@@ -138,21 +138,21 @@ $conn->close();
     }
 
     .insert-photo-btn {
-  position: absolute;
-  top: 50%;
-  right: 30px;
-  transform: translateY(-50%);
-  background-color: #047857;
-  color: white;
-  font-size: 12px;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+      position: absolute;
+      top: 50%;
+      right: 30px;
+      transform: translateY(-50%);
+      background-color: #047857;
+      color: white;
+      font-size: 12px;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
 
 
