@@ -1036,8 +1036,8 @@ $stmt->execute([
                   <label><input type="checkbox" name="days" value="F"> F</label>
                 </div>
               <input type="hidden" name="schedule_days" id="schedule_days" value="<?= htmlspecialchars($trainee['schedule_days'] ?? '') ?>" />
-<input type="hidden" name="schedule_start" id="schedule_start" value="<?= htmlspecialchars($trainee['schedule_start'] ?? '') ?>" />
-<input type="hidden" name="schedule_end" id="schedule_end" value="<?= htmlspecialchars($trainee['schedule_end'] ?? '') ?>" />
+              <input type="hidden" name="schedule_start" id="schedule_start" value="<?= htmlspecialchars($trainee['schedule_start'] ?? '') ?>" />
+              <input type="hidden" name="schedule_end" id="schedule_end" value="<?= htmlspecialchars($trainee['schedule_end'] ?? '') ?>" />
 
                 <div>
                   <label class="time-label" for="startTime">Start:

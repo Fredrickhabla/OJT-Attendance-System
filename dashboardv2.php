@@ -543,9 +543,6 @@ canvas {
     </table>
   </div>
 </div>
- 
-
-  
 
   </tbody>
     </table>
@@ -682,8 +679,6 @@ document.getElementById("downloadBtn").addEventListener("click", function () {
     console.error("Logging error:", error);
   });
 });
-
-
 
 
 </script>
