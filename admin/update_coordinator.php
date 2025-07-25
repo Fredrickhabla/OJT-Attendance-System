@@ -8,13 +8,14 @@ include('../conn.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['coordinator_id'] ?? '';
+    $name = $_POST['name'] ?? '';
     $position = $_POST['position'] ?? '';
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
 
-    // Fetch old data
+
     $oldData = [];
-    $result = $conn->query("SELECT position, email, phone, profile_picture FROM coordinator WHERE coordinator_id = '$id'");
+    $result = $conn->query("SELECT name, position, email, phone, profile_picture FROM coordinator WHERE coordinator_id = '$id'");
     if ($result && $result->num_rows > 0) {
         $oldData = $result->fetch_assoc();
     }
@@ -33,13 +34,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update query
     if (!empty($_FILES['profile_picture']['name'])) {
-        $query = "UPDATE coordinator SET position=?, email=?, phone=?, profile_picture=? WHERE coordinator_id=?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("sssss", $position, $email, $phone, $imagePath, $id);
+        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=?, profile_picture=? WHERE coordinator_id=?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("ssssss", $name, $position, $email, $phone, $imagePath, $id);
+
     } else {
-        $query = "UPDATE coordinator SET position=?, email=?, phone=? WHERE coordinator_id=?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssss", $position, $email, $phone, $id);
+        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=? WHERE coordinator_id=?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("sssss", $name, $position, $email, $phone, $id);
+
     }
 
     if ($stmt->execute()) {
@@ -55,6 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Build only changed fields
             $oldChanged = [];
             $newChanged = [];
+
+            if (($oldData['name'] ?? '') !== $name) {
+    $oldChanged['name'] = $oldData['name'];
+    $newChanged['name'] = $name;
+}
 
             if (($oldData['position'] ?? '') !== $position) {
                 $oldChanged['position'] = $oldData['position'];

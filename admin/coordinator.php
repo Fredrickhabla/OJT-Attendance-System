@@ -502,10 +502,16 @@ if ($coordinatorResult->num_rows > 0) {
     <span onclick="closeModal()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold">&times;</span>
     <form action="update_coordinator.php" method="POST" enctype="multipart/form-data">
       <input type="hidden" name="coordinator_id" id="edit_coordinator_id">
+      
+
       <div>
         <label>Photo:</label>
         <input type="file" name="profile_picture">
       </div>
+      <div>
+  <label>Name:</label>
+  <input type="text" name="name" id="edit_name">
+</div>
       <div>
         <label>Position:</label>
         <input type="text" name="position" id="edit_position">
@@ -584,6 +590,7 @@ if ($coordinatorResult->num_rows > 0) {
 
   function openEditModal(id, name, position, email, phone, address, image) {
   document.getElementById('editModal').style.display = 'flex';
+  document.getElementById('edit_name').value = name;
   document.getElementById('edit_position').value = position;
   document.getElementById('edit_email').value = email;
   document.getElementById('edit_phone').value = phone;
