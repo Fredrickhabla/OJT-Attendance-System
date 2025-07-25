@@ -172,6 +172,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       color: #fff;
       text-decoration: underline;
     }
+    .input-box {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 20px;
+    }
+
+    .input-box input[type="password"],
+    .input-box input[type="text"] {
+    width: 100%;
+    height: 48px;
+    padding: 0 44px 0 16px;
+    border: none;
+    border-radius: 999px;
+    font-size: 16px;
+    background-color: white;
+    box-shadow: 0 0 0 1px #ccc;
+    outline: none;
+    }
+
+    .eye-toggle {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -191,15 +218,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?= $message ?>
       </p>
     <?php else: ?>
-      <form method="post">
+        <form method="post">
         <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
+
         <label for="password">New Password:</label>
-        <input type="password" name="password" id="password" required>
+
+        <div class="input-box">
+            <input type="password" name="password" id="password" required>
+            <span class="eye-toggle" onclick="togglePassword()">
+            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="gray" class="bi bi-eye" viewBox="0 0 16 16">
+                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 
+                1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 
+                5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 
+                1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 
+                13 0 0 1 1.172 8z"/>
+                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 
+                2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 
+                7 0 3.5 3.5 0 0 1-7 0"/>
+            </svg>
+            </span>
+        </div>
+
         <button type="submit" class="signin-button">Update Password</button>
-      </form>
+        </form>
     <?php endif; ?>
   </div>
 </div>
+<script>
+function togglePassword() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eye-icon');
 
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('bi-eye');
+    icon.classList.add('bi-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('bi-eye-slash');
+    icon.classList.add('bi-eye');
+  }
+}
+</script>
 </body>
 </html>
