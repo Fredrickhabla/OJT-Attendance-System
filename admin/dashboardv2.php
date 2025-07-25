@@ -1,5 +1,17 @@
 <?php
+session_start(); 
 require_once '../conn.php';
+require_once 'logger.php';
+
+
+
+$timeout_duration = 900; 
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
@@ -15,7 +27,6 @@ $traineeCount = $stmtTrainee->fetchColumn();
 
 $stmtCoordinator = $pdo->query("SELECT COUNT(*) FROM coordinator");
 $coordinatorCount = $stmtCoordinator->fetchColumn();
-require_once 'logger.php';
 
 $timeout_duration = 900; 
 

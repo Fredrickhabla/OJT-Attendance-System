@@ -1,6 +1,10 @@
+
 <?php
 session_start();
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
+
+
+// Protect this page: allow only admins
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
@@ -16,6 +20,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
+include('../connection.php');
 require_once 'logger.php';
 ?>
 

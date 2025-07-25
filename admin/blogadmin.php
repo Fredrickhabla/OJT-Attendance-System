@@ -1,6 +1,14 @@
 <?php
+session_start(); 
 include('../connection.php');
 require_once 'logger.php';
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
 
 $timeout_duration = 900; 
 

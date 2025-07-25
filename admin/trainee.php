@@ -1,6 +1,13 @@
 <?php
-
+session_start(); 
 include('../connection.php');
+require_once 'logger.php';
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
 
 $timeout_duration = 900; 
 
@@ -22,7 +29,7 @@ $countSql = "SELECT COUNT(*) as total FROM trainee WHERE active = 'Y'";
 $countResult = $conn->query($countSql);
 $totalTrainees = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalTrainees / $limit);
-require_once 'logger.php';
+
 // Fetch trainees from database
 $sql = "SELECT t.*, u.email 
         FROM trainee t
