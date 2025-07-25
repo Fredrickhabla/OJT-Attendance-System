@@ -140,7 +140,7 @@ logTransaction($conn, $user_id, $full_name, "User signed in successfully", $user
 
     if ($row = $result->fetch_assoc()) {
       
-        $requiredFields = ['name', 'position', 'email', 'phone', 'profile_picture'];
+        $requiredFields = ['name', 'position', 'email', 'phone'];
 
         $isComplete = true;
         foreach ($requiredFields as $field) {
