@@ -1,5 +1,6 @@
 <?php
 session_start();
+$_SESSION['flash'] = $_SESSION['flash'] ?? [];
 require_once 'connection.php';
 if (!isset($_SESSION["user_id"])) {
     header("Location: indexv2.php");
@@ -86,11 +87,11 @@ if ($trainee_id) {
 
 
     $attendanceQuery = $conn->prepare("
-        SELECT date, time_in, time_out, hours 
-        FROM attendance_record 
-        WHERE trainee_id = ? 
-        ORDER BY date DESC
-    ");
+    SELECT date, time_in, time_out, hours, status 
+    FROM attendance_record 
+    WHERE trainee_id = ? 
+    ORDER BY date DESC
+");
     $attendanceQuery->bind_param("s", $trainee_id);
     $attendanceQuery->execute();
     $attendanceResult = $attendanceQuery->get_result();
@@ -102,6 +103,123 @@ if ($trainee_id) {
     $attendanceQuery->close();
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    date_default_timezone_set('Asia/Manila');
+    $currentDate = date('Y-m-d');
+    $currentTime = date('H:i:s');
+
+    $stmt = $conn->prepare("SELECT * FROM attendance_record WHERE trainee_id = ? AND date = ?");
+    $stmt->bind_param("ss", $trainee_id, $currentDate);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existing = $result->fetch_assoc();
+    $stmt->close();
+
+    if (isset($_POST['time_in'])) {
+    if ($existing) {
+        $_SESSION['flash'][] = "You have already timed in today.";
+    } else {
+        $attendance_id = uniqid("attn_");
+        $time_out = '00:00:00';
+        $hours = 0;
+
+        // --- Get trainee schedule
+        $schedStmt = $conn->prepare("SELECT schedule_start FROM trainee WHERE trainee_id = ?");
+        $schedStmt->bind_param("s", $trainee_id);
+        $schedStmt->execute();
+        $schedResult = $schedStmt->get_result();
+        $schedRow = $schedResult->fetch_assoc();
+        $schedStmt->close();
+
+        $schedStart = new DateTime($schedRow['schedule_start']);
+        $timeIn = new DateTime($currentTime);
+        $status = "present";
+        $hoursLate = 0;
+
+        if ($timeIn > $schedStart) {
+            $status = "late";
+            $hoursLate = round(($timeIn->getTimestamp() - $schedStart->getTimestamp()) / 3600, 2);
+        }
+
+        $insertStmt = $conn->prepare("
+            INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, status, hours_late)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $insertStmt->bind_param("sssssdss", $attendance_id, $trainee_id, $currentDate, $currentTime, $time_out, $hours, $status, $hoursLate);
+        $insertStmt->execute();
+        $insertStmt->close();
+
+        $_SESSION['flash'][] = "Time in recorded at $currentTime. Status: $status.";
+    }
+}
+
+
+    if (isset($_POST['time_out'])) {
+        if (!$existing) {
+            $_SESSION['flash'][] = "You need to time in first before timing out.";
+        } elseif ($existing['time_out'] !== "00:00:00") {
+            $_SESSION['flash'][] = "You have already timed out today.";
+        } else {
+            // Get trainee's schedule
+$schedStmt = $conn->prepare("SELECT schedule_start, schedule_end FROM trainee WHERE trainee_id = ?");
+$schedStmt->bind_param("s", $trainee_id);
+$schedStmt->execute();
+$schedResult = $schedStmt->get_result();
+$schedRow = $schedResult->fetch_assoc();
+$schedStmt->close();
+
+$schedStart = new DateTime($schedRow['schedule_start']);
+$schedEnd = new DateTime($schedRow['schedule_end']);
+$timeIn = new DateTime($existing['time_in']);
+$timeOut = new DateTime($currentTime);
+$interval = $timeOut->diff($timeIn);
+$totalMinutes = ($interval->h * 60) + $interval->i;
+$hoursWorked = floor($totalMinutes / 60);
+
+if ($hoursWorked >= 5) {
+    $hoursWorked -= 1;
+}
+
+
+$statusParts = [];
+$hoursLate = 0;
+
+if ($timeIn > $schedStart) {
+    $statusParts[] = 'late';
+    $hoursLate = round(($timeIn->getTimestamp() - $schedStart->getTimestamp()) / 3600, 2);
+}
+
+if ($timeOut < $schedEnd) {
+    $statusParts[] = 'undertime';
+} elseif ($timeOut > $schedEnd) {
+    // Calculate how many hours beyond the scheduled end
+    $extraTime = $timeOut->getTimestamp() - $schedEnd->getTimestamp();
+    $extraHours = $extraTime / 3600;
+
+    if ($extraHours >= 1) {
+        $statusParts[] = 'overtime';
+    }
+}
+
+$status = empty($statusParts) ? 'present' : implode(', ', $statusParts);
+
+$updateStmt = $conn->prepare("
+    UPDATE attendance_record 
+    SET time_out = ?, hours = ?, hours_late = ?, status = ? 
+    WHERE trainee_id = ? AND date = ?
+");
+$updateStmt->bind_param("sdssss", $currentTime, $hoursWorked, $hoursLate, $status, $trainee_id, $currentDate);
+$updateStmt->execute();
+$updateStmt->close();
+$_SESSION['flash'][] = "Time out recorded successfully at $currentTime. Status: $status.";
+
+        }
+    }
+
+    // Always redirect after handling post
+    header("Location: dashboardv2.php");
+    exit();
+}
 
 $conn->close(); 
 ?>
@@ -413,6 +531,18 @@ canvas {
   margin-right: 5px;
 }
 
+.btn-timein, .btn-timeout {
+  padding: 8px 16px;
+  background-color: #3b7c1b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-timein:hover, .btn-timeout:hover {
+  background-color: #2f5e14;
+}
 
     </style>
 
@@ -490,7 +620,19 @@ canvas {
 
     <!-- Main Content -->
     <main class="main-content">
-  <h1>PERSONAL PROGRESS</h1>
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+  <h1 style="margin: 0;">PERSONAL PROGRESS</h1>
+  <div style="display: flex; gap: 10px;">
+    <form method="post" action="" style="display: inline;">
+      <button type="submit" name="time_in" class="btn-timein">Time In</button>
+    </form>
+    <form method="post" action="" style="display: inline;">
+      <button type="submit" name="time_out" class="btn-timeout">Time Out</button>
+    </form>
+  </div>
+</div>
+
+
   <div class="cards-3">
     <!-- Left Column -->
     <div class="left-col">
@@ -536,6 +678,7 @@ canvas {
           <th>Time In</th>
           <th>Time Out</th>
           <th>Total Hours</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -557,6 +700,15 @@ canvas {
 </main>
 
   </div>
+  <?php if (!empty($_SESSION['flash'])): ?>
+  <script>
+    <?php foreach ($_SESSION['flash'] as $msg): ?>
+      alert("<?= addslashes($msg) ?>");
+    <?php endforeach; ?>
+  </script>
+  <?php $_SESSION['flash'] = []; // Clear messages ?>
+<?php endif; ?>
+
 </body>
 
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.css" rel="stylesheet" />
@@ -611,7 +763,7 @@ const attendanceEvents = data
 if (data.length === 0) {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td colspan="5" style="text-align: center; padding: 220px 50px; color: #888; font-style: italic; border-radius: 8px;">
+    <td colspan="6" style="text-align: center; padding: 220px 50px; color: #888; font-style: italic; border-radius: 8px;">
       No attendance record yet.
     </td>
   `;
@@ -625,6 +777,7 @@ if (data.length === 0) {
       <td>${entry.time_in || "&nbsp;"}</td>
       <td>${entry.time_out || "&nbsp;"}</td>
       <td>${entry.hours || "&nbsp;"}</td>
+      <td>${entry.status || "&nbsp;"}</td>
     `;
     tableBody.appendChild(row);
   });
