@@ -169,7 +169,7 @@ logAudit(
         "address" => $address
     ]),
     "-",
-    $first_name 
+   $user_id 
 );
 
 
