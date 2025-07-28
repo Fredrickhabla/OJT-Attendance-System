@@ -13,7 +13,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
     session_unset();
     session_destroy();
-    header("Location: indexv2.php?timeout=1"); // redirect after timeout
+    header("Location: indexv2.php?timeout=1"); 
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time();
@@ -87,7 +87,7 @@ if ($trainee_id) {
 
 
     $attendanceQuery = $conn->prepare("
-    SELECT date, time_in, time_out, hours, status 
+    SELECT date, time_in, time_out, hours, status, hours_late
     FROM attendance_record 
     WHERE trainee_id = ? 
     ORDER BY date DESC
@@ -149,72 +149,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $insertStmt->execute();
         $insertStmt->close();
 
+        $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// Transaction log
+logTransaction($pdo, $user_id, $full_name, "Trainee timed in at $currentTime with status: $status", $username);
+
+// Audit log
+logAudit($pdo, $user_id, "Time In", $currentTime, null, $username);
+
+
         $_SESSION['flash'][] = "Time in recorded at $currentTime. Status: $status.";
     }
 }
 
+if (isset($_POST['time_out'])) {
+    if (!$existing) {
+        $_SESSION['flash'][] = "You need to time in first before timing out.";
+    } elseif ($existing['time_out'] !== "00:00:00") {
+        $_SESSION['flash'][] = "You have already timed out today.";
+    } else {
+        // Get trainee's schedule
+        $schedStmt = $conn->prepare("SELECT schedule_start, schedule_end FROM trainee WHERE trainee_id = ?");
+        $schedStmt->bind_param("s", $trainee_id);
+        $schedStmt->execute();
+        $schedResult = $schedStmt->get_result();
+        $schedRow = $schedResult->fetch_assoc();
+        $schedStmt->close();
 
-    if (isset($_POST['time_out'])) {
-        if (!$existing) {
-            $_SESSION['flash'][] = "You need to time in first before timing out.";
-        } elseif ($existing['time_out'] !== "00:00:00") {
-            $_SESSION['flash'][] = "You have already timed out today.";
-        } else {
-            // Get trainee's schedule
-$schedStmt = $conn->prepare("SELECT schedule_start, schedule_end FROM trainee WHERE trainee_id = ?");
-$schedStmt->bind_param("s", $trainee_id);
-$schedStmt->execute();
-$schedResult = $schedStmt->get_result();
-$schedRow = $schedResult->fetch_assoc();
-$schedStmt->close();
+        $schedStart = new DateTime($schedRow['schedule_start']);
+        $schedEnd = new DateTime($schedRow['schedule_end']);
+        $timeIn = new DateTime($existing['time_in']);
+        $timeOut = new DateTime($currentTime);
+        $interval = $timeOut->diff($timeIn);
+        $totalMinutes = ($interval->h * 60) + $interval->i;
+        $hoursWorked = floor($totalMinutes / 60);
 
-$schedStart = new DateTime($schedRow['schedule_start']);
-$schedEnd = new DateTime($schedRow['schedule_end']);
-$timeIn = new DateTime($existing['time_in']);
-$timeOut = new DateTime($currentTime);
-$interval = $timeOut->diff($timeIn);
-$totalMinutes = ($interval->h * 60) + $interval->i;
-$hoursWorked = floor($totalMinutes / 60);
-
-if ($hoursWorked >= 5) {
-    $hoursWorked -= 1;
-}
-
-
-$statusParts = [];
-$hoursLate = 0;
-
-if ($timeIn > $schedStart) {
-    $statusParts[] = 'late';
-    $hoursLate = round(($timeIn->getTimestamp() - $schedStart->getTimestamp()) / 3600, 2);
-}
-
-if ($timeOut < $schedEnd) {
-    $statusParts[] = 'undertime';
-} elseif ($timeOut > $schedEnd) {
-    // Calculate how many hours beyond the scheduled end
-    $extraTime = $timeOut->getTimestamp() - $schedEnd->getTimestamp();
-    $extraHours = $extraTime / 3600;
-
-    if ($extraHours >= 1) {
-        $statusParts[] = 'overtime';
-    }
-}
-
-$status = empty($statusParts) ? 'present' : implode(', ', $statusParts);
-
-$updateStmt = $conn->prepare("
-    UPDATE attendance_record 
-    SET time_out = ?, hours = ?, hours_late = ?, status = ? 
-    WHERE trainee_id = ? AND date = ?
-");
-$updateStmt->bind_param("sdssss", $currentTime, $hoursWorked, $hoursLate, $status, $trainee_id, $currentDate);
-$updateStmt->execute();
-$updateStmt->close();
-$_SESSION['flash'][] = "Time out recorded successfully at $currentTime. Status: $status.";
-
+        // Deduct 1 hour break if 5 or more hours worked
+        if ($hoursWorked >= 5) {
+            $hoursWorked -= 1;
         }
+
+        // Only determine if late or present
+        $status = "present";
+        $hoursLate = 0;
+        if ($timeIn > $schedStart) {
+            $status = "late";
+            $hoursLate = round(($timeIn->getTimestamp() - $schedStart->getTimestamp()) / 3600, 2);
+        }
+
+        $updateStmt = $conn->prepare("
+            UPDATE attendance_record 
+            SET time_out = ?, hours = ?, hours_late = ?, status = ? 
+            WHERE trainee_id = ? AND date = ?
+        ");
+        $updateStmt->bind_param("sdssss", $currentTime, $hoursWorked, $hoursLate, $status, $trainee_id, $currentDate);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+// Transaction log
+logTransaction($pdo, $user_id, $full_name, "Trainee timed out at $currentTime with status: $status", $username);
+
+// Audit log
+logAudit($pdo, $user_id, "Time Out", $currentTime, $existing['time_in'], $username);
+
+
+        $_SESSION['flash'][] = "Time out recorded successfully at $currentTime. Status: $status.";
     }
+}
 
     // Always redirect after handling post
     header("Location: dashboardv2.php");
@@ -678,6 +683,7 @@ canvas {
           <th>Time In</th>
           <th>Time Out</th>
           <th>Total Hours</th>
+          <th>Hours Late</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -763,7 +769,7 @@ const attendanceEvents = data
 if (data.length === 0) {
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td colspan="6" style="text-align: center; padding: 220px 50px; color: #888; font-style: italic; border-radius: 8px;">
+    <td colspan="7" style="text-align: center; padding: 220px 50px; color: #888; font-style: italic; border-radius: 8px;">
       No attendance record yet.
     </td>
   `;
@@ -777,6 +783,7 @@ if (data.length === 0) {
       <td>${entry.time_in || "&nbsp;"}</td>
       <td>${entry.time_out || "&nbsp;"}</td>
       <td>${entry.hours || "&nbsp;"}</td>
+      <td>${entry.hours_late || "&nbsp;"}</td>
       <td>${entry.status || "&nbsp;"}</td>
     `;
     tableBody.appendChild(row);

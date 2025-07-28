@@ -10,6 +10,7 @@ require_once 'logger.php';
 $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 
 $user_id = $_SESSION['user_id'];
+$username = $_SESSION['username'] ?? 'unknown_user';
 $user_name = $user_email = "";
 $coordinator_id = null;
 
@@ -175,7 +176,7 @@ logAudit(
         "address" => $address
     ]),
     "-",
-   $user_id 
+   $username
 );
 
 
@@ -196,11 +197,11 @@ if (!empty($selectedCoordinatorId)) {
 }
 
 if ($trainee_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $first_name);
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $username);
 }
 
 
-logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $first_name);
+logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $username);
 
 echo "<script>
     alert('Profile saved successfully.');
