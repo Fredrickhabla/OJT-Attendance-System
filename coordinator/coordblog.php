@@ -65,14 +65,25 @@ $trainee_result = $trainee_stmt->get_result();
 
 
 $searchSql = '';
-$searchParam = '';
+$searchParams = [];
+
 if (!empty($search)) {
     $searchSql = " AND (
         CONCAT(t.first_name, ' ', t.surname) LIKE ?
         OR bp.title LIKE ?
         OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
     )";
-    $searchParam = "%" . $search . "%";
+
+    $searchParams[] = "%" . $search . "%"; 
+    $searchParams[] = "%" . $search . "%"; 
+
+    $timestamp = strtotime($search);
+    if ($timestamp) {
+        $formattedDate = date('Y-m-d', $timestamp);
+    } else {
+        $formattedDate = $search;
+    }
+    $searchParams[] = "%" . $formattedDate . "%"; 
 }
 
 
@@ -95,8 +106,8 @@ if ($filter !== 'all') {
 
 if (!empty($search)) {
     $countQuery .= $searchSql;
-    $countTypes .= 'sss';
-    array_push($countParams, $searchParam, $searchParam, $searchParam);
+    $countTypes .= str_repeat('s', count($searchParams));
+$countParams = array_merge($countParams, $searchParams);
 }
 
 
@@ -129,8 +140,8 @@ if ($filter !== 'all') {
 
 if (!empty($search)) {
     $query .= $searchSql;
-    $types .= 'sss';
-    array_push($params, $searchParam, $searchParam, $searchParam);
+    $types .= str_repeat('s', count($searchParams));
+$params = array_merge($params, $searchParams);
 }
 
 $query .= " ORDER BY bp.created_at DESC LIMIT ? OFFSET ?";
@@ -691,52 +702,55 @@ border-radius: 4px;
         </div>
 
        
-        <div class="blog-list" id="blogList">
-          <?php if ($result->num_rows === 0): ?>
-  <p style="text-align:center; font-size: 1.2rem; color: #888; padding: 40px;">
-    No assigned trainees yet or no blog posts available.
-  </p>
-<?php else: ?>
-  <?php while($row = $result->fetch_assoc()): ?>
-
-  <div class="blog-card" data-content='<?= htmlspecialchars($row["content"], ENT_QUOTES) ?>'>
-    <div class="blog-info">
-      <div class="avatar"><?= strtoupper(substr($row['first_name'], 0, 1)) ?></div>
-      <div>
-        <h3 class="blog-title"><?= htmlspecialchars($row['title']) ?></h3>
-        <p class="blog-meta"><?= date("F j, Y", strtotime($row['created_at'])) ?></p>
-        <p class="blog-meta1"><?= htmlspecialchars($row['first_name'] . ' ' . $row['surname']) ?></p>
-      </div>
-    </div>
-    <div class="blog-actions">
-      <button class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-pencil">
+       <div class="blog-list" id="blogList">
+  <?php if ($result->num_rows === 0): ?>
+    <p style="text-align:center; font-size: 1.2rem; color: #888; padding: 40px;">
+      No assigned trainees yet or no blog posts available.
+    </p>
+  <?php else: ?>
+    <?php while($row = $result->fetch_assoc()): ?>
+      <div class="blog-card" data-content='<?= htmlspecialchars($row["content"], ENT_QUOTES) ?>'>
+        <div class="blog-info">
+          <div class="avatar"><?= strtoupper(substr($row['first_name'], 0, 1)) ?></div>
+          <div>
+            <h3 class="blog-title"><?= htmlspecialchars($row['title']) ?></h3>
+            <p class="blog-meta"><?= date("F j, Y", strtotime($row['created_at'])) ?></p>
+            <p class="blog-meta1"><?= htmlspecialchars($row['first_name'] . ' ' . $row['surname']) ?></p>
+          </div>
+        </div>
+        <div class="blog-actions">
+          <button class="edit-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="lucide lucide-pencil">
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg></button>
-      
+            </svg>
+          </button>
+        </div>
+      </div>
+    <?php endwhile; ?>
+
+   
+    <div class="pagination">
+      <?php if ($page > 1): ?>
+        <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>
+      <?php endif; ?>
+
+      <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+        <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" 
+           class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+      <?php endfor; ?>
+
+      <?php if ($page < $totalPages): ?>
+        <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
+      <?php endif; ?>
+
+      <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
     </div>
-  </div>
-  
-
-<?php endwhile; ?>
-<?php endif; ?>
-<div class="pagination">
-  <?php if ($page > 1): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>
   <?php endif; ?>
-
-  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" 
-       class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-  <?php endfor; ?>
-
-  <?php if ($page < $totalPages): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
-  <?php endif; ?>
-  <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
 </div>
+
 
         </div>
       </section>
@@ -776,25 +790,25 @@ border-radius: 4px;
   const title = card.querySelector(".blog-title").innerText;
   const content = card.getAttribute("data-content") || "";
 
-  // Save current main content
+  
   const mainDiv = document.querySelector(".main");
   originalMainHTML = mainDiv.innerHTML;
 
-  // Clone the editor template and insert it
+  
   const template = document.getElementById("editorTemplate");
   const clone = template.content.cloneNode(true);
-  mainDiv.innerHTML = ''; // clear it first
+  mainDiv.innerHTML = ''; 
   mainDiv.appendChild(clone);
 
-  // Set the title and disable input
+  
   const titleInput = document.getElementById("editorTitle");
   titleInput.value = title;
-  titleInput.readOnly = true; // <-- just disables typing, keeps style
+  titleInput.readOnly = true; 
 
-  // Initialize Quill with toolbar, but read-only
+ 
   quill = new Quill("#quillEditor", {
     theme: "snow",
-    readOnly: true, // <-- this disables editing
+    readOnly: true, 
     modules: {
       toolbar: false
     }

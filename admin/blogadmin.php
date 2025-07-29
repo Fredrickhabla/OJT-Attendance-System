@@ -3,7 +3,6 @@ session_start();
 include('../connection.php');
 require_once 'logger.php';
 
-// Check if user is logged in and is an admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -34,16 +33,32 @@ $offset = ($page - 1) * $limit;
 $trainee_result = $conn->query("SELECT trainee_id, first_name, surname FROM trainee");
 $department_result = $conn->query("SELECT department_id, name FROM departments");
 
+$parsedDate = '';
+if (!empty($search)) {
+    $normalizedSearch = ucwords(strtolower(trim($search)));
+    
+    $timestamp = strtotime($search);
+    if ($timestamp) {
+        $parsedDate = date('Y-m-d', $timestamp);
+    }
+}
 
 $searchSql = '';
 $searchParam = '';
 if (!empty($search)) {
     $searchSql = " AND (
-        CONCAT(t.first_name, ' ', t.surname) LIKE ?
-        OR bp.title LIKE ?
-        OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
-    )";
-    $searchParam = "%" . $search . "%";
+    CONCAT(t.first_name, ' ', t.surname) LIKE ?
+    OR bp.title LIKE ?
+    OR DATE_FORMAT(bp.created_at, '%Y-%m-%d') LIKE ?
+)";
+
+$searchParam = "%" . $search . "%";
+
+if (!empty($parsedDate)) {
+    $searchDateParam = "%" . $parsedDate . "%";
+} else {
+    $searchDateParam = $searchParam;
+}
 }
 
 
@@ -69,7 +84,7 @@ if ($department_filter !== 'all') {
 if (!empty($search)) {
     $countQuery .= $searchSql;
     $countTypes .= 'sss';
-    array_push($countParams, $searchParam, $searchParam, $searchParam);
+    array_push($countParams, $searchParam, $searchParam, $searchDateParam);
 }
 
 
@@ -105,7 +120,7 @@ if ($department_filter !== 'all') {
 if (!empty($search)) {
     $query .= $searchSql;
     $types .= 'sss';
-    array_push($params, $searchParam, $searchParam, $searchParam);
+    array_push($params, $searchParam, $searchParam, $searchDateParam);
 }
 
 $query .= " ORDER BY bp.created_at DESC LIMIT ? OFFSET ?";
@@ -389,14 +404,14 @@ flex-direction: column;
   right: 12px;
 }
 
-/* Blog Cards */
+
 .blog-list {
    flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-right: 8px; /* optional: space for scrollbar */
+  padding-right: 8px; 
   
 }
 
@@ -640,7 +655,7 @@ border-radius: 4px;
     <div class="topbar">Blogs</div>
     <div class="main">
 
-    <!-- Place this INSIDE .main div, AFTER the <section> -->
+    
 <template id="editorTemplate">
   <div class="bond-paper editor-container">
     <div class="editor-header">
@@ -668,7 +683,7 @@ border-radius: 4px;
     <?php endwhile; ?>
   </select>
 
-  <!-- Add this below -->
+ 
   <select class="filter-select1" onchange="location = this.value;">
     <option value="?trainee_id=<?= $filter ?>&department_id=all" <?= $department_filter === 'all' ? 'selected' : '' ?>>All Departments</option>
     <?php while($dept = $department_result->fetch_assoc()): ?>
@@ -679,7 +694,7 @@ border-radius: 4px;
   </select>
 
           <form method="get" class="search-container" style="display: flex; align-items: center;">
-  <!-- Keep current filter on form submit -->
+
   <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($filter) ?>">
 
   <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search by name, title, or date..." value="<?= htmlspecialchars($search) ?>">
@@ -696,50 +711,54 @@ border-radius: 4px;
         </div>
 
         <!-- Blog Cards -->
-        <div class="blog-list" id="blogList">
-          <?php while($row = $result->fetch_assoc()): ?>
-  <div class="blog-card" data-content='<?= htmlspecialchars($row["content"], ENT_QUOTES) ?>'>
-    <div class="blog-info">
-      <div class="avatar"><?= strtoupper(substr($row['first_name'], 0, 1)) ?></div>
-      <div>
-        <h3 class="blog-title"><?= htmlspecialchars($row['title']) ?></h3>
-        <p class="blog-meta"><?= date("F j, Y", strtotime($row['created_at'])) ?></p>
-        <p class="blog-meta1"><?= htmlspecialchars($row['first_name'] . ' ' . $row['surname']) ?></p>
-      </div>
-    </div>
-    <div class="blog-actions">
-      <button class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-pencil">
+<div class="blog-list" id="blogList">
+  <?php if ($result->num_rows === 0): ?>
+    <p style="text-align: center; padding: 20px; font-style: italic; color: gray;">No blog posts yet.</p>
+  <?php else: ?>
+    <?php while($row = $result->fetch_assoc()): ?>
+      <div class="blog-card" data-content='<?= htmlspecialchars($row["content"], ENT_QUOTES) ?>'>
+        <div class="blog-info">
+          <div class="avatar"><?= strtoupper(substr($row['first_name'], 0, 1)) ?></div>
+          <div>
+            <h3 class="blog-title"><?= htmlspecialchars($row['title']) ?></h3>
+            <p class="blog-meta"><?= date("F j, Y", strtotime($row['created_at'])) ?></p>
+            <p class="blog-meta1"><?= htmlspecialchars($row['first_name'] . ' ' . $row['surname']) ?></p>
+          </div>
+        </div>
+        <div class="blog-actions">
+          <button class="edit-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="lucide lucide-pencil">
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg></button>
-      
-    </div>
-  </div>
-<?php endwhile; ?>
+            </svg>
+          </button>
+        </div>
+      </div>
+    <?php endwhile; ?>
 
-<div class="pagination">
-  <?php if ($page > 1): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>
+    <?php if ($totalBlogs > 0): ?>
+      <div class="pagination">
+        <?php if ($page > 1): ?>
+          <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page - 1 ?>">&laquo; Prev</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+          <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" 
+             class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+        <?php endfor; ?>
+
+        <?php if ($page < $totalPages): ?>
+          <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
+        <?php endif; ?>
+
+        <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
+      </div>
+    <?php endif; ?>
   <?php endif; ?>
-
-  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>" 
-       class="<?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
-  <?php endfor; ?>
-
-  <?php if ($page < $totalPages): ?>
-    <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
-  <?php endif; ?>
-  <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
 </div>
 
-        </div>
-      </section>
-        
-    </div>
-  </div>
 </div>
 
 

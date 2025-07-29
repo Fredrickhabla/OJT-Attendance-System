@@ -212,22 +212,52 @@ $conn->close();
     .h2coord{
         font-size: 24px;
         color: #065f46;
-        margin: 0;
+        margin-top: 20px;
+        margin-bottom: 0;
+        margin-left: 0;
+        margin-right: 0;
         text-align: center;
 
     }
+
+    .reset-btn svg {
+  transition: transform 0.2s ease;
+}
+.reset-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+
+
+.reset-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
       <div class="card-header">
+        
         <h2 class="h2coord">Coordinator Profile</h2>
       </div>
       <div class="card-content">
-
-        <form class="form" method="POST" enctype="multipart/form-data">
+<button type="button" class="reset-btn" onclick="resetForm()" title="Reset all fields">
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 .49-9.36L1 10"></path>
+  </svg>
+</button>
+        <form class="form" method="POST" enctype="multipart/form-data" id="profile-form">
+          
           <div class="avatar-wrapper">
+            
             <?php if (!empty($profile_picture)): ?>
               <img src="<?= htmlspecialchars($profile_picture) ?>" alt="Avatar" class="avatar" />
             <?php else: ?>
@@ -240,19 +270,19 @@ $conn->close();
           </div>
 
           <div class="form-group">
-            <label for="name">Name</label>
+            <label for="name">Name<span style="color: red;">*</span></label>
             <input type="text" id="name" name="name" required/>
           </div>
           <div class="form-group">
-            <label for="position">Position</label>
+            <label for="position">Position<span style="color: red;">*</span></label>
             <input type="text" id="position" name="position" required/>
           </div>
           <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email">Email<span style="color: red;">*</span></label>
             <input type="email" id="email" name="email" required/>
           </div>
           <div class="form-group">
-            <label for="phone">Phone</label>
+            <label for="phone">Phone<span style="color: red;">*</span></label>
             <input type="tel" id="phone" name="phone" required/>
           </div>
 
@@ -286,4 +316,9 @@ $conn->close();
       avatarWrapper.insertBefore(img, avatarWrapper.querySelector('.insert-photo-btn'));
     }
   });
+
+  function resetForm() {
+  const form = document.getElementById("profile-form");
+  form.reset();
+}
 </script>

@@ -548,8 +548,6 @@ h2 {
   transform: rotate(90deg);
 }
 
-
-
 .reset-btn {
   position: absolute;
   top: 15px;
