@@ -237,8 +237,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Time In</th>
                 <th>Time Out</th>
                 <th>Hours</th>
-                <th>Work Description</th>
-                <th>View Signature</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -264,17 +262,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   ?>
                 </td>
                 <td><?= htmlspecialchars($row['hours']) ?></td>
-                <td><?= nl2br(htmlspecialchars($row['work_description'])) ?></td>
-                <td>
-                  <?php if (!empty($row['signature'])): ?>
-                    <img src="/ojtform/<?= htmlspecialchars($row['signature']) ?>" 
-                        alt="Signature" 
-                        class="signature-img mx-auto d-block" 
-                        title="Click to enlarge" />
-                  <?php else: ?>
-                    <span class="text-muted d-block text-center">No signature</span>
-                  <?php endif; ?>
-                </td>
                 <td style="text-align: center;">
                   <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
@@ -303,23 +290,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="signatureModalLabel">Signature Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img src="" id="signatureModalImg" class="img-fluid mb-3" alt="Signature Image">
-        <br>
-        <a href="#" id="downloadSignatureBtn" class="btn btn-success" download>
-          <i class="bi bi-download"></i> Download Signature
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
