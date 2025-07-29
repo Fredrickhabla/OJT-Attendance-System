@@ -19,14 +19,19 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     exit;
 }
 
-// Get and validate attendance ID from URL
+
 $attendance_id = $_GET['attendance_id'] ?? '';
 if (!preg_match('/^[a-zA-Z0-9_]+$/', $attendance_id)) {
     die("Invalid attendance ID format.");
 }
 
-// Fetch record from the correct table
-$stmt = $pdo->prepare("SELECT * FROM attendance_record WHERE attendance_id = ?");
+
+$stmt = $pdo->prepare("
+  SELECT ar.*, CONCAT(t.first_name, ' ', t.surname) AS full_name
+  FROM attendance_record ar
+  JOIN trainee t ON ar.trainee_id = t.trainee_id
+  WHERE ar.attendance_id = ?
+");
 $stmt->execute([$attendance_id]);
 $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -34,70 +39,82 @@ if (!$record) {
     die("Record not found.");
 }
 
+
+$trainee_id = $record['trainee_id'];
+$scheduleStmt = $pdo->prepare("SELECT schedule_start FROM trainee WHERE trainee_id = ?");
+$scheduleStmt->execute([$trainee_id]);
+$traineeData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
+$schedule_start = $traineeData['schedule_start'] ?? '08:00'; 
+
 $success = "";
 $error = "";
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'] ?? '';
     $time_in = $_POST['time_in'] ?? '';
     $time_out = $_POST['time_out'] ?? '';
-    $hours = $_POST['hours'] ?? '';
-    $work_description = $_POST['work_description'] ?? '';
-    $signature_path = $record['signature']; // default to old
 
-    // Handle signature upload
-    if (isset($_FILES['signature']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/ojtform/uploads/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $filename = time() . '_' . basename($_FILES['signature']['name']);
-        $fullTargetPath = $uploadDir . $filename;
-        $webPath = 'uploads/' . $filename;
+    $trainee_id = $record['trainee_id'];
+    $scheduleStmt = $pdo->prepare("SELECT schedule_start FROM trainee WHERE trainee_id = ?");
+    $scheduleStmt->execute([$trainee_id]);
+    $traineeData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
+    $schedule_start = $traineeData['schedule_start'] ?? '08:00'; 
 
-        if (move_uploaded_file($_FILES['signature']['tmp_name'], $fullTargetPath)) {
-            $signature_path = $webPath;
-        } else {
-            $error = "Failed to upload the signature. Error code: " . $_FILES['signature']['error'];
+   
+    echo "<pre>DEBUG - Schedule Start: {$schedule_start}</pre>";
+
+    $hours = 0;
+    $hours_late = 0;
+
+    try {
+        $timeInObj = new DateTime("$date $time_in");
+        $timeOutObj = new DateTime("$date $time_out");
+
+    
+        if ($timeOutObj < $timeInObj) {
+            $timeOutObj->modify('+1 day');
         }
+
+        $workedInterval = $timeInObj->diff($timeOutObj);
+        $hours = round($workedInterval->h + ($workedInterval->i / 60), 2);
+
+        $scheduleObj = new DateTime("$date $schedule_start");
+        if ($timeInObj > $scheduleObj) {
+            $lateInterval = $scheduleObj->diff($timeInObj);
+            $hours_late = round($lateInterval->h + ($lateInterval->i / 60), 2);
+        }
+
+    } catch (Exception $e) {
+        $error = "Invalid date/time format.";
     }
 
-    // Proceed with update if valid
-    if (!$error && $date && $time_in && $time_out && $hours) {
-        // Save old values for audit
+    if (!$error && $date && $time_in && $time_out) {
         $old_values_array = [
             'date' => $record['date'],
             'time_in' => $record['time_in'],
             'time_out' => $record['time_out'],
             'hours' => $record['hours'],
-            'work_description' => $record['work_description'],
-            'signature' => $record['signature']
+            'hours_late' => $record['hours_late']
         ];
 
-        // Perform update
-        $update = $pdo->prepare("UPDATE attendance_record SET date=?, time_in=?, time_out=?, hours=?, work_description=?, signature=? WHERE attendance_id=?");
-        if ($update->execute([$date, $time_in, $time_out, $hours, $work_description, $signature_path, $attendance_id])) {
+        $update = $pdo->prepare("UPDATE attendance_record SET date=?, time_in=?, time_out=?, hours=?, hours_late=? WHERE attendance_id=?");
+        if ($update->execute([$date, $time_in, $time_out, $hours, $hours_late, $attendance_id])) {
             $success = "Record updated successfully.";
 
-            // Get admin info
             $admin_id = $_SESSION['user_id'] ?? 'unknown';
             $admin_name = $_SESSION['username'] ?? 'Unknown Admin';
 
-            // Log transaction
             logTransaction($pdo, $admin_id, $admin_name, "Updated attendance record ID: $attendance_id", $admin_name);
 
-            // New values for comparison
             $new_values_array = [
                 'date' => $date,
                 'time_in' => $time_in,
                 'time_out' => $time_out,
                 'hours' => $hours,
-                'work_description' => $work_description,
-                'signature' => $signature_path
+                'hours_late' => $hours_late
             ];
 
-            // Detect changes
             $changed_old = [];
             $changed_new = [];
 
@@ -109,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Log changes
             if (!empty($changed_old)) {
                 logAudit(
                     $pdo,
@@ -122,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
             }
 
-            // Refresh current record
             $stmt->execute([$attendance_id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
         } else {
@@ -132,8 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please fill in all required fields.";
     }
 }
-
 ?>
+
 
 
 <!DOCTYPE html>
@@ -309,86 +324,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="topbar">Edit Attendance Record</div>
     <div class="main">
       <div class="form-container">
+        <p><strong>Debug - Schedule Start Time:</strong> <?= $schedule_start ?></p>
         <?php if ($success): ?>
           <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
         <?php if ($error): ?>
           <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
-        <form method="post" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" class="form-control" value="<?= htmlspecialchars($record['date']) ?>" required>
-          </div>
-          <div class="mb-3">
-  <label class="form-label">Time In</label>
-  <input type="time" id="time_in" name="time_in" class="form-control" value="<?= htmlspecialchars($record['time_in']) ?>" required>
-</div>
-<div class="mb-3">
-  <label class="form-label">Time Out</label>
-  <input type="time" id="time_out" name="time_out" class="form-control" value="<?= htmlspecialchars($record['time_out']) ?>" required>
-</div>
-<div class="mb-3">
-  <label class="form-label">Hours</label>
-  <input type="number" id="hours" name="hours" step="0.01" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required readonly>
+        <form method="post" id="attendanceForm">
+
+        <div class="mb-3">
+  <label class="form-label">Name</label>
+  <input type="text" class="form-control" value="<?= htmlspecialchars($record['full_name'] ?? 'Unknown') ?>" readonly>
 </div>
 
-          <div class="mb-3">
-            <label class="form-label">Work Description</label>
-            <textarea name="work_description" class="form-control"><?= htmlspecialchars($record['work_description']) ?></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Current Signature</label><br>
-            <?php if (!empty($record['signature'])): ?>
-              <a href="/ojtform/<?= htmlspecialchars($record['signature']) ?>" target="_blank">
-                <img src="/ojtform/<?= htmlspecialchars($record['signature']) ?>" alt="Signature" class="signature-img">
-              </a>
-            <?php else: ?>
-              <span class="text-muted">No signature</span>
-            <?php endif; ?>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Upload New Signature (optional)</label>
-            <input type="file" name="signature" class="form-control">
-          </div>
-          <div style="text-align: center;">
-          <button type="submit" class="btn btn-success">Update Record</button>
-          <a href="view_attendancev2.php" class="btn btn-secondary">Back to Records</a>
-          </div>
-        </form>
+
+  <div class="mb-3">
+    <label class="form-label">Date</label>
+    <input type="date" name="date" class="form-control" value="<?= htmlspecialchars($record['date']) ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Time In</label>
+    <input type="time" id="time_in" name="time_in" class="form-control" value="<?= htmlspecialchars($record['time_in']) ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Time Out</label>
+    <input type="time" id="time_out" name="time_out" class="form-control" value="<?= htmlspecialchars($record['time_out']) ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Hours</label>
+    <input type="number" id="hours" name="hours" step="0.01" class="form-control" value="<?= htmlspecialchars($record['hours']) ?>" required readonly>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Hours Late</label>
+    <input type="number" id="hours_late" name="hours_late" step="0.01" class="form-control" value="<?= htmlspecialchars($record['hours_late'] ?? 0) ?>" readonly>
+  </div>
+
+  <div style="text-align: center;">
+    <button type="submit" class="btn btn-success">Update Record</button>
+    <a href="view_attendancev2.php" class="btn btn-secondary">Back to Records</a>
+  </div>
+</form>
+
       </div>
     </div>
   </div>
 </div>
 <script>
-  function calculateHours() {
-    const timeIn = document.getElementById("time_in").value;
-    const timeOut = document.getElementById("time_out").value;
-    const hoursField = document.getElementById("hours");
-
-    if (timeIn && timeOut) {
-      const [inHours, inMinutes] = timeIn.split(":").map(Number);
-      const [outHours, outMinutes] = timeOut.split(":").map(Number);
-
-      const start = new Date();
-      const end = new Date();
-
-      start.setHours(inHours, inMinutes, 0);
-      end.setHours(outHours, outMinutes, 0);
-
-      let diff = (end - start) / 1000 / 60 / 60; // in hours
-      if (diff < 0) diff += 24; // handle overnight times
-
-      hoursField.value = diff.toFixed(2);
-    }
-  }
-
-  document.getElementById("time_in").addEventListener("change", calculateHours);
-  document.getElementById("time_out").addEventListener("change", calculateHours);
-
-  // Optional: auto-calculate on page load
-  window.addEventListener("DOMContentLoaded", calculateHours);
+  const SCHEDULE_START = "<?= $schedule_start ?>";
 </script>
+<script>
+  function calculateHours() {
+  const date = document.querySelector('input[name="date"]').value;
+  const timeIn = document.getElementById("time_in").value;
+  const timeOut = document.getElementById("time_out").value;
+  const hoursField = document.getElementById("hours");
+  const hoursLateField = document.getElementById("hours_late");
+
+  if (date && timeIn && timeOut) {
+    const start = new Date(`${date}T${timeIn}`);
+    const end = new Date(`${date}T${timeOut}`);
+
+    let diff = (end - start) / 1000 / 60 / 60;
+    if (diff < 0) diff += 24; 
+
+    hoursField.value = diff.toFixed(2);
+
+    const expected = new Date(`${date}T${SCHEDULE_START}`);
+
+    const lateDiff = (start - expected) / 1000 / 60 / 60;
+
+    hoursLateField.value = lateDiff > 0 ? lateDiff.toFixed(2) : "0.00";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const timeIn = document.getElementById("time_in");
+  const timeOut = document.getElementById("time_out");
+
+  timeIn.addEventListener("change", calculateHours);
+  timeOut.addEventListener("change", calculateHours);
+});
+</script>
+
 <script src="/ojtform/autologout.js"></script>
 </body>
 </html>
