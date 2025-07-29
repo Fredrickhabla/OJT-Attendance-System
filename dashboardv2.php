@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($existing) {
         $_SESSION['flash'][] = "You have already timed in today.";
     } else {
-        $attendance_id = uniqid("attn_");
+        $name = uniqid("attn_");
         $time_out = '00:00:00';
         $hours = 0;
 
@@ -142,10 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $insertStmt = $conn->prepare("
-            INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, status, hours_late)
+            INSERT INTO attendance_record (name, trainee_id, date, time_in, time_out, hours, status, hours_late)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $insertStmt->bind_param("sssssdss", $attendance_id, $trainee_id, $currentDate, $currentTime, $time_out, $hours, $status, $hoursLate);
+        $insertStmt->bind_param("sssssdss", $name, $trainee_id, $currentDate, $currentTime, $time_out, $hours, $status, $hoursLate);
         $insertStmt->execute();
         $insertStmt->close();
 
