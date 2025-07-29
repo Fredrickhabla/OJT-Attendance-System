@@ -692,7 +692,7 @@ h2 {
           <div class="form-vertical">
 
           <div class="form-group">
-  <label for="existingCoordinator">Select Existing Coordinator (optional)</label>
+  <label for="existingCoordinator">Select Existing Coordinator <span style="color: red;">*</span></label>
   <select id="existingCoordinator" name="existingCoordinator">
     <option value="">-- Choose a Coordinator --</option>
     <?php foreach ($all_coordinators as $coord): ?>
@@ -705,19 +705,19 @@ h2 {
 
             <div class="form-group">
               <label for="coordName">Name<span style="color: red;">*</span></label>
-              <input id="coordName" type="text" name="coordName" value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>" readonly required />
+              <input id="coordName" type="text" name="coordName" value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>" disabled/>
             </div>
             <div class="form-group">
               <label for="position">Position<span style="color: red;">*</span></label>
-              <input id="position" type="text" name="position" value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>" readonly required />
+              <input id="position" type="text" name="position" value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>" disabled />
             </div>
             <div class="form-group">
               <label for="coordEmail">Email<span style="color: red;">*</span></label>
-         <input id="coordEmail" type="email" name="coordEmail" value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>" readonly required />
+         <input id="coordEmail" type="email" name="coordEmail" value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>" disabled />
             </div>
             <div class="form-group">
               <label for="phone">Phone<span style="color: red;">*</span></label>
-              <input id="phone" type="text" name="phone" value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>" readonly required />
+              <input id="phone" type="text" name="phone" value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>" disabled />
             </div>
           </div>
           <div class="actions">
@@ -830,14 +830,6 @@ document.getElementById('trainee_picture').addEventListener('change', function(e
   }
 });
 
-document.getElementById('coordinator_picture').addEventListener('change', function (event) {
-    const preview = document.getElementById('coordinator-preview');
-    const file = event.target.files[0];
-    if (file) {
-      preview.src = URL.createObjectURL(file);
-    }
-  });
-
   document.addEventListener("DOMContentLoaded", function () {
     const coordinatorSelect = document.getElementById("existingCoordinator");
 
@@ -860,7 +852,7 @@ coordinatorSelect.addEventListener("change", function () {
       document.getElementById("coordEmail").value = data.email || "";
       document.getElementById("phone").value = data.phone || "";
 
-      // Update image
+      
       const preview = document.getElementById("coordinator-preview");
       preview.src = data.profile_picture ? `${data.profile_picture}?v=${Date.now()}` : 'images/placeholder.jpg';
   });
@@ -868,31 +860,22 @@ coordinatorSelect.addEventListener("change", function () {
 });
 
 
-    function toggleCoordinatorInputs() {
+     function toggleCoordinatorInputs() {
         const isExistingSelected = coordinatorSelect.value !== "";
 
-        const coordInputs = [
-    document.getElementById("coordName"),
-    document.getElementById("position"),
-    document.getElementById("coordEmail"),
-    document.getElementById("phone")
-];
-
-
         coordInputs.forEach(input => {
-            input.readOnly = isExistingSelected;
             input.disabled = isExistingSelected;
-
-            
-            if (isExistingSelected) {
-                input.title = "You can't edit an existing user coordinator";
-            } else {
-                input.title = "Fill in this field if you don't select an existing coordinator";
-            }
+            input.readOnly = isExistingSelected;
+            input.title = isExistingSelected
+                ? "You can't edit an existing coordinator"
+                : "Please select an existing coordinator";
         });
     }
 
-    toggleCoordinatorInputs(); 
+    // Ensure fields are always disabled from the start
+    toggleCoordinatorInputs();
+
+    // Also run when the dropdown changes
     coordinatorSelect.addEventListener("change", toggleCoordinatorInputs);
 });
 

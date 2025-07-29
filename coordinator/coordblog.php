@@ -497,7 +497,7 @@ $result = $stmt->get_result();
 .bond-paper {
   background: #fff;
   padding: 40px;
-  max-width: 1000px;
+  width: 80%;
   margin-top:80px;
   
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
@@ -688,10 +688,6 @@ border-radius: 4px;
          value="<?= htmlspecialchars($search) ?>">
 </div>
 
-
-
-</form>
-
         </div>
 
        
@@ -739,6 +735,7 @@ border-radius: 4px;
   <?php if ($page < $totalPages): ?>
     <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
   <?php endif; ?>
+  <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
 </div>
 
         </div>
@@ -761,15 +758,7 @@ border-radius: 4px;
       theme: "snow",
       placeholder: "Write your blog content...",
       modules: {
-        toolbar: [
-          [{ header: [1, 2, 3, false] }],
-          ["bold", "italic", "underline"],
-          ["blockquote", "code-block"],
-          [{ list: "ordered" }, { list: "bullet" }],
-          [{ align: [] }],
-          ["link", "image", "video"],
-          ["clean"]
-        ]
+        toolbar: false
       }
     });
 
@@ -807,15 +796,7 @@ border-radius: 4px;
     theme: "snow",
     readOnly: true, // <-- this disables editing
     modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline"],
-        ["blockquote", "code-block"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        [{ align: [] }],
-        ["link", "image", "video"],
-        ["clean"]
-      ]
+      toolbar: false
     }
   });
 
@@ -867,7 +848,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-
+function scrollToTop() {
+  const main = document.querySelector('.blog-list');
+  if (main) {
+    main.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 </script>
 <script src="/ojtform/autologout.js"></script>
 </html>

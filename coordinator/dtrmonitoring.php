@@ -895,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function () {
   .then(data => {
     dtrData = data;
 
-    // Destroy existing DataTable first if it exists
+   
     if ($.fn.DataTable.isDataTable('#dtrTable')) {
       $('#dtrTable').DataTable().clear().destroy();
     }
@@ -904,12 +904,12 @@ document.addEventListener('DOMContentLoaded', function () {
     tbody.innerHTML = '';
 
     if (data.length === 0) {
-      // Set a row with correct number of columns
+      
       tbody.innerHTML = '<tr><td colspan="4" class="text-center">No attendance records found.</td></tr>';
 
-      // Avoid reinitializing DataTables on empty data
+   
     } else {
-      // Loop and append rows
+    
       data.forEach(record => {
         const row = `<tr>
           <td>${record.date}</td>
@@ -920,7 +920,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tbody.innerHTML += row;
       });
 
-      // Only initialize DataTable if data exists
+     
       $('#dtrTable').DataTable({
         paging: true,
         pageLength: 5,
@@ -945,45 +945,6 @@ document.addEventListener('DOMContentLoaded', function () {
 let dtrData = [];
 let currentPage = 1;
 const rowsPerPage = 5;
-
-// function renderTablePage() {
-//   const tbody = document.getElementById('dtrBody');
-//   tbody.innerHTML = '';
-
-//   const start = (currentPage - 1) * rowsPerPage;
-//   const end = start + rowsPerPage;
-//   const pageData = dtrData.slice(start, end);
-
-//   if (pageData.length === 0) {
-//     tbody.innerHTML = '<tr><td colspan="4">No attendance records found.</td></tr>';
-//   } else {
-//     pageData.forEach(record => {
-//       const row = `<tr>
-//         <td>${record.date}</td>
-//         <td>${record.time_in}</td>
-//         <td>${record.time_out}</td>
-//         <td>${record.total_hours}</td>
-//       </tr>`;
-//       tbody.innerHTML += row;
-//     });
-//   }
-
-//   document.getElementById('recordCount').textContent = `Showing ${Math.min(end, dtrData.length)} of ${dtrData.length} records`;
-// }
-
-// function nextPage() {
-//   if ((currentPage * rowsPerPage) < dtrData.length) {
-//     currentPage++;
-//     renderTablePage();
-//   }
-// }
-
-// function prevPage() {
-//   if (currentPage > 1) {
-//     currentPage--;
-//     renderTablePage();
-//   }
-// }
 
 function downloadCSV() {
   if (dtrData.length === 0) return;

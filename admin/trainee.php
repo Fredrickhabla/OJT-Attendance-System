@@ -311,26 +311,28 @@ if ($result->num_rows > 0) {
   justify-content: right;
   align-items: right;
 }
-.pagination a {
+.pagination a,
+.pagination-link {
+  display: inline-block;
   padding: 6px 12px;
   border: 1px solid #166534;
   color: #333;
   text-decoration: none;
   border-radius: 4px;
-  justify-content: right;
-  align-items: right;
+  background-color: white;
+  cursor: pointer;
 }
 
-
-
-.pagination a.active {
+.pagination a.active,
+.pagination-link.active {
   background-color: #047857;
   color: white;
   font-weight: bold;
 }
 
-.pagination a:hover {
-  background-color:rgb(12, 100, 74);
+.pagination a:hover,
+.pagination-link:hover {
+  background-color: rgb(12, 100, 74);
   color: white;
 }
 
@@ -441,7 +443,13 @@ if ($result->num_rows > 0) {
   <?php if ($page < $totalPages): ?>
     <a href="?page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
   <?php endif; ?>
+
+  <a href="#" onclick="scrollToTop(); return false;" class="pagination-link" style="margin-left: 5px;">
+  ↑ Page Up
+</a>
 </div>
+
+
     </main>
     
 
@@ -462,6 +470,13 @@ if ($result->num_rows > 0) {
     box.style.display = searchContent.includes(query) ? 'block' : 'none';
     });
   });
+
+  function scrollToTop() {
+  const main = document.querySelector('.main');
+  if (main) {
+    main.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 </script>
 <script src="/ojtform/autologout.js"></script>
 </body>
