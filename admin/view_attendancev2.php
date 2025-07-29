@@ -239,6 +239,8 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Time In</th>
                 <th>Time Out</th>
                 <th>Hours</th>
+                <th>Status</th>
+                <th>Hours Late</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -264,11 +266,13 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   ?>
                 </td>
                 <td><?= htmlspecialchars($row['hours']) ?></td>
+                <td><?= htmlspecialchars($row['status']) ?></td>
+                <td><?= htmlspecialchars($row['hours_late']) ?></td>
                 <td style="text-align: center;">
-                  <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
+                  <a href="edit_attendancev2.php?name=<?= urlencode($row['name']) ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="delete_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
+                  <a href="delete_attendancev2.php?name=<?= urlencode($row['name']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?');" title="Delete">
                     <i class="bi bi-trash"></i>
                   </a>
                 </td>
