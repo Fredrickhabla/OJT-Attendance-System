@@ -61,9 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $traineeData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
     $schedule_start = $traineeData['schedule_start'] ?? '08:00'; 
 
-   
-    echo "<pre>DEBUG - Schedule Start: {$schedule_start}</pre>";
-
     $hours = 0;
     $hours_late = 0;
 
@@ -324,7 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="topbar">Edit Attendance Record</div>
     <div class="main">
       <div class="form-container">
-        <p><strong>Debug - Schedule Start Time:</strong> <?= $schedule_start ?></p>
+        
         <?php if ($success): ?>
           <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
