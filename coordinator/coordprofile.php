@@ -1,12 +1,12 @@
 <?php
 session_start();
 require_once '../connection.php';
-
+require_once '../logger.php'; 
 $profile_picture = null;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION['user_id'] ?? null;
-
+    $username = $_SESSION['username'] ?? 'unknown';
     if (!$user_id) {
         die("User not logged in.");
     }
@@ -16,19 +16,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
 
-     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-    
-    $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
-    $relativePath = "uploads/coordinators/" . $uploadFileName;
-    $absolutePath = __DIR__ . "/../" . $relativePath;
+    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+        $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
+        $relativePath = "uploads/coordinators/" . $uploadFileName;
+        $absolutePath = __DIR__ . "/../" . $relativePath;
 
-
-    if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
-        $profile_picture = $relativePath; 
+        if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
+            $profile_picture = $relativePath;
+        }
     }
-}
-
-
 
     $coordinator_id = 'coord_' . uniqid();
 
@@ -36,6 +32,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("sssssss", $coordinator_id, $name, $position, $email, $phone, $profile_picture, $user_id);
 
     if ($stmt->execute()) {
+      
+        $description = "Coordinator profile created: $coordinator_id";
+        logTransaction($conn, $user_id, $username, $description, $username);
+
+        
+        $activity = "New Coordinator profile";
+        $new_value = json_encode([
+            'coordinator_id' => $coordinator_id,
+            'name' => $name,
+            'position' => $position,
+            'email' => $email,
+            'phone' => $phone,
+            'profile_picture' => $profile_picture
+        ]);
+        $old_value = '-'; 
+        logAudit($conn, $user_id, $activity, $new_value, $old_value, $username);
+
         header("Location: coorddashboard.php");
         exit;
     } else {
@@ -47,6 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -124,21 +138,21 @@ $conn->close();
     }
 
     .insert-photo-btn {
-  position: absolute;
-  top: 50%;
-  right: 30px;
-  transform: translateY(-50%);
-  background-color: #047857;
-  color: white;
-  font-size: 12px;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+      position: absolute;
+      top: 50%;
+      right: 30px;
+      transform: translateY(-50%);
+      background-color: #047857;
+      color: white;
+      font-size: 12px;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
 
 

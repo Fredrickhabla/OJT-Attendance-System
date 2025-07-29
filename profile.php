@@ -10,6 +10,7 @@ require_once 'logger.php';
 $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 
 $user_id = $_SESSION['user_id'];
+$username = $_SESSION['username'] ?? 'unknown_user';
 $user_name = $user_email = "";
 $coordinator_id = null;
 
@@ -45,6 +46,12 @@ if (!empty($trainee_id)) {
     $stmt->close();
 }
 
+$stmt = $conn->prepare("SELECT coordinator_id FROM trainee WHERE user_id = ?");
+$stmt->bind_param("s", $user_id);
+$stmt->execute();
+$stmt->bind_result($coordinator_id);
+$stmt->fetch();
+$stmt->close();
 
 $coordinator = [];
 if (!empty($coordinator_id)) {
@@ -169,7 +176,7 @@ logAudit(
         "address" => $address
     ]),
     "-",
-    $first_name 
+   $username
 );
 
 
@@ -182,48 +189,19 @@ if (!empty($selectedCoordinatorId)) {
     $stmt->close();
 
 } else {
-  
-    $coordinator_id = uniqid("coord_");
-
-    $stmt = $conn->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $coordinator_id, $coord_name, $position, $coord_email, $coord_phone, $coordinator_picture_path);
-    $stmt->execute();
-    $stmt->close();
-
-   
-    $stmt = $conn->prepare("UPDATE trainee SET coordinator_id = ? WHERE trainee_id = ?");
-    $stmt->bind_param("ss", $coordinator_id, $trainee_id);
-    $stmt->execute();
-    $stmt->close();
-
-logTransaction($pdo, $user_id, $updated_user_name, "Added new coordinator", $first_name);
-logAudit(
-    $pdo,
-    $user_id,
-    "New coordinator added",
-    json_encode([
-        "name" => $coord_name,
-        "position" => $position,
-        "email" => $coord_email,
-        "phone" => $coord_phone
-    ]),
-    "-",
-    $first_name
-);
+  echo "<script>
+        alert('You must select an existing coordinator.');
+        window.history.back();
+    </script>";
+    exit();
 }
 
 if ($trainee_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $first_name);
-}
-
-if ($coordinator_picture_path) {
-    logTransaction($pdo, $user_id, $user_name, "Uploaded new coordinator photo", $first_name);
+    logTransaction($pdo, $user_id, $user_name, "Uploaded new trainee photo", $username);
 }
 
 
-
-
-logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $first_name);
+logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $username);
 
 echo "<script>
     alert('Profile saved successfully.');
@@ -563,6 +541,24 @@ h2 {
   border: 1px solid #1f8f59; 
 }
 
+.reset-btn svg {
+  transition: transform 0.2s ease;
+}
+.reset-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+
+
+.reset-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
 
 
   </style>
@@ -570,7 +566,7 @@ h2 {
 <body>
   <div class="container">
     <div class="card">
-       <form method="POST" enctype="multipart/form-data" class="content">
+       <form id="profile-form" method="POST" enctype="multipart/form-data" class="content">
         
 
         <!-- Left Section -->
@@ -596,36 +592,37 @@ h2 {
           <h2>Profile Settings</h2>
           <div class="form-grid">
             <div class="form-group">
-              <label for="firstName">First Name</label>
+              <label for="firstName">First Name<span style="color: red;">*</span></label>
               <input id="firstName" type="text" name="firstName" value="<?= htmlspecialchars($trainee['first_name'] ?? '') ?>" required/>
             </div>
             <div class="form-group">
-              <label for="surname">Surname</label>
+              <label for="surname">Surname<span style="color: red;">*</span></label>
               <input id="surname" type="text" name="surname" value="<?= htmlspecialchars($trainee['surname'] ?? '') ?>" required/>
             </div>
           </div>
           <div class="form-vertical">
             <div class="form-group">
-              <label for="email">Email</label>
+              <label for="email">Email<span style="color: red;">*</span></label>
               <input id="email" type="email" name="email" value="<?= htmlspecialchars($user_email) ?>" />
             </div>
             <div class="form-group">
-              <label for="school">School</label>
+              <label for="school">School<span style="color: red;">*</span></label>
              <input id="school" type="text" name="school" value="<?= htmlspecialchars($trainee['school'] ?? '') ?>" required/>
             </div>
             <div class="form-group">
-              <label for="phoneNumber">Phone Number</label>
+              <label for="phoneNumber">Phone Number<span style="color: red;">*</span></label>
               <input id="phoneNumber" type="text" name="phoneNumber" value="<?= htmlspecialchars($trainee['phone_number'] ?? '') ?>" required/>
             </div>
             <div class="form-group">
-              <label for="address">Address</label>
+              <label for="address">Address<span style="color: red;">*</span></label>
               <input id="address" type="text" name="address" value="<?= htmlspecialchars($trainee['address'] ?? '') ?>" required/>
             </div>
             <div class="form-group" id="scheduleContainer">
-  <label for="schedule" style="font-size: 0.95rem;">Schedule</label>
+  <label for="schedule" style="font-size: 0.95rem;">Schedule<span style="color: red;">*</span></label>
   <input id="schedule" type="text" readonly placeholder="Click to select schedule" />
   <div id="schedulePicker">
     <div class="days">
+      <label><input type="checkbox" id="selectAllDays"> Select All</label><br>
       <label><input type="checkbox" name="days" value="M"> M</label>
       <label><input type="checkbox" name="days" value="T"> T</label>
       <label><input type="checkbox" name="days" value="W"> W</label>
@@ -650,13 +647,13 @@ h2 {
 </div>
 
             <div class="form-group">
-              <label for="requiredHours">Required Hours</label>
+              <label for="requiredHours">Required Hours<span style="color: red;">*</span></label>
              <input id="requiredHours" type="number" name="requiredHours" value="<?= htmlspecialchars($trainee['required_hours']?? '') ?>" />
 
             </div>
           </div>
           <div class="form-group">
-  <label for="department_id" class="dept">Department</label>
+  <label for="department_id" class="dept">Department<span style="color: red;">*</span></label>
   <select id="department_id" name="department_id" class="big-select" required>
     <option value="" class="deptlist">-- Select Department --</option>
     <?php foreach ($departments as $dept): ?>
@@ -672,6 +669,12 @@ h2 {
 
         <!-- Right Section -->
         <div class="right-section">
+           <button type="button" class="reset-btn" onclick="resetForm()" title="Reset all fields">
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 .49-9.36L1 10"></path>
+  </svg>
+</button>
           <h2>Coordinator Profile</h2>
           <div class="coordinator-avatar">
             <div class="avatar avatar-small">
@@ -683,8 +686,7 @@ h2 {
        class="avatar-img">
               
             </div>
-            <label for="coordinator_picture" class="btn"> Insert Photo</label>
-  <input type="file" id="coordinator_picture" name="coordinator_picture" accept="image/*" style="display: none;">
+    
 
           </div>
           <div class="form-vertical">
@@ -702,20 +704,20 @@ h2 {
 </div>
 
             <div class="form-group">
-              <label for="coordName">Name</label>
-              <input id="coordName" type="text" name="coordName" value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>" required/>
+              <label for="coordName">Name<span style="color: red;">*</span></label>
+              <input id="coordName" type="text" name="coordName" value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>" readonly required />
             </div>
             <div class="form-group">
-              <label for="position">Position</label>
-              <input id="position" type="text" name="position" value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>" required/>
+              <label for="position">Position<span style="color: red;">*</span></label>
+              <input id="position" type="text" name="position" value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>" readonly required />
             </div>
             <div class="form-group">
-              <label for="coordEmail">Email</label>
-         <input id="coordEmail" type="email" name="coordEmail" value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>" required/>
+              <label for="coordEmail">Email<span style="color: red;">*</span></label>
+         <input id="coordEmail" type="email" name="coordEmail" value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>" readonly required />
             </div>
             <div class="form-group">
-              <label for="phone">Phone</label>
-              <input id="phone" type="text" name="phone" value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>" required/>
+              <label for="phone">Phone<span style="color: red;">*</span></label>
+              <input id="phone" type="text" name="phone" value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>" readonly required />
             </div>
           </div>
           <div class="actions">
@@ -727,9 +729,10 @@ h2 {
     </div>
   </div>
   
+<script>
+  const coordinators = <?= json_encode($all_coordinators, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+</script>
 
-  
-</body>
 <script>
 
     const scheduleDaysInput = document.getElementById('schedule_days');
@@ -791,6 +794,24 @@ document.querySelector('form').addEventListener('submit', syncScheduleToHiddenIn
   }
 
   dayCheckboxes.forEach(cb => cb.addEventListener('change', updateScheduleInput));
+  const selectAllCheckbox = document.getElementById('selectAllDays');
+
+selectAllCheckbox.addEventListener('change', function () {
+  dayCheckboxes.forEach(cb => {
+    cb.checked = this.checked;
+  });
+  updateScheduleInput();
+});
+
+// Also update "Select All" if any single day is toggled manually
+dayCheckboxes.forEach(cb => {
+  cb.addEventListener('change', () => {
+    const allChecked = Array.from(dayCheckboxes).every(c => c.checked);
+    selectAllCheckbox.checked = allChecked;
+    updateScheduleInput();
+  });
+});
+
   startTimeInput.addEventListener('input', updateScheduleInput);
   endTimeInput.addEventListener('input', updateScheduleInput);
 
@@ -819,28 +840,71 @@ document.getElementById('coordinator_picture').addEventListener('change', functi
 
   document.addEventListener("DOMContentLoaded", function () {
     const coordinatorSelect = document.getElementById("existingCoordinator");
-    const coordInputs = [
-        document.getElementById("coordName"),
-        document.getElementById("position"),
-        document.getElementById("coordEmail"),
-        document.getElementById("phone"),
-        document.getElementById("coordinator_picture")
-    ];
+
+coordinatorSelect.addEventListener("change", function () {
+    const selectedId = this.value;
+
+    if (!selectedId) {
+        document.getElementById("coordName").value = "";
+        document.getElementById("position").value = "";
+        document.getElementById("coordEmail").value = "";
+        document.getElementById("phone").value = "";
+        return;
+    }
+
+    fetch(`get_coordinator.php?id=${selectedId}`)
+  .then(response => response.json())
+  .then(data => {
+      document.getElementById("coordName").value = data.name || "";
+      document.getElementById("position").value = data.position || "";
+      document.getElementById("coordEmail").value = data.email || "";
+      document.getElementById("phone").value = data.phone || "";
+
+      // Update image
+      const preview = document.getElementById("coordinator-preview");
+      preview.src = data.profile_picture ? `${data.profile_picture}?v=${Date.now()}` : 'images/placeholder.jpg';
+  });
+
+});
+
 
     function toggleCoordinatorInputs() {
         const isExistingSelected = coordinatorSelect.value !== "";
+
+        const coordInputs = [
+    document.getElementById("coordName"),
+    document.getElementById("position"),
+    document.getElementById("coordEmail"),
+    document.getElementById("phone")
+];
+
+
         coordInputs.forEach(input => {
             input.readOnly = isExistingSelected;
             input.disabled = isExistingSelected;
+
+            
+            if (isExistingSelected) {
+                input.title = "You can't edit an existing user coordinator";
+            } else {
+                input.title = "Fill in this field if you don't select an existing coordinator";
+            }
         });
     }
 
-    toggleCoordinatorInputs();
+    toggleCoordinatorInputs(); 
     coordinatorSelect.addEventListener("change", toggleCoordinatorInputs);
 });
 
+function resetForm() {
+  const form = document.getElementById("profile-form");
+  form.reset();
+}
   
 </script>
+  
+</body>
+
 </html>
 
 

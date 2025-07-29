@@ -1,4 +1,7 @@
 <?php
+session_start(); 
+
+require_once '../connection.php';
 
 if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     header('Content-Type: application/json');
@@ -44,13 +47,6 @@ if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     echo json_encode($records);
     exit;
 }
-
-session_start(); 
-
-require_once '../connection.php';
-
-
-
 
 
 $user_id = $_SESSION['user_id'] ?? null;
@@ -130,6 +126,7 @@ if ($result->num_rows > 0) {
   <title>Reports - OJT Attendance Monitoring</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
   <style>
      * {
@@ -552,6 +549,15 @@ tbody tr:hover {
   color: #15803d;
 }
 
+.dataTables_wrapper {
+  font-size: 14px;
+}
+.dataTables_filter {
+  float: right;
+  margin-bottom: 10px;
+}
+
+
 
 .remarks-textarea {
   width: 100%;
@@ -833,7 +839,17 @@ tbody tr:hover {
   <div class="modal-content">
     <h2 id="modalTitle" class="modal-title">Trainee DTR</h2>
     <div class="modal-table-container">
-      <table id="dtrTable" class="modal-table">
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+  <div id="recordCount" style="font-weight: bold;"></div>
+  <button onclick="downloadCSV()" class="trainee-btn">
+    <i class="bi bi-download"></i> Download CSV
+  </button>
+</div>
+
+
+      <table id="dtrTable" class="modal-table display" style="width: 100%;">
+
         <thead>
           <tr>
             <th>Date</th>
@@ -852,7 +868,8 @@ tbody tr:hover {
     </div>
   </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="/ojtform/autologout.js"></script>
 
 <script>
@@ -869,32 +886,55 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('modalTitle').textContent = traineeName + "'s Daily Time Record (DTR)";
 
       fetch('?fetch_dtr=1&trainee_id=' + traineeId)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('dtrBody');
-          tbody.innerHTML = '';
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    dtrData = data;
 
-          if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">No attendance records found.</td></tr>';
-          } else {
-            data.forEach(record => {
-              const row = `<tr>
-                <td>${record.date}</td>
-                <td>${record.time_in}</td>
-                <td>${record.time_out}</td>
-                <td>${record.total_hours}</td>
-              </tr>`;
-              tbody.innerHTML += row;
-            });
-          }
+    // Destroy existing DataTable first if it exists
+    if ($.fn.DataTable.isDataTable('#dtrTable')) {
+      $('#dtrTable').DataTable().clear().destroy();
+    }
 
-          document.getElementById('dtrModal').style.display = 'flex';
-        })
+    const tbody = document.getElementById('dtrBody');
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+      // Set a row with correct number of columns
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center">No attendance records found.</td></tr>';
+
+      // Avoid reinitializing DataTables on empty data
+    } else {
+      // Loop and append rows
+      data.forEach(record => {
+        const row = `<tr>
+          <td>${record.date}</td>
+          <td>${record.time_in}</td>
+          <td>${record.time_out}</td>
+          <td>${record.total_hours}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+
+      // Only initialize DataTable if data exists
+      $('#dtrTable').DataTable({
+        paging: true,
+        pageLength: 5,
+        ordering: true,
+        order: [[0, 'desc']],
+        searching: true
+      });
+    }
+
+    document.getElementById('recordCount').textContent = `Total Records: ${dtrData.length}`;
+    document.getElementById('dtrModal').style.display = 'flex';
+  })
+
+
         .catch(error => {
           console.error('Fetch Error:', error);
         });
@@ -902,5 +942,63 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+let dtrData = [];
+let currentPage = 1;
+const rowsPerPage = 5;
 
+// function renderTablePage() {
+//   const tbody = document.getElementById('dtrBody');
+//   tbody.innerHTML = '';
+
+//   const start = (currentPage - 1) * rowsPerPage;
+//   const end = start + rowsPerPage;
+//   const pageData = dtrData.slice(start, end);
+
+//   if (pageData.length === 0) {
+//     tbody.innerHTML = '<tr><td colspan="4">No attendance records found.</td></tr>';
+//   } else {
+//     pageData.forEach(record => {
+//       const row = `<tr>
+//         <td>${record.date}</td>
+//         <td>${record.time_in}</td>
+//         <td>${record.time_out}</td>
+//         <td>${record.total_hours}</td>
+//       </tr>`;
+//       tbody.innerHTML += row;
+//     });
+//   }
+
+//   document.getElementById('recordCount').textContent = `Showing ${Math.min(end, dtrData.length)} of ${dtrData.length} records`;
+// }
+
+// function nextPage() {
+//   if ((currentPage * rowsPerPage) < dtrData.length) {
+//     currentPage++;
+//     renderTablePage();
+//   }
+// }
+
+// function prevPage() {
+//   if (currentPage > 1) {
+//     currentPage--;
+//     renderTablePage();
+//   }
+// }
+
+function downloadCSV() {
+  if (dtrData.length === 0) return;
+
+  const headers = ['Date', 'Time In', 'Time Out', 'Total Hours'];
+  const rows = dtrData.map(row => [row.date, row.time_in, row.time_out, row.total_hours]);
+  let csvContent = 'data:text/csv;charset=utf-8,' 
+                 + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "dtr_records.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>

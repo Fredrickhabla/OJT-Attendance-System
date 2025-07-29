@@ -75,6 +75,7 @@ echo "<script>alert('Signup failed: " . $e->getMessage() . "'); history.back();<
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Acer OJT</title>
   <link rel="stylesheet" href="styles.css"/>
+  
 </head>
 
 <style>
@@ -189,7 +190,7 @@ background: #00bf63;
   color: #065f46;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
-
+position: relative; /* ✅ Add this line */
   
 }
 .right-panel h2 {
@@ -294,6 +295,25 @@ form .grid-2 {
   user-select: none;
 }
 
+.reset-btn svg {
+  transition: transform 0.2s ease;
+}
+.reset-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+
+
+.reset-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 </style>
 <body>
   <div class="wrapper">
@@ -311,6 +331,13 @@ form .grid-2 {
 
       <!-- Right: White Signup Form -->
       <div class="right-panel">
+         <button type="button" class="reset-btn" onclick="resetForm()" title="Reset all fields">
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"></polyline>
+    <path d="M3.51 15a9 9 0 1 0 .49-9.36L1 10"></path>
+  </svg>
+</button>
+
         <h2 class="signuph2">Sign up to Acer OJT</h2>
         <form id="signup-form" method="POST" action="signup.php">
   <div class="grid-2">
@@ -403,6 +430,14 @@ function togglePassword() {
   passwordInput.type = type;
 }
 
+function resetForm() {
+  const form = document.getElementById("signup-form");
+  form.reset();
+
+  // Manually uncheck radio buttons
+  const roleRadios = document.querySelectorAll('input[name="role"]');
+  roleRadios.forEach(radio => radio.checked = false);
+}
 
 </script>
 </body>

@@ -415,7 +415,9 @@ if ($result->num_rows > 0) {
       <div class="trainee-grid">
        
         <?php foreach ($trainees as $id => $trainee): ?>
-          <div class="trainee-box" data-name="<?= strtolower($trainee['name']) ?>">
+          <div class="trainee-box"
+     data-search="<?= strtolower($trainee['name'] . ' ' . $trainee['email'] . ' ' . $trainee['phone'] . ' ' . $trainee['address']) ?>">
+
 
             <img src="<?= htmlspecialchars($trainee['image']) ?>" alt="Profile" class="trainee-img">
             <h3 class="trainee-name"><?= htmlspecialchars($trainee['name']) ?></h3>
@@ -456,8 +458,8 @@ if ($result->num_rows > 0) {
     const query = this.value.toLowerCase();
 
     traineeBoxes.forEach(box => {
-      const name = box.getAttribute('data-name');
-      box.style.display = name.includes(query) ? 'block' : 'none';
+      const searchContent = box.getAttribute('data-search');
+    box.style.display = searchContent.includes(query) ? 'block' : 'none';
     });
   });
 </script>

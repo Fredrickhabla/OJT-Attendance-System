@@ -472,7 +472,16 @@ if ($coordinatorResult->num_rows > 0) {
     <main class="main">
       <?php foreach ($coordinators as $coor): ?>
   <div class="coordinator-card"
+     data-search="<?= htmlspecialchars(strtolower(
+       $coor['name'] . ' ' .
+       $coor['position'] . ' ' .
+       $coor['email'] . ' ' .
+       $coor['phone'] . ' ' .
+       $coor['address'] . ' ' .
+       implode(' ', $coor['trainees'])
+     ), ENT_QUOTES) ?>"
      onclick='openEditModal(
+
        "<?= $coor['id'] ?>",
        "<?= htmlspecialchars($coor['name'], ENT_QUOTES) ?>",
        "<?= htmlspecialchars($coor['position'], ENT_QUOTES) ?>",
@@ -588,21 +597,12 @@ if ($coordinatorResult->num_rows > 0) {
   const searchInput = document.getElementById('searchInput');
   const coordinatorCards = document.querySelectorAll('.coordinator-card');
 
-  searchInput.addEventListener('input', function () {
+searchInput.addEventListener('input', function () {
   const query = this.value.toLowerCase();
 
   coordinatorCards.forEach(card => {
-    const name = card.querySelector('h2').textContent.toLowerCase();
-
-    // Get all trainee names inside this card
-    const traineeItems = card.querySelectorAll('.trainee-item');
-    const traineeNames = Array.from(traineeItems).map(item =>
-      item.textContent.toLowerCase()
-    );
-
-    // Check if coordinator name or any trainee name matches the query
-    const match = name.includes(query) || traineeNames.some(t => t.includes(query));
-
+    const searchContent = card.getAttribute('data-search') || "";
+    const match = searchContent.includes(query);
     card.style.display = match ? 'flex' : 'none';
   });
 });
