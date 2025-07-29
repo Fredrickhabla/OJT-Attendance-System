@@ -801,7 +801,6 @@ selectAllCheckbox.addEventListener('change', function () {
   updateScheduleInput();
 });
 
-// Also update "Select All" if any single day is toggled manually
 dayCheckboxes.forEach(cb => {
   cb.addEventListener('change', () => {
     const allChecked = Array.from(dayCheckboxes).every(c => c.checked);
@@ -870,10 +869,8 @@ coordinatorSelect.addEventListener("change", function () {
         });
     }
 
-    // Ensure fields are always disabled from the start
     toggleCoordinatorInputs();
 
-    // Also run when the dropdown changes
     coordinatorSelect.addEventListener("change", toggleCoordinatorInputs);
 });
 
