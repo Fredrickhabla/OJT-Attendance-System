@@ -22,8 +22,20 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
-$coordinatorQuery = "SELECT * FROM coordinator WHERE active = 'Y'";
+$limit = 6; // You can change the number of coordinators per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Count total coordinators
+$countSql = "SELECT COUNT(*) as total FROM coordinator WHERE active = 'Y'";
+$countResult = $conn->query($countSql);
+$totalCoordinators = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalCoordinators / $limit);
+
+// Paginated query
+$coordinatorQuery = "SELECT * FROM coordinator WHERE active = 'Y' LIMIT $limit OFFSET $offset";
 $coordinatorResult = $conn->query($coordinatorQuery);
+
 
 $coordinators = [];
 
@@ -53,7 +65,7 @@ if ($coordinatorResult->num_rows > 0) {
             "email" => $coor['email'],
             "phone" => $coor['phone'],
             "address" => $address,
-            "image" => !empty($coor['profile_picture']) ? "/ojtform/" . $coor['profile_picture'] : "/ojtform/images/sampleprofile.jpg",
+            "image" => !empty($coor['profile_picture']) ? "/ojtform/" . $coor['profile_picture'] : "/ojtform/images/placeholdersquare.jpg",
             "trainees" => $trainees
         ];
     }
@@ -399,6 +411,35 @@ if ($coordinatorResult->num_rows > 0) {
   background-color: rgb(200, 60, 50);
 }
 
+.pagination {
+  justify-content: right;
+  align-items: right;
+}
+.pagination a,
+.pagination-link {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid #166534;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.pagination a.active,
+.pagination-link.active {
+  background-color: #047857;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination a:hover,
+.pagination-link:hover {
+  background-color: rgb(12, 100, 74);
+  color: white;
+}
+
   </style>
 </head>
 <body>
@@ -509,9 +550,30 @@ if ($coordinatorResult->num_rows > 0) {
   </div>
     </div>
   </div>
-<?php endforeach; ?>
 
+  
+<?php endforeach; ?>
+<div class="pagination" style="text-align:right; padding: 20px;">
+  <?php if ($page > 1): ?>
+    <a href="?page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
+  <?php endif; ?>
+
+  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+    <a href="?page=<?= $i ?>" style="margin: 0 5px; <?= $i === $page ? 'font-weight: bold; text-decoration: underline;' : '' ?>">
+      <?= $i ?>
+    </a>
+  <?php endfor; ?>
+
+  <?php if ($page < $totalPages): ?>
+    <a href="?page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
+  <?php endif; ?>
+  <a href="#" onclick="scrollToTop(); return false;" class="pagination-link" style="margin-left: 5px;">
+  ↑ Page Up
+</a>
+</div>
     </main>
+    
+
   </div>
 </div>
 
@@ -632,6 +694,13 @@ function openDeleteModal(id, position, email, phone, address) {
 
 function closeDeleteModal() {
   document.getElementById('deleteModal').style.display = 'none';
+}
+
+function scrollToTop() {
+  const main = document.querySelector('.main');
+  if (main) {
+    main.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 </script>

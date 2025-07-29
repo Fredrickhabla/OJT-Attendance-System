@@ -506,7 +506,7 @@ flex-direction: column;
 .bond-paper {
   background: #fff;
   padding: 40px;
-  max-width: 1000px;
+  width: 80%;
   margin-top:80px;
   
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
@@ -572,6 +572,10 @@ border-radius: 4px;
   color: white;
 }
 
+.bond-paper editor-container {
+  max-width: 800px;
+  width: 100%;
+}
 
 
   </style>
@@ -728,6 +732,7 @@ border-radius: 4px;
   <?php if ($page < $totalPages): ?>
     <a href="?trainee_id=<?= urlencode($filter) ?>&search=<?= urlencode($search) ?>&page=<?= $page + 1 ?>">Next &raquo;</a>
   <?php endif; ?>
+  <a href="#" onclick="scrollToTop(); return false;" title="Back to top">▲ Page Up</a>
 </div>
 
         </div>
@@ -749,20 +754,9 @@ border-radius: 4px;
     quill = new Quill("#quillEditor", {
       theme: "snow",
       placeholder: "Write your blog content...",
-      modules: {
-        toolbar: [
-          [{ header: [1, 2, 3, false] }],
-          ["bold", "italic", "underline"],
-          ["blockquote", "code-block"],
-          [{ list: "ordered" }, { list: "bullet" }],
-          [{ align: [] }],
-          ["link", "image", "video"],
-          ["clean"]
-        ]
-      }
     });
 
-    // Attach to all edit buttons
+    
     document.querySelectorAll(".edit-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         openEditor(this.closest(".blog-card"));
@@ -776,39 +770,30 @@ border-radius: 4px;
   const title = card.querySelector(".blog-title").innerText;
   const content = card.getAttribute("data-content") || "";
 
-  // Save current main content
+
   const mainDiv = document.querySelector(".main");
   originalMainHTML = mainDiv.innerHTML;
 
-  // Clone the editor template and insert it
+
   const template = document.getElementById("editorTemplate");
   const clone = template.content.cloneNode(true);
-  mainDiv.innerHTML = ''; // clear it first
+  mainDiv.innerHTML = ''; 
   mainDiv.appendChild(clone);
 
-  // Set the title and disable input
+  
   const titleInput = document.getElementById("editorTitle");
   titleInput.value = title;
-  titleInput.readOnly = true; // <-- just disables typing, keeps style
+  titleInput.readOnly = true; 
 
-  // Initialize Quill with toolbar, but read-only
+  
   quill = new Quill("#quillEditor", {
     theme: "snow",
-    readOnly: true, // <-- this disables editing
+    readOnly: true, 
     modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline"],
-        ["blockquote", "code-block"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        [{ align: [] }],
-        ["link", "image", "video"],
-        ["clean"]
-      ]
+      toolbar: false
     }
   });
 
-  // Set content
   quill.root.innerHTML = content;
 }
 
@@ -857,7 +842,12 @@ document.addEventListener("DOMContentLoaded", function () {
     xhr.send();
   });
 });
-
+function scrollToTop() {
+  const main = document.querySelector('.blog-list');
+  if (main) {
+    main.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 </script>
 <script src="/ojtform/autologout.js"></script>
 </html>
