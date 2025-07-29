@@ -13,20 +13,30 @@ header('Content-Disposition: attachment; filename=attendance_record.csv');
 $output = fopen('php://output', 'w');
 
 // CSV column headers
-fputcsv($output, ['Attendance ID', 'Trainee ID', 'Date', 'Time In', 'Time Out', 'Hours', 'Work Description', 'Signature', 'Status']);
+fputcsv($output, ['Name', 'Date', 'Time In', 'Time Out', 'Hours', 'Hours Late', 'Status']);
 
-// Fetch records
-$stmt = $pdo->query("SELECT * FROM attendance_record ORDER BY attendance_id DESC");
+// Fetch records with JOIN to trainee table to get names
+$sql = "
+    SELECT 
+        ar.date, ar.time_in, ar.time_out, ar.hours, ar.hours_late, ar.status,
+        CONCAT(t.first_name, ' ', t.surname) AS full_name
+    FROM 
+        attendance_record ar
+    JOIN 
+        trainee t ON ar.trainee_id = t.trainee_id
+    ORDER BY 
+        ar.attendance_id DESC
+";
+
+$stmt = $pdo->query($sql);
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     fputcsv($output, [
-        $row['attendance_id'],
-        $row['trainee_id'],
+        $row['full_name'],
         $row['date'],
         $row['time_in'],
         $row['time_out'],
         $row['hours'],
-        $row['work_description'],
-        $row['signature'],
+        $row['hours_late'],
         $row['status']
     ]);
 }

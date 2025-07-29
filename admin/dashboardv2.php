@@ -7,7 +7,7 @@ require_once 'logger.php';
 
 $timeout_duration = 900; 
 
-// Check if user is logged in and is an admin
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -44,7 +44,7 @@ if (isset($_POST['export_excel'])) {
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo "{$row['trainee_id']}\t{$row['log_date']}\t{$row['time_in']}\t{$row['time_out']}\n";
         }
-        exit; // stop further HTML from rendering
+        exit; 
     } catch (PDOException $e) {
         die("Error: " . $e->getMessage());
     }

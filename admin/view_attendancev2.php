@@ -27,7 +27,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
 require_once 'logger.php';
 
 $stmt = $pdo->query("
-    SELECT ar.*, CONCAT(u.first_name, ' ', u.surname) AS full_name
+    SELECT ar.attendance_id, ar.trainee_id, ar.date, ar.time_in, ar.time_out, ar.hours, ar.hours_late,
+           CONCAT(u.first_name, ' ', u.surname) AS full_name
     FROM attendance_record ar
     LEFT JOIN trainee u ON ar.trainee_id = u.trainee_id
     ORDER BY ar.date DESC
@@ -224,10 +225,14 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h3 class="text-center text-success mb-4"><i class="bi bi-table"></i> Attendance Records</h3>
 
         <div class="mb-3 text-end">
-          <a href="export_csv.php" class="btn btn-success btn-sm">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Export as CSV
-          </a>
-        </div>
+  <!-- <a href="export_csv.php" class="btn btn-success btn-sm">
+    <i class="bi bi-file-earmark-spreadsheet"></i> Export Full CSV
+  </a> -->
+  <button id="exportCSV" class="btn btn-outline-success btn-sm">
+    <i class="bi bi-funnel"></i> Export Filtered CSV
+  </button>
+</div>
+
 
         <?php if ($records): ?>
         <div class="table-responsive">
@@ -239,6 +244,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>Time In</th>
                 <th>Time Out</th>
                 <th>Hours</th>
+                <th>Hours Late</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -264,6 +270,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   ?>
                 </td>
                 <td><?= htmlspecialchars($row['hours']) ?></td>
+                <td><?= htmlspecialchars($row['hours_late']) ?></td>
                 <td style="text-align: center;">
                   <a href="edit_attendancev2.php?attendance_id=<?= urlencode($row['attendance_id']) ?>" class="btn btn-sm btn-primary" title="Edit">
                     <i class="bi bi-pencil"></i>
@@ -299,23 +306,53 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-  $(document).ready(function() {
-    $('#attendanceTable').DataTable({
+  $(document).ready(function () {
+    // ✅ Initialize DataTable once
+    const table = $('#attendanceTable').DataTable({
       "order": [[1, "desc"]],
       "pageLength": 10
     });
-  });
 
-  document.querySelectorAll('.signature-img').forEach(function(img) {
-    img.addEventListener('click', function(e) {
-      const src = this.getAttribute('src');
-      document.getElementById('signatureModalImg').src = src;
-      document.getElementById('downloadSignatureBtn').href = src;
-      const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
-      modal.show();
+    // ✅ CSV export for filtered results
+    $('#exportCSV').on('click', function () {
+      const headers = ['Name', 'Date', 'Time In', 'Time Out', 'Hours', 'Hours Late'];
+      const rows = table.rows({ search: 'applied' }).nodes(); // only visible rows
+      const csvData = [headers.join(',')];
+
+      rows.each(function (row) {
+        const cells = $(row).find('td').toArray();
+        const rowData = cells.slice(0, 6).map(td => `"${$(td).text().trim()}"`);
+        csvData.push(rowData.join(','));
+      });
+
+      if (csvData.length === 1) {
+        alert("No matching records found to export.");
+        return;
+      }
+
+      const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'filtered_attendance.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // ✅ Signature image modal (if you're still using it)
+    document.querySelectorAll('.signature-img').forEach(function (img) {
+      img.addEventListener('click', function () {
+        const src = this.getAttribute('src');
+        document.getElementById('signatureModalImg').src = src;
+        document.getElementById('downloadSignatureBtn').href = src;
+        const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
+        modal.show();
+      });
     });
   });
 </script>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="/ojtform/autologout.js"></script>
