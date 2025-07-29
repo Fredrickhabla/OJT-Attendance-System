@@ -575,17 +575,6 @@ canvas {
       </a>
     </li>
     <li>
-      <a href="attendance_formv2.php">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <path d="M4 4h16v16H4z"/>
-          <line x1="8" y1="2" x2="8" y2="22"/>
-          <line x1="16" y1="2" x2="16" y2="22"/>
-        </svg>
-        ATTENDANCE FORM
-      </a>
-    </li>
-    <li>
       <a href="profiledashboard.php">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
