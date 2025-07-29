@@ -683,7 +683,7 @@ border-radius: 4px;
     <?php endwhile; ?>
   </select>
 
-  <!-- Add this below -->
+ 
   <select class="filter-select1" onchange="location = this.value;">
     <option value="?trainee_id=<?= $filter ?>&department_id=all" <?= $department_filter === 'all' ? 'selected' : '' ?>>All Departments</option>
     <?php while($dept = $department_result->fetch_assoc()): ?>
@@ -694,7 +694,7 @@ border-radius: 4px;
   </select>
 
           <form method="get" class="search-container" style="display: flex; align-items: center;">
-  <!-- Keep current filter on form submit -->
+
   <input type="hidden" name="trainee_id" value="<?= htmlspecialchars($filter) ?>">
 
   <input type="text" name="search" id="searchInput" class="search-input" placeholder="Search by name, title, or date..." value="<?= htmlspecialchars($search) ?>">
