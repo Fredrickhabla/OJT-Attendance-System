@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $insertStmt = $conn->prepare("
-            INSERT INTO attendance_record (name, trainee_id, date, time_in, time_out, hours, status, hours_late)
+            INSERT INTO attendance_record (attendance_id, trainee_id, date, time_in, time_out, hours, status, hours_late)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $insertStmt->bind_param("sssssdss", $name, $trainee_id, $currentDate, $currentTime, $time_out, $hours, $status, $hoursLate);
@@ -183,14 +183,17 @@ if (isset($_POST['time_out'])) {
         $timeOut = new DateTime($currentTime);
         $interval = $timeOut->diff($timeIn);
         $totalMinutes = ($interval->h * 60) + $interval->i;
-        $hoursWorked = floor($totalMinutes / 60);
+        $hoursWorked = round($totalMinutes / 60, 2); 
 
-        // Deduct 1 hour break if 5 or more hours worked
-        if ($hoursWorked >= 5) {
+
+        $lunchStart = new DateTime($timeIn->format('Y-m-d') . ' 12:00:00');
+        $lunchEnd = new DateTime($timeIn->format('Y-m-d') . ' 13:00:00');
+
+
+        if ($timeIn < $lunchEnd && $timeOut > $lunchStart) {
             $hoursWorked -= 1;
         }
 
-        // Only determine if late or present
         $status = "present";
         $hoursLate = 0;
         if ($timeIn > $schedStart) {
@@ -210,10 +213,8 @@ if (isset($_POST['time_out'])) {
         $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Transaction log
 logTransaction($pdo, $user_id, $full_name, "Trainee timed out at $currentTime with status: $status", $username);
 
-// Audit log
 logAudit($pdo, $user_id, "Time Out", $currentTime, $existing['time_in'], $username);
 
 
@@ -221,7 +222,6 @@ logAudit($pdo, $user_id, "Time Out", $currentTime, $existing['time_in'], $userna
     }
 }
 
-    // Always redirect after handling post
     header("Location: dashboardv2.php");
     exit();
 }
