@@ -225,6 +225,13 @@ if (isset($_POST['export_excel'])) {
         text-align: center;
         font-size: 20px;
     }
+  .active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
   </style>
 </head>
 <body>
@@ -235,12 +242,14 @@ if (isset($_POST['export_excel'])) {
     <h1 class="acerlogo">OJT - ACER</h1>
     <div class="menu-label">Menu</div>
     <nav class="nav">
-      <a href="dashboardv2.php">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
-        </svg>
-        Dashboard
-      </a>
+    <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+    <a href="dashboardv2.php" class="<?= $current_page == 'dashboardv2.php' ? 'active' : '' ?>">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
+      </svg>
+      Dashboard
+    </a>
+
       <a href="trainee.php">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />

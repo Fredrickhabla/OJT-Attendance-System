@@ -493,8 +493,12 @@ body {
   color: white;
 }
 
-
-
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
     </style>
 
 <body>
@@ -531,9 +535,10 @@ body {
       </a>
     </li>
     <li>
-      <a href="blog.php">
+      <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+      <a href="blog.php" class="<?= $current_page == 'blog.php' ? 'active' : '' ?>">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20v13H6.5A2.5 2.5 0 0 1 4 17.5z"/>
         </svg>

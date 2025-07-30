@@ -439,6 +439,12 @@ if ($coordinatorResult->num_rows > 0) {
   background-color: rgb(12, 100, 74);
   color: white;
 }
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
   </style>
 </head>
@@ -460,10 +466,12 @@ if ($coordinatorResult->num_rows > 0) {
         </svg>
         Trainee
       </a>
-      <a href="coordinator.php">
+      <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+      <a href="coordinator.php" class="<?= $current_page == 'coordinator.php' ? 'active' : '' ?>">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zM12 14v7m0-7l-9-5m9 5l9-5" />
-        </svg> Coordinator
+        </svg>
+        Coordinator
       </a>
       <a href="report.php">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">

@@ -218,6 +218,12 @@ require_once 'logger.php';
     .bi {
       margin-right: 6px;
     }
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
   </style>
 </head>
@@ -248,7 +254,8 @@ require_once 'logger.php';
           </svg>
           Coordinator
         </a>
-        <a href="report.php">
+        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+        <a href="report.php" class="<?= $current_page == 'report.php' ? 'active' : '' ?>">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
           </svg>

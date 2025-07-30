@@ -213,6 +213,12 @@ width: 100%;
   border: none;
   background: transparent;
 }
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
   </style>
 </head>
@@ -254,11 +260,12 @@ width: 100%;
             </svg>
             <span>Blogs</span>
         </a>
-        <a href="department.php">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+        <a href="department.php" class="<?= $current_page == 'department.php' ? 'active' : '' ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
-           </svg>
-            <span>Department</span>
+          </svg>
+          <span>Department</span>
         </a>
     </nav>
 

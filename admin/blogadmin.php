@@ -368,8 +368,6 @@ flex-direction: column;
   padding-left:8px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-
-
   
 }
 
@@ -377,7 +375,7 @@ flex-direction: column;
   flex: 1;
   position: relative;
   
-  
+
 }
 
 .search-box input {
@@ -592,6 +590,12 @@ border-radius: 4px;
   width: 100%;
 }
 
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
   </style>
 </head>
@@ -628,12 +632,13 @@ border-radius: 4px;
           </svg>
           Report
         </a>
-        <a href="blogadmin.php">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
-            </svg>
-            <span>Blogs</span>
+        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+        <a href="blogadmin.php" class="<?= $current_page == 'blogadmin.php' ? 'active' : '' ?>">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+          </svg>
+          <span>Blogs</span>
         </a>
         <a href="department.php">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
