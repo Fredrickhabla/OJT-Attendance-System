@@ -32,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $position = $_POST['position'] ?? '';
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
+    $school = $_POST['school'] ?? '';
 
     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
         $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
@@ -45,8 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $coordinator_id = 'coord_' . uniqid();
 
-    $stmt = $conn->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssss", $coordinator_id, $name, $position, $email, $phone, $profile_picture, $user_id);
+    $stmt = $conn->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, school, profile_picture, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssssssss", $coordinator_id, $name, $position, $email, $phone, $school, $profile_picture, $user_id);
 
     if ($stmt->execute()) {
       
@@ -61,6 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             'position' => $position,
             'email' => $email,
             'phone' => $phone,
+            'school' => $school,
             'profile_picture' => $profile_picture
         ]);
         $old_value = '-'; 
@@ -100,7 +102,7 @@ $conn->close();
     }
 
     .card {
-      width: 400px;
+      width: 440px;
       background-color: white;
       border-radius: 24px;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
@@ -302,6 +304,11 @@ $conn->close();
             <label for="phone">Phone<span style="color: red;">*</span></label>
             <input type="tel" id="phone" name="phone" required/>
           </div>
+
+          <div class="form-group">
+  <label for="school">School<span style="color: red;">*</span></label>
+  <input type="text" id="school" name="school" required/>
+</div>
 
           <div class="form-actions">
             <button type="submit" class="save-btn">Save</button>

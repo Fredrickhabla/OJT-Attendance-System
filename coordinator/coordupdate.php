@@ -27,7 +27,7 @@ if (!$user_id) {
 }
 
 
-$coorResult = $conn->query("SELECT coordinator_id, name, position, phone, email, profile_picture FROM coordinator WHERE user_id = '$user_id'");
+$coorResult = $conn->query("SELECT coordinator_id, name, position, phone, email, profile_picture, school FROM coordinator WHERE user_id = '$user_id'");
 
 if (!$coorResult || $coorResult->num_rows === 0) {
     die("Coordinator not found for this user.");
@@ -36,6 +36,7 @@ $coor = $coorResult->fetch_assoc();
 $coordinator_id = $coor['coordinator_id'];
 $full_name = $coor['name'];
 $email = $coor['email'];
+$school = $coor['school'] ?? '';
 $profile_picture = !empty($coor['profile_picture']) 
     ? '/ojtform/' . $coor['profile_picture'] 
     : '/ojtform/images/placeholder.jpg';
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $position = $conn->real_escape_string($_POST['position']);
     $email = $conn->real_escape_string($_POST['email']);
     $phone = $conn->real_escape_string($_POST['phone']);
+    $school = $conn->real_escape_string($_POST['school']);
 
    
    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
@@ -67,9 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-    $updateQuery = "UPDATE coordinator 
-                    SET name = '$name', position = '$position', email = '$email', phone = '$phone'
-                    WHERE user_id = '$user_id'";
+$updateQuery = "UPDATE coordinator 
+                SET name = '$name', position = '$position', email = '$email', phone = '$phone', school = '$school'
+                WHERE user_id = '$user_id'";
+
 
     if ($conn->query($updateQuery)) {
     $changedFields = [];
@@ -96,6 +99,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $oldValues['phone'] = $coor['phone'];
         $newValues['phone'] = $phone;
     }
+
+    if ($school !== $coor['school']) {
+    $changedFields[] = 'school';
+    $oldValues['school'] = $coor['school'];
+    $newValues['school'] = $school;
+    }
+
 
     if (!empty($changedFields)) {
         $fieldsList = implode(', ', $changedFields);
@@ -294,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  
 
 .card {
-      width: 400px;
+      width: 420px;
       background-color: white;
       border-radius: 24px;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
@@ -311,14 +321,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     .card-content {
-      padding: 20px;
+      padding: 16px;
     }
 
     .avatar-wrapper {
       position: relative;
       display: flex;
       justify-content: center;
-      margin-bottom: 24px;
+     
     }
 
     .avatar {
@@ -375,7 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 10px;
     }
 
     .form-group {
@@ -506,6 +516,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- Main Content -->
   <div class="content">
+    <?php
+if (isset($_SESSION['change_success'])) {
+    echo "<script>alert('" . $_SESSION['change_success'] . "');</script>";
+    unset($_SESSION['change_success']);
+}
+
+if (isset($_SESSION['change_error'])) {
+    echo "<script>alert('" . $_SESSION['change_error'] . "');</script>";
+    unset($_SESSION['change_error']);
+}
+?>
+
 <!-- Topbar -->
 
 <div class="topbar" style="
@@ -566,6 +588,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <label for="phone">Phone</label>
     <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($coor['phone']) ?>" required/>
   </div>
+  <div class="form-group">
+  <label for="school">School</label>
+  <input type="text" id="school" name="school" value="<?= htmlspecialchars($school) ?>" required/>
+</div>
+
 
   <div class="form-actions">
     <button type="submit" class="save-btn">Save</button>
@@ -582,7 +609,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <div style="background: white; padding: 30px; border-radius: 10px; width: 400px; position: relative;">
     <h3 style="margin-bottom: 20px; text-align: center;">Change Password</h3>
-    <form method="POST" action="/ojtform/change_password.php">
+    <form method="POST" action="change_password.php">
       <div class="form-group">
         <label for="current_password">Current Password</label>
         <input type="password" name="current" required />
