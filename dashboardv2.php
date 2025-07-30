@@ -548,6 +548,12 @@ canvas {
 .btn-timein:hover, .btn-timeout:hover {
   background-color: #2f5e14;
 }
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
     </style>
 
@@ -565,14 +571,15 @@ canvas {
       <nav class="nav-menu">
   <ul>
     <li>
-      <a href="dashboardv2.php">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-          <path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
-        </svg>
-        DASHBOARD
-      </a>
+    <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+    <a href="dashboardv2.php" class="<?= $current_page == 'dashboardv2.php' ? 'active' : '' ?>">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      DASHBOARD
+    </a>
     </li>
     <li>
       <a href="profiledashboard.php">

@@ -879,7 +879,12 @@ $stmt->execute([
     transform: translateY(0);
   }
 }
-
+.active {
+  color: #ffffff; /* or your desired highlight color */
+  background-color: #4CAF50; /* or any background for active */
+  padding: 5px 10px;
+  border-radius: 5px;
+}
   </style>
   
 
@@ -908,9 +913,10 @@ $stmt->execute([
       </a>
     </li>
     <li>
-      <a href="#">
+      <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+      <a href="profiledashboard.php" class="<?= $current_page == 'profiledashboard.php' ? 'active' : '' ?>">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 0 0-3-3.87"/>
           <path d="M4 21v-2a4 4 0 0 1 3-3.87"/>
           <circle cx="12" cy="7" r="4"/>
