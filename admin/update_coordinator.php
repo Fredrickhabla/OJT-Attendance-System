@@ -12,10 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $position = $_POST['position'] ?? '';
     $email = $_POST['email'] ?? '';
     $phone = $_POST['phone'] ?? '';
-
+   $school = $_POST['school'] ?? '';
 
     $oldData = [];
-    $result = $conn->query("SELECT name, position, email, phone, profile_picture FROM coordinator WHERE coordinator_id = '$id'");
+    $result = $conn->query("SELECT name, position, email, phone, profile_picture, school FROM coordinator WHERE coordinator_id = '$id'");
+
     if ($result && $result->num_rows > 0) {
         $oldData = $result->fetch_assoc();
     }
@@ -34,14 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update query
     if (!empty($_FILES['profile_picture']['name'])) {
-        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=?, profile_picture=? WHERE coordinator_id=?";
+        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=?, school=?, profile_picture=? WHERE coordinator_id=?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("ssssss", $name, $position, $email, $phone, $imagePath, $id);
+$stmt->bind_param("sssssss", $name, $position, $email, $phone, $school, $imagePath, $id);
+
 
     } else {
-        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=? WHERE coordinator_id=?";
+        $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=?, school=? WHERE coordinator_id=?";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("sssss", $name, $position, $email, $phone, $id);
+$stmt->bind_param("ssssss", $name, $position, $email, $phone, $school, $id);
 
     }
 
@@ -76,6 +78,11 @@ $stmt->bind_param("sssss", $name, $position, $email, $phone, $id);
                 $oldChanged['phone'] = $oldData['phone'];
                 $newChanged['phone'] = $phone;
             }
+            if (($oldData['school'] ?? '') !== $school) {
+    $oldChanged['school'] = $oldData['school'];
+    $newChanged['school'] = $school;
+}
+
             if (!empty($_FILES['profile_picture']['name']) && ($oldData['profile_picture'] ?? '') !== $imagePath) {
                 $oldChanged['profile_picture'] = $oldData['profile_picture'];
                 $newChanged['profile_picture'] = $imagePath;

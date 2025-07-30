@@ -20,12 +20,61 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
+$user_id = $_SESSION['user_id'] ?? null;
+if (!$user_id) {
+    die("User not logged in.");
+}
+
+if (isset($_GET['download_all_dtr'])) {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename=all_dtr_records.csv');
+
+    $startDate = $_GET['start'] ?? '';
+    $endDate = $_GET['end'] ?? '';
+
+    $sql = "SELECT ar.date, ar.time_in, ar.time_out, t.first_name, t.surname 
+            FROM attendance_record ar 
+            JOIN trainee t ON ar.trainee_id = t.trainee_id 
+            JOIN coordinator c ON t.coordinator_id = c.coordinator_id 
+            WHERE c.user_id = ?
+              AND ar.date BETWEEN ? AND ?
+            ORDER BY t.surname, ar.date";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $user_id, $startDate, $endDate);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $output = fopen("php://output", "w");
+    fputcsv($output, ['Name', 'Date', 'Time In', 'Time Out', 'Total Hours']);
+
+    while ($row = $result->fetch_assoc()) {
+        $name = ucwords(strtolower($row['first_name'] . ' ' . $row['surname']));
+        $timeIn = new DateTime($row['time_in']);
+        $timeOut = new DateTime($row['time_out']);
+        $interval = $timeIn->diff($timeOut);
+        $totalHours = (int)($interval->h + ($interval->i / 60));
+        fputcsv($output, [$name, $row['date'], $row['time_in'], $row['time_out'], number_format($totalHours, 2)]);
+    }
+
+    fclose($output);
+    exit;
+}
+
+
+
 if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     header('Content-Type: application/json');
     
     $trainee_id = $_GET['trainee_id'];
 
-    $stmt = $conn->prepare("SELECT date, time_in, time_out FROM attendance_record WHERE trainee_id = ?");
+    $stmt = $conn->prepare("
+    SELECT ar.date, ar.time_in, ar.time_out, t.first_name, t.surname 
+    FROM attendance_record ar 
+    JOIN trainee t ON ar.trainee_id = t.trainee_id 
+    WHERE ar.trainee_id = ?
+");
+
 
     $stmt->bind_param("s", $trainee_id);
     $stmt->execute();
@@ -40,8 +89,9 @@ if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     $interval = $timeIn->diff($timeOut);
     $totalHours = (int)($interval->h + ($interval->i / 60));
 
-
+    $fullName = ucwords(strtolower($row['first_name'] . ' ' . $row['surname']));
     $records[] = [
+        'name' => $fullName,
         'date' => $row['date'],
         'time_in' => $row['time_in'],
         'time_out' => $row['time_out'],
@@ -408,6 +458,26 @@ tbody tr:hover {
   display: inline-block;
 }
 
+.modal-overlay1 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content1 {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+}
 
 .badge.Active {
   background-color: #dcfce7;
@@ -511,10 +581,10 @@ tbody tr:hover {
       font-size: 14px;
     }
     .trainee-btn {
-      background-color: #166534;
+      background-color: #14532d;
       color: white;
       padding: 8px 16px;
-      border: none;
+      border: 1px solid white;
       border-radius: 15px;
       margin-bottom: 10px;
       cursor: pointer;
@@ -818,7 +888,10 @@ tbody tr:hover {
     <!-- Department Name -->
     <span>Daily Time Record Monitoring</span>
 
-</div>
+    <button onclick="openDateRangeModal()" class="trainee-btn">
+    <i class="bi bi-download"></i> Download All DTR
+  </button>
+  </div>
 
 
    <main class="main">
@@ -839,6 +912,24 @@ tbody tr:hover {
     <?php endforeach; ?>
   </div>
 <?php endif; ?>
+
+<div id="dateRangeModal" class="modal-overlay1" style="display: none;">
+  <div class="modal-content" style="max-width: 400px;">
+    <h2 class="modal-title1">Download All DTR</h2>
+    <div style="margin-bottom: 15px;">
+      <label for="startDateInput" style="font-weight: bold;">Start Date:</label>
+      <input type="date" id="startDateInput" style="width: 100%; padding: 8px;">
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="endDateInput" style="font-weight: bold;">End Date:</label>
+      <input type="date" id="endDateInput" style="width: 100%; padding: 8px;">
+    </div>
+    <div style="text-align: center;">
+      <button class="trainee-btn" onclick="submitDateRange()">Download CSV</button>
+      <button class="trainee-btn" onclick="closeDateRangeModal()" style="margin-left: 10px;">Cancel</button>
+    </div>
+  </div>
+</div>
     <!-- DTR Modal -->
 <div id="dtrModal" class="modal-overlay" style="display: none;">
   <div class="modal-content">
@@ -857,6 +948,7 @@ tbody tr:hover {
 
         <thead>
           <tr>
+            <th>Name</th>
             <th>Date</th>
             <th>Time In</th>
             <th>Time Out</th>
@@ -872,6 +964,9 @@ tbody tr:hover {
       <button class="trainee-btn" onclick="closeDTRModal()">Close</button>
     </div>
   </div>
+  <!-- Date Range Modal -->
+
+
 </div>
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -917,6 +1012,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
       data.forEach(record => {
         const row = `<tr>
+          <td>${record.name}</td>
           <td>${record.date}</td>
           <td>${record.time_in}</td>
           <td>${record.time_out}</td>
@@ -954,8 +1050,8 @@ const rowsPerPage = 5;
 function downloadCSV() {
   if (dtrData.length === 0) return;
 
-  const headers = ['Date', 'Time In', 'Time Out', 'Total Hours'];
-  const rows = dtrData.map(row => [row.date, row.time_in, row.time_out, row.total_hours]);
+  const headers = ['Name', 'Date', 'Time In', 'Time Out', 'Total Hours'];
+  const rows = dtrData.map(row => [row.name, row.date, row.time_in, row.time_out, row.total_hours]);
   let csvContent = 'data:text/csv;charset=utf-8,' 
                  + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
 
@@ -967,4 +1063,43 @@ function downloadCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+function downloadAllDTR() {
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  if (!start || !end) {
+    alert("Please select both start and end dates.");
+    return;
+  }
+
+  const url = `?download_all_dtr=1&start=${start}&end=${end}`;
+  window.location.href = url;
+}
+
+function openDateRangeModal() {
+  document.getElementById('dateRangeModal').style.display = 'flex';
+}
+
+function closeDateRangeModal() {
+  document.getElementById('dateRangeModal').style.display = 'none';
+  document.getElementById('startDateInput').value = '';
+  document.getElementById('endDateInput').value = '';
+}
+
+function submitDateRange() {
+  const start = document.getElementById('startDateInput').value;
+  const end = document.getElementById('endDateInput').value;
+
+  if (!start || !end) {
+    alert("Please select both start and end dates.");
+    return;
+  }
+
+  const url = `?download_all_dtr=1&start=${start}&end=${end}`;
+  window.location.href = url;
+
+  closeDateRangeModal();
+}
+
 </script>

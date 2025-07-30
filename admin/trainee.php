@@ -24,18 +24,36 @@ $limit = 12; // Number of trainees per page
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Count total trainees
-$countSql = "SELECT COUNT(*) as total FROM trainee WHERE active = 'Y'";
+// NEW SEARCH + WHERE LOGIC HERE
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$whereClause = "WHERE t.active = 'Y'";
+
+if (!empty($search)) {
+    $searchEscaped = $conn->real_escape_string($search);
+    $whereClause .= " AND (
+        CONCAT(t.first_name, ' ', t.surname) LIKE '%$searchEscaped%' OR
+        u.email LIKE '%$searchEscaped%' OR
+        t.phone_number LIKE '%$searchEscaped%' OR
+        t.address LIKE '%$searchEscaped%'
+    )";
+}
+
+// Count total rows (after filtering)
+$countSql = "SELECT COUNT(*) as total 
+             FROM trainee t
+             LEFT JOIN users u ON t.user_id = u.user_id
+             $whereClause";
 $countResult = $conn->query($countSql);
 $totalTrainees = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalTrainees / $limit);
 
-// Fetch trainees from database
+// Fetch filtered + paginated trainees
 $sql = "SELECT t.*, u.email 
         FROM trainee t
         LEFT JOIN users u ON t.user_id = u.user_id
-        WHERE t.active = 'Y'
+        $whereClause
         LIMIT $limit OFFSET $offset";
+
 
 $result = $conn->query($sql);
 
@@ -294,6 +312,7 @@ if ($result->num_rows > 0) {
   position: absolute;
   left: 10px;
   width: 18px;
+  bottom: 10px;
   height: 18px;
   color: #888;
 }
@@ -403,14 +422,18 @@ if ($result->num_rows > 0) {
             </svg>
             TRAINEE
             </div>
-         <div class="search-container">
-  <input type="text" id="searchInput" placeholder="Search by name..." class="search-input">
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-       viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
-  </svg>
-</div>
+        <form method="get" class="search-container" style="display: flex; align-items: center;">
+  <input type="text" id="searchInput" name="search" placeholder="Search by name..." value="<?= htmlspecialchars($search ?? '') ?>" class="search-input">
+
+  <button type="submit" style="border: none; background: none; cursor: pointer;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
+    </svg>
+  </button>
+</form>
+
 
         </div>
     <main class="main">
@@ -429,25 +452,28 @@ if ($result->num_rows > 0) {
           </div>
         <?php endforeach; ?>
       </div>
-      <div class="pagination" style="text-align:right; padding: 20px;">
-  <?php if ($page > 1): ?>
-    <a href="?page=<?= $page - 1 ?>" style="margin-right: 10px;">&laquo; Prev</a>
-  <?php endif; ?>
+     <?php if ($totalPages > 1): ?>
+  <div class="pagination" style="text-align:right; padding: 20px;">
+    <?php if ($page > 1): ?>
+      <a href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>">&laquo; Prev</a>
+    <?php endif; ?>
 
-  <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-    <a href="?page=<?= $i ?>" style="margin: 0 5px; <?= $i === $page ? 'font-weight: bold;' : '' ?>">
-      <?= $i ?>
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+      <a href="?page=<?= $i ?>&search=<?= urlencode($search) ?>" <?= $i === $page ? 'style="font-weight: bold;"' : '' ?>>
+        <?= $i ?>
+      </a>
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+      <a href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>">Next &raquo;</a>
+    <?php endif; ?>
+
+    <a href="#" onclick="scrollToTop(); return false;" class="pagination-link" style="margin-left: 5px;">
+      ↑ Page Up
     </a>
-  <?php endfor; ?>
+  </div>
+<?php endif; ?>
 
-  <?php if ($page < $totalPages): ?>
-    <a href="?page=<?= $page + 1 ?>" style="margin-left: 10px;">Next &raquo;</a>
-  <?php endif; ?>
-
-  <a href="#" onclick="scrollToTop(); return false;" class="pagination-link" style="margin-left: 5px;">
-  ↑ Page Up
-</a>
-</div>
 
 
     </main>
@@ -459,17 +485,46 @@ if ($result->num_rows > 0) {
 
 
 <script>
-  const searchInput = document.getElementById('searchInput');
-  const traineeBoxes = document.querySelectorAll('.trainee-box');
+const searchInput = document.getElementById('searchInput');
+const traineeGrid = document.querySelector('.trainee-grid');
 
-  searchInput.addEventListener('input', function () {
-    const query = this.value.toLowerCase();
+searchInput.addEventListener('input', function () {
+  const query = this.value;
+  const pagination = document.querySelector('.pagination');
 
-    traineeBoxes.forEach(box => {
-      const searchContent = box.getAttribute('data-search');
-    box.style.display = searchContent.includes(query) ? 'block' : 'none';
+  if (query.trim() !== '') {
+    pagination.style.display = 'none';
+  } else {
+    pagination.style.display = 'block';
+  }
+
+  fetch(`search_trainee.php?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      traineeGrid.innerHTML = '';
+
+      if (data.length === 0) {
+        traineeGrid.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+
+      data.forEach(trainee => {
+        const div = document.createElement('div');
+        div.className = 'trainee-box';
+        div.innerHTML = `
+          <img src="${trainee.image}" alt="Profile" class="trainee-img">
+          <h3 class="trainee-name">${trainee.name}</h3>
+          <p class="trainee-email">${trainee.email}</p>
+          <a href="traineeview.php?id=${encodeURIComponent(trainee.trainee_id)}"><button class="trainee-btn">View Profile</button></a>
+          <p class="trainee-contact">${trainee.phone} | ${trainee.address}</p>
+        `;
+        traineeGrid.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error('Search error:', err);
     });
-  });
+});
 
   function scrollToTop() {
   const main = document.querySelector('.main');

@@ -716,7 +716,7 @@ for ($i = $rowCount; $i < 8; $i++):
     <h2 class="modal-title">Add Remarks</h2>
     <p class="modal-subtitle">For: <span id="traineeName" class="highlighted-name"></span></p>
 
-    <form action="save_remarks.php" method="POST">
+    <form action="/admin/save_remarks.php" method="POST">
       <input type="hidden" name="trainee_id" id="traineeId">
        <input type="hidden" name="coordinator_id" value="<?= htmlspecialchars($coordinator_id) ?>">
 

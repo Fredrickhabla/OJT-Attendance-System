@@ -3,13 +3,11 @@ session_start();
 include('../connection.php');
 require_once 'logger.php';
 
-// Check if user is logged in and is an admin
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
-
-
 
 $timeout_duration = 900; 
 
@@ -22,17 +20,16 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
-$limit = 6; // You can change the number of coordinators per page
+$limit = 6; 
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// Count total coordinators
+
 $countSql = "SELECT COUNT(*) as total FROM coordinator WHERE active = 'Y'";
 $countResult = $conn->query($countSql);
 $totalCoordinators = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalCoordinators / $limit);
 
-// Paginated query
 $coordinatorQuery = "SELECT * FROM coordinator WHERE active = 'Y' LIMIT $limit OFFSET $offset";
 $coordinatorResult = $conn->query($coordinatorQuery);
 
@@ -41,37 +38,33 @@ $coordinators = [];
 
 if ($coordinatorResult->num_rows > 0) {
     while ($coor = $coordinatorResult->fetch_assoc()) {
-        $coordinator_id = $coor['coordinator_id'];
+    $coordinator_id = $coor['coordinator_id'];
 
-        // Get trainees under this coordinator
-        $traineeQuery = "SELECT CONCAT(first_name, ' ', surname) AS name, school
-                         FROM trainee WHERE coordinator_id = '$coordinator_id'";
-        $traineeResult = $conn->query($traineeQuery);
+    $traineeQuery = "SELECT CONCAT(first_name, ' ', surname) AS name
+                     FROM trainee WHERE coordinator_id = '$coordinator_id'";
+    $traineeResult = $conn->query($traineeQuery);
 
-        $trainees = [];
-        $address = "N/A";
-
-        while ($trainee = $traineeResult->fetch_assoc()) {
-            $trainees[] = ucwords(strtolower($trainee['name']));
-            if ($address === "N/A" && !empty($trainee['school'])) {
-                $address = $trainee['school'];
-            }
-        }
-
-        $coordinators[] = [
-           "id" => $coordinator_id,
-            "name" => $coor['name'],
-            "position" => $coor['position'],
-            "email" => $coor['email'],
-            "phone" => $coor['phone'],
-            "address" => $address,
-            "image" => !empty($coor['profile_picture']) ? "/ojtform/" . $coor['profile_picture'] : "/ojtform/images/placeholdersquare.jpg",
-            "trainees" => $trainees
-        ];
+    $trainees = [];
+    while ($trainee = $traineeResult->fetch_assoc()) {
+        $trainees[] = ucwords(strtolower($trainee['name']));
     }
+
+    $address = !empty($coor['school']) ? $coor['school'] : "N/A";
+
+    $coordinators[] = [
+        "id" => $coordinator_id,
+        "name" => $coor['name'],
+        "position" => $coor['position'],
+        "email" => $coor['email'],
+        "phone" => $coor['phone'],
+        "address" => $address,
+        "image" => !empty($coor['profile_picture']) ? "/ojtform/" . $coor['profile_picture'] : "/ojtform/images/placeholdersquare.jpg",
+        "trainees" => $trainees
+    ];
+}
+
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -312,29 +305,29 @@ if ($coordinatorResult->num_rows > 0) {
 }
 
 .trainee-item::before {
-  content: "•"; /* Bullet symbol */
+  content: "•"; 
   position: absolute;
   left: 0;
   top: 0;
   color: black;
 }
 
-/* Modal overlay */
+
 #editModal {
-  display: none; /* Hidden by default */
+  display: none; 
   position: fixed;
   top: 0;
   left: 0;
   z-index: 999;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* dark transparent background */
+  background-color: rgba(0, 0, 0, 0.5); 
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Modal content box */
+
 #editModal > div {
   background: #ffffff;
   padding: 25px 30px;
@@ -345,7 +338,7 @@ if ($coordinatorResult->num_rows > 0) {
   position: relative;
 }
 
-/* Close button (X) */
+
 #editModal span {
   position: absolute;
   top: 10px;
@@ -356,7 +349,7 @@ if ($coordinatorResult->num_rows > 0) {
   color: #333;
 }
 
-/* Form labels and inputs */
+
 #editModal form div {
   margin-bottom: 15px;
 }
@@ -511,6 +504,7 @@ if ($coordinatorResult->num_rows > 0) {
     </div>
 
     <main class="main">
+      <div id="coordinatorGrid">
       <?php foreach ($coordinators as $coor): ?>
   <div class="coordinator-card"
      data-search="<?= htmlspecialchars(strtolower(
@@ -571,6 +565,7 @@ if ($coordinatorResult->num_rows > 0) {
   ↑ Page Up
 </a>
 </div>
+</div>
     </main>
     
 
@@ -605,9 +600,9 @@ if ($coordinatorResult->num_rows > 0) {
         <input type="text" name="phone" id="edit_phone">
       </div>
       <div>
-        <label>School:</label>
-        <input type="text" name="address" id="edit_address" disabled>
-      </div>
+    <label>School:</label>
+    <input type="text" name="school" id="edit_address">
+</div>
         <div style="display: flex; gap: 20px;">
           <button type="submit">Save Changes</button>
           <a href="delete_coordinator.php?coordinator_id=<?= htmlspecialchars($coordinator_id) ?>"
@@ -656,19 +651,64 @@ if ($coordinatorResult->num_rows > 0) {
 </body>
 
 <script>
-  const searchInput = document.getElementById('searchInput');
-  const coordinatorCards = document.querySelectorAll('.coordinator-card');
+ const searchInput = document.getElementById('searchInput');
+const coordinatorGrid = document.getElementById('coordinatorGrid');
 
 searchInput.addEventListener('input', function () {
-  const query = this.value.toLowerCase();
+  const query = this.value.trim();
 
-  coordinatorCards.forEach(card => {
-    const searchContent = card.getAttribute('data-search') || "";
-    const match = searchContent.includes(query);
-    card.style.display = match ? 'flex' : 'none';
-  });
+   if (query === "") {
+    window.location.href = window.location.pathname;
+    return;
+  }
+
+  fetch(`search_coordinator.php?q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      coordinatorGrid.innerHTML = ''; 
+
+      if (data.length === 0) {
+        coordinatorGrid.innerHTML = '<p>No coordinators found.</p>';
+        return;
+      }
+
+      data.forEach(coor => {
+        const traineesHtml = coor.trainees.map(name => `<div class="trainee-item">${name}</div>`).join('');
+
+        const div = document.createElement('div');
+        div.className = 'coordinator-card';
+        div.setAttribute('onclick', `openEditModal(
+          '${coor.id}',
+          '${coor.name.replace(/'/g, "\\'")}',
+          '${coor.position.replace(/'/g, "\\'")}',
+          '${coor.email.replace(/'/g, "\\'")}',
+          '${coor.phone.replace(/'/g, "\\'")}',
+          '${coor.address.replace(/'/g, "\\'")}',
+          '${coor.image}'
+        )`);
+        div.innerHTML = `
+          <img src="${coor.image}" alt="Profile">
+          <div class="coordinator-details">
+            <h2>${coor.name}</h2>
+            <p><span class="label">Position:</span> ${coor.position}</p>
+            <p><span class="label">Email:</span> ${coor.email}</p>
+            <p><span class="label">Phone:</span> ${coor.phone}</p>
+            <p><span class="label">School:</span> ${coor.address}</p>
+          </div>
+          <div class="trainees">
+            <span class="trainee-label">Trainees:</span>
+            <div class="trainee-grid">
+              ${traineesHtml}
+            </div>
+          </div>
+        `;
+        coordinatorGrid.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error('Search failed:', err);
+    });
 });
-
 
   function openEditModal(id, name, position, email, phone, address, image) {
   document.getElementById('editModal').style.display = 'flex';
