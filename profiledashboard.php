@@ -1,13 +1,13 @@
 <?php
 session_start();
 
-$timeout_duration = 900; 
+$timeout_duration = 900;
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
     session_unset();
     session_destroy();
-    header("Location: indexv2.php?timeout=1"); 
+    header("Location: indexv2.php?timeout=1");
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time();
@@ -32,7 +32,6 @@ $stmt = $pdo->prepare("SELECT * FROM trainee WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $trainee = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
 $coordinator = [];
 $coordinator_id = '';
 if ($trainee && !empty($trainee['coordinator_id'])) {
@@ -42,10 +41,8 @@ if ($trainee && !empty($trainee['coordinator_id'])) {
     $coordinator = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-
 $stmt = $pdo->query("SELECT * FROM coordinator");
 $all_coordinators = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
 $disableCoordinatorInputs = false;
 foreach ($all_coordinators as $coord) {
@@ -63,8 +60,6 @@ foreach ($all_coordinators as $coord) {
 $stmt = $pdo->query("SELECT * FROM departments WHERE status = 'active'");
 $all_departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-
 $traineePicturePath = null;
 if (isset($_FILES['trainee_picture']) && $_FILES['trainee_picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = 'uploads/trainees/';
@@ -81,28 +76,8 @@ if ($traineePicturePath === null && isset($trainee['profile_picture'])) {
     $traineePicturePath = $trainee['profile_picture'];
 }
 
-
-$coordinatorPicturePath = null;
-if (isset($_FILES['coordinator_picture']) && $_FILES['coordinator_picture']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = 'uploads/coordinators/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
-    $fileName = uniqid('coord_') . '_' . basename($_FILES['coordinator_picture']['name']);
-    $uploadPath = $uploadDir . $fileName;
-    move_uploaded_file($_FILES['coordinator_picture']['tmp_name'], $uploadPath);
-    $coordinatorPicturePath = $uploadPath;
-}
-
-if ($coordinatorPicturePath === null && isset($coordinator['profile_picture'])) {
-    $coordinatorPicturePath = $coordinator['profile_picture'];
-}
-
-// Set user name/email if from session or DB
 $user_name = $trainee ? ($trainee['first_name'] . ' ' . $trainee['surname']) : '';
 $user_email = $trainee['email'] ?? '';
-
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect user data
@@ -118,180 +93,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requiredHours = $_POST['requiredHours'] ?? 0;
     $departmentId = $_POST['department'] ?? null;
 
-    $coordId = $_POST['existingCoordinator'];
-    $coordinatorName = $_POST['coordName'];
-    $coordinatorPosition = $_POST['position'];
-    $coordinatorEmail = $_POST['coordEmail'];
-    $coordinatorPhone = $_POST['phone'];
+   
+    // Get the selected coordinator from the dropdown (if any)
+$selectedCoordinatorId = $_POST['existingCoordinator'] ?? '';
+$coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinator_id;
 
-
-
-if (!empty($coordId) && $coordId !== $coordinator_id) {
- 
-} else {
-  
-    if (!empty($coordinator_id)) {
-    // Save old data for audit
-    $oldCoordinator = $coordinator;
-
-    $stmt = $pdo->prepare("UPDATE coordinator SET name = ?, position = ?, email = ?, phone = ?, profile_picture = ? WHERE coordinator_id = ?");
-    $stmt->execute([$coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath, $coordinator_id]);
-    $coordId = $coordinator_id;
-
-    $oldCoordinator = $coordinator;
-$newCoordinatorValues = [
-    'name' => $coordinatorName,
-    'position' => $coordinatorPosition,
-    'email' => $coordinatorEmail,
-    'phone' => $coordinatorPhone,
-    'profile_picture' => $coordinatorPicturePath
-];
-
-$oldCoordValues = [];
-$changedCoordValues = [];
-
-foreach ($newCoordinatorValues as $key => $newVal) {
-    $oldVal = $oldCoordinator[$key] ?? null;
-    if ($oldVal != $newVal) {
-        $changedCoordValues[$key] = $newVal;
-        $oldCoordValues[$key] = $oldVal;
-    }
-}
-
-if (!empty($changedCoordValues)) {
-    logTransaction($pdo, $user_id, $user_name, "Updated Coordinator Info", $sys_user);
-    logAudit($pdo, $user_id, "Update Coordinator", json_encode($changedCoordValues), json_encode($oldCoordValues), $sys_user);
-}
-
-
-} else {
-    $coordId = uniqid('coord_');
-    $stmt = $pdo->prepare("INSERT INTO coordinator (coordinator_id, name, position, email, phone, profile_picture) 
-                        VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$coordId, $coordinatorName, $coordinatorPosition, $coordinatorEmail, $coordinatorPhone, $coordinatorPicturePath]);
-
-    logTransaction($pdo, $user_id, $user_name, "Created Coordinator", $sys_user);
-    logAudit($pdo, $user_id, "Create Coordinator", json_encode([
-        'name' => $coordinatorName,
-        'position' => $coordinatorPosition,
-        'email' => $coordinatorEmail,
-        'phone' => $coordinatorPhone
-    ]), null, $sys_user);
-}
-
-}
 
     if ($trainee) {
-        
         $stmt = $pdo->prepare("UPDATE trainee SET 
-        first_name = ?, 
-        surname = ?, 
-        email = ?, 
-        school = ?, 
-        phone_number = ?, 
-        address = ?, 
-        schedule_days = ?, 
-        schedule_start = ?, 
-        schedule_end = ?, 
-        required_hours = ?, 
-        profile_picture = ?, 
-        coordinator_id = ?,
-        department_id = ?
-        WHERE user_id = ?");
+            first_name = ?, 
+            surname = ?, 
+            email = ?, 
+            school = ?, 
+            phone_number = ?, 
+            address = ?, 
+            schedule_days = ?, 
+            schedule_start = ?, 
+            schedule_end = ?, 
+            required_hours = ?, 
+            profile_picture = ?, 
+            coordinator_id = ?,
+            department_id = ?
+            WHERE user_id = ?");
 
-    $stmt->execute([
-        $firstName,
-        $surname,
-        $email,
-        $school,
-        $phoneNumber,
-        $address,
-        $scheduleDays,
-        $scheduleStart,
-        $scheduleEnd,
-        $requiredHours,
-        $traineePicturePath,
-        $coordId,
-        $departmentId,
-        $user_id
-    ]);
-// Prepare new values
-$newValues = [
-    'first_name' => $firstName,
-    'surname' => $surname,
-    'email' => $email,
-    'school' => $school,
-    'phone_number' => $phoneNumber,
-    'address' => $address,
-    'schedule_days' => $scheduleDays,
-    'schedule_start' => $scheduleStart,
-    'schedule_end' => $scheduleEnd,
-    'required_hours' => $requiredHours,
-    'profile_picture' => $traineePicturePath,
-    'coordinator_id' => $coordId,
-    'department_id' => $departmentId
-];
+        $stmt->execute([
+            $firstName,
+            $surname,
+            $email,
+            $school,
+            $phoneNumber,
+            $address,
+            $scheduleDays,
+            $scheduleStart,
+            $scheduleEnd,
+            $requiredHours,
+            $traineePicturePath,
+            $coordId,
+            $departmentId,
+            $user_id
+        ]);
 
-// Compare changes
-$oldValues = [];
-$changedValues = [];
+        $newValues = [
+            'first_name' => $firstName,
+            'surname' => $surname,
+            'email' => $email,
+            'school' => $school,
+            'phone_number' => $phoneNumber,
+            'address' => $address,
+            'schedule_days' => $scheduleDays,
+            'schedule_start' => $scheduleStart,
+            'schedule_end' => $scheduleEnd,
+            'required_hours' => $requiredHours,
+            'profile_picture' => $traineePicturePath,
+            'coordinator_id' => $coordId,
+            'department_id' => $departmentId
+        ];
 
-foreach ($newValues as $key => $newVal) {
-    $oldVal = $trainee[$key] ?? null;
-    if ($oldVal != $newVal) {
-        $changedValues[$key] = $newVal;
-        $oldValues[$key] = $oldVal;
-    }
-}
+        $oldValues = [];
+        $changedValues = [];
 
-// Log only if there are changes
-if (!empty($changedValues)) {
-    logTransaction($pdo, $user_id, $user_name, "Updated Trainee Profile", $sys_user);
-    logAudit($pdo, $user_id, "Update Trainee", json_encode($changedValues), json_encode($oldValues), $sys_user);
-}
+        foreach ($newValues as $key => $newVal) {
+            $oldVal = $trainee[$key] ?? null;
+            if ($oldVal != $newVal) {
+                $changedValues[$key] = $newVal;
+                $oldValues[$key] = $oldVal;
+            }
+        }
 
+        if (!empty($changedValues)) {
+            logTransaction($pdo, $user_id, $user_name, "Updated Trainee Profile", $sys_user);
+            logAudit($pdo, $user_id, "Update Trainee", json_encode($changedValues), json_encode($oldValues), $sys_user);
+        }
 
     } else {
-        $fullSchedule = $scheduleDays . ' (' . $scheduleStart . '-' . $scheduleEnd . ')';
+        $stmt = $pdo->prepare("UPDATE trainee SET 
+            first_name = ?, 
+            surname = ?, 
+            email = ?, 
+            school = ?, 
+            phone_number = ?, 
+            address = ?, 
+            schedule_days = ?, 
+            schedule_start = ?, 
+            schedule_end = ?, 
+            required_hours = ?, 
+            profile_picture = ?, 
+            coordinator_id = ?,
+            department_id = ?
+            WHERE user_id = ?");
 
-$stmt = $pdo->prepare("UPDATE trainee SET 
-      first_name = ?, 
-    surname = ?, 
-    email = ?, 
-    school = ?, 
-    phone_number = ?, 
-    address = ?, 
-    schedule_days = ?, 
-    schedule_start = ?, 
-    schedule_end = ?, 
-    required_hours = ?, 
-    profile_picture = ?, 
-    coordinator_id = ?,
-    department_id = ?
-    WHERE user_id = ?");
-
-$stmt->execute([
-    $firstName,
-    $surname,
-    $email,
-    $school,
-    $phoneNumber,
-    $address,
-    $scheduleDays,
-    $scheduleStart,
-    $scheduleEnd,
-    $requiredHours,
-    $traineePicturePath,
-    $coordId,
-    $departmentId,
-    $user_id
-]);
+        $stmt->execute([
+            $firstName,
+            $surname,
+            $email,
+            $school,
+            $phoneNumber,
+            $address,
+            $scheduleDays,
+            $scheduleStart,
+            $scheduleEnd,
+            $requiredHours,
+            $traineePicturePath,
+            $coordId,
+            $departmentId,
+            $user_id
+        ]);
     }
 
     echo "<script>alert('Trainee profile saved successfully!'); window.location.href='dashboardv2.php';</script>";
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
