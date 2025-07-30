@@ -791,12 +791,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
     transform: translateY(0);
   }
 }
-.active {
-  color: #ffffff; /* or your desired highlight color */
-  background-color: #4CAF50; /* or any background for active */
-  padding: 5px 10px;
-  border-radius: 5px;
-}
+
   </style>
   
 
@@ -833,7 +828,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
           <path d="M4 21v-2a4 4 0 0 1 3-3.87"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
-        PROFILE
+        <strong>PROFILE</strong>
       </a>
     </li>
     <li>

@@ -548,12 +548,7 @@ canvas {
 .btn-timein:hover, .btn-timeout:hover {
   background-color: #2f5e14;
 }
-.active {
-  color: #ffffff; /* or your desired highlight color */
-  background-color: #4CAF50; /* or any background for active */
-  padding: 5px 10px;
-  border-radius: 5px;
-}
+
 
     </style>
 
