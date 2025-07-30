@@ -1,5 +1,14 @@
 <?php
 session_start(); 
+include('../connection.php');
+require_once '../logger.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coordinator') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
+
 $timeout_duration = 900; 
 
 if (isset($_SESSION['LAST_ACTIVITY']) &&
@@ -10,9 +19,9 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time();
-require_once '../connection.php';
 
 $user_id = $_SESSION['user_id'] ?? null;
+$user_name = $_SESSION['username'] ?? null;
 if (!$user_id) {
     die("User not logged in.");
 }
@@ -38,17 +47,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = $conn->real_escape_string($_POST['phone']);
 
    
-    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-   
+   if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+    $old_picture = $coor['profile_picture']; // Get old picture path BEFORE update
+
     $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
     $relativePath = "uploads/coordinators/" . $uploadFileName;
     $absolutePath = __DIR__ . "/../" . $relativePath;
 
     if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
-        
-        $conn->query("UPDATE coordinator SET profile_picture = '$relativePath' WHERE user_id = '$user_id'");
+        $updatePicSQL = "UPDATE coordinator SET profile_picture = '$relativePath' WHERE user_id = '$user_id'";
+        if ($conn->query($updatePicSQL)) {
+            // ✅ Log the change
+            logTransaction($conn, $user_id, $full_name, "Updated profile picture", $user_name);
+            logAudit($conn, $user_id, "Update Picture", $relativePath, $old_picture, $user_name);
+        }
     }
 }
+
 
 
 
@@ -57,9 +72,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE user_id = '$user_id'";
 
     if ($conn->query($updateQuery)) {
+    $changedFields = [];
+    $oldValues = [];
+    $newValues = [];
+
+    if ($name !== $coor['name']) {
+        $changedFields[] = 'name';
+        $oldValues['name'] = $coor['name'];
+        $newValues['name'] = $name;
+    }
+    if ($position !== $coor['position']) {
+        $changedFields[] = 'position';
+        $oldValues['position'] = $coor['position'];
+        $newValues['position'] = $position;
+    }
+    if ($email !== $coor['email']) {
+        $changedFields[] = 'email';
+        $oldValues['email'] = $coor['email'];
+        $newValues['email'] = $email;
+    }
+    if ($phone !== $coor['phone']) {
+        $changedFields[] = 'phone';
+        $oldValues['phone'] = $coor['phone'];
+        $newValues['phone'] = $phone;
+    }
+
+    if (!empty($changedFields)) {
+        $fieldsList = implode(', ', $changedFields);
+        logTransaction($conn, $user_id, $full_name, "Updated fields: {$fieldsList}", $user_name);
+        logAudit($conn, $user_id, "Profile Update", json_encode($newValues), json_encode($oldValues), $user_name);
+    }
+
     echo "<script>alert('Profile updated successfully.'); window.location.href = '" . $_SERVER['PHP_SELF'] . "';</script>";
     exit;
-} else {
+}
+
+
+ else {
         echo "<p>Error updating coordinator: " . $conn->error . "</p>";
     }
 }

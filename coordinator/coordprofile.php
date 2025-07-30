@@ -1,7 +1,24 @@
 <?php
-session_start();
-require_once '../connection.php';
-require_once '../logger.php'; 
+session_start(); 
+include('../connection.php');
+require_once '../logger.php';
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coordinator') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
+
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 $profile_picture = null;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

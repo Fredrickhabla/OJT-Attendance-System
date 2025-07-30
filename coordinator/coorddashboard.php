@@ -1,7 +1,13 @@
 <?php
 session_start(); 
+include('../connection.php');
+require_once '../logger.php';
 
-require_once '../connection.php';
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coordinator') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
 
 $timeout_duration = 900; 
 

@@ -1,23 +1,28 @@
 <?php
 session_start(); 
+include('../connection.php');
+require_once '../logger.php';
 
-require_once '../connection.php';
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coordinator') {
+    header("Location: /ojtform/indexv2.php");
+    exit;
+}
+
+
+$timeout_duration = 900; 
+
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+   (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: /ojtform/indexv2.php?timeout=1"); 
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 
 if (isset($_GET['fetch_dtr']) && isset($_GET['trainee_id'])) {
     header('Content-Type: application/json');
     
-    require_once '../connection.php';
-        $timeout_duration = 900; 
-
-    if (isset($_SESSION['LAST_ACTIVITY']) &&
-      (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
-        session_unset();
-        session_destroy();
-        header("Location: /ojtform/indexv2.php?timeout=1"); 
-        exit;
-    }
-    $_SESSION['LAST_ACTIVITY'] = time();
-
     $trainee_id = $_GET['trainee_id'];
 
     $stmt = $conn->prepare("SELECT date, time_in, time_out FROM attendance_record WHERE trainee_id = ?");

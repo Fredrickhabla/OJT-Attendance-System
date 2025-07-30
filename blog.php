@@ -55,7 +55,7 @@ $total_posts = $count_result['total'];
 $total_pages = ceil($total_posts / $limit);
 
 
-$stmt = $conn->prepare("SELECT post_id, title, content, created_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
+$stmt = $conn->prepare("SELECT post_id, title, content, created_at, updated_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
 $stmt->bind_param("sii", $trainee_id, $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -588,7 +588,15 @@ body {
       <div class="avatar"><?= strtoupper($post['title'][0]) ?></div>
       <div class="post-info">
         <h3><?= htmlspecialchars($post['title']) ?></h3>
-        <p><?= ucfirst($post['status']) ?> · <?= date("F j, Y", strtotime($post['created_at'])) ?></p>
+        <p>
+  <?php if (!empty($post['updated_at']) && $post['updated_at'] !== $post['created_at']): ?>
+    Updated <?= date("F j, Y", strtotime($post['updated_at'])) ?>
+  <?php else: ?>
+    Published <?= date("F j, Y", strtotime($post['created_at'])) ?>
+  <?php endif; ?>
+</p>
+
+
       </div>
     </div>
     <div>
@@ -666,7 +674,7 @@ body {
           ["blockquote", "code-block"],
           [{ list: "ordered" }, { list: "bullet" }],
           [{ align: [] }],
-          ["link", "image", "video"],
+          ["link", "image"],
           ["clean"]
         ]
       }
@@ -822,6 +830,31 @@ function deletePost(button) {
     });
 }
 
+quill.getModule('toolbar').addHandler('image', () => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'file');
+  input.setAttribute('accept', 'image/*');
+  input.click();
+
+  input.onchange = () => {
+    const file = input.files[0];
+    const maxSize = 4 * 1024 * 1024; 
+
+    if (file.size > maxSize) {
+      alert('Image size must be under 4MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const range = quill.getSelection();
+      quill.insertEmbed(range.index, 'image', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+});
+
+
 
 document.getElementById("searchInput").addEventListener("input", function () {
   const query = this.value.toLowerCase();
@@ -838,6 +871,7 @@ document.getElementById("searchInput").addEventListener("input", function () {
     }
   });
 });
+
 
 
 </script>
