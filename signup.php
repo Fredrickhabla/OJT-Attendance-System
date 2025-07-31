@@ -350,20 +350,20 @@ form .grid-2 {
         <form id="signup-form" method="POST" action="signup.php">
   <div class="grid-2">
     <div class="field">
-      <label for="name">Name</label>
+      <label for="name">Name<span style="color: red;">*</span></label>
       <input class="namelabel" type="text" id="name" name="name" required/>
     </div>
     <div class="field">
-      <label for="username">Username</label>
+      <label for="username">Username<span style="color: red;">*</span></label>
       <input type="text" id="username" name="username" required/>
     </div>
   </div>
   <div class="field">
-    <label for="email">Email</label>
+    <label for="email">Email<span style="color: red;">*</span></label>
     <input type="email" id="email" name="email" required/>
   </div>
 <div class="field" style="position: relative;">
-  <label for="password">Password</label>
+  <label for="password">Password<span style="color: red;">*</span></label>
   <input type="password" id="password" name="password" required style="padding-right: 40px;" />
   <span class="eye-toggle" onclick="togglePassword()" title="Show/Hide Password">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="gray" class="bi bi-eye" viewBox="0 0 16 16">
@@ -379,7 +379,7 @@ form .grid-2 {
   </div>
 
   <div class="field">
-  <label>Select Role</label>
+  <label>Select Role<span style="color: red;">*</span></label>
   <div class="role-options">
     <input type="radio" id="role-student" name="role" value="student" required>
     <label for="role-student">Student</label>

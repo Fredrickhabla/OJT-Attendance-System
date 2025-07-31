@@ -741,14 +741,19 @@ const attendanceEvents = data
     entryDate.setHours(0, 0, 0, 0);
     return entryDate <= today;
   })
-  .map(entry => ({
-    title: 'Present',
-    start: entry.date,
-    display: 'auto',
-    backgroundColor: '#d1fae5',
-    borderColor: '#34d399',
-    textColor: '#065f46'
-  }));
+  .map(entry => {
+    const isLate = entry.status === 'late';
+
+    return {
+      title: isLate ? 'Late' : 'Present',
+      start: entry.date,
+      display: 'auto',
+      backgroundColor: isLate ? '#fef3c7' : '#d1fae5',    
+      borderColor: isLate ? '#facc15' : '#34d399',         
+      textColor: isLate ? '#92400e' : '#065f46'        
+    };
+  });
+
 
 
 

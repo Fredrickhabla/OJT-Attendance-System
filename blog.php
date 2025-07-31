@@ -46,23 +46,34 @@ $limit = 8;
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$count_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM blog_posts WHERE trainee_id = ?");
-$count_stmt->bind_param("s", $trainee_id);
+if (!empty($search)) {
+    $count_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM blog_posts WHERE trainee_id = ? AND title LIKE CONCAT('%', ?, '%')");
+    $count_stmt->bind_param("ss", $trainee_id, $search);
+} else {
+    $count_stmt = $conn->prepare("SELECT COUNT(*) AS total FROM blog_posts WHERE trainee_id = ?");
+    $count_stmt->bind_param("s", $trainee_id);
+}
 $count_stmt->execute();
 $count_result = $count_stmt->get_result()->fetch_assoc();
 $total_posts = $count_result['total'];
 $total_pages = ceil($total_posts / $limit);
 
-
-$stmt = $conn->prepare("SELECT post_id, title, content, created_at, updated_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
-$stmt->bind_param("sii", $trainee_id, $limit, $offset);
+if (!empty($search)) {
+    $stmt = $conn->prepare("SELECT post_id, title, content, created_at, updated_at, status FROM blog_posts WHERE trainee_id = ? AND title LIKE CONCAT('%', ?, '%') ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    $stmt->bind_param("ssii", $trainee_id, $search, $limit, $offset);
+} else {
+    $stmt = $conn->prepare("SELECT post_id, title, content, created_at, updated_at, status FROM blog_posts WHERE trainee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    $stmt->bind_param("sii", $trainee_id, $limit, $offset);
+}
 $stmt->execute();
 $result = $stmt->get_result();
-
+$posts = [];
 while ($row = $result->fetch_assoc()) {
     $posts[] = $row;
 }
+
 ?>
 
 
@@ -568,10 +579,9 @@ body {
           <i class="fas fa-plus"></i> New Post
         </button>
         <div class="search-container">
-         <input type="text" id="searchInput" placeholder="Search..." />
-          <i class="fas fa-search"></i>
-          <i class="fas fa-microphone"></i>
-        </div>
+  <input type="text" id="searchInput" placeholder="Search..." />
+  <i class="fas fa-search"></i>
+</div>
       </div>
 
       <!-- Blog Posts -->
@@ -722,26 +732,74 @@ card.setAttribute("data-post-id", "0");
       container.prepend(card);
     });
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-  const query = this.value.toLowerCase();
-  const cards = document.querySelectorAll("#postsContainer .card");
+   const searchInput = document.getElementById("searchInput");
+  const postsContainer = document.getElementById("postsContainer");
 
-  cards.forEach(card => {
-    const title = card.querySelector("h3").innerText.toLowerCase();
-    const content = card.getAttribute("data-content").toLowerCase();
+  searchInput.addEventListener("input", function () {
+    const query = this.value.trim();
+    const pagination = document.querySelector(".pagination");
 
-    if (title.includes(query) || content.includes(query)) {
-      card.style.display = "flex";
-    } else {
-      card.style.display = "none";
-    }
+  if (query.length > 0) {
+    pagination.style.display = "none";
+  } else {
+    pagination.style.display = "block";
+  }
+
+    fetch("search_blog_posts.php?query=" + encodeURIComponent(query))
+      .then(response => response.json())
+      .then(data => {
+        postsContainer.innerHTML = ""; // Clear current posts
+
+        if (data.length === 0) {
+          postsContainer.innerHTML = "<p>No matching blog posts found.</p>";
+          return;
+        }
+
+        data.forEach(post => {
+          const card = document.createElement("div");
+          card.className = "card filled";
+          card.setAttribute("data-post-id", post.post_id);
+          card.setAttribute("data-content", JSON.stringify(post.content));
+
+          const publishedDate = post.updated_at && post.updated_at !== post.created_at
+            ? `Updated ${new Date(post.updated_at).toLocaleDateString()}`
+            : `Published ${new Date(post.created_at).toLocaleDateString()}`;
+
+          card.innerHTML = `
+            <div class="post-content">
+              <div class="avatar">${post.title.charAt(0).toUpperCase()}</div>
+              <div class="post-info">
+                <h3>${post.title}</h3>
+                <p>${publishedDate}</p>
+              </div>
+            </div>
+            <div>
+              <button class="icon-btn" title="Edit" onclick="openEditor(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-pencil">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+              </button>
+              <button class="icon-btn" title="Delete" onclick="deletePost(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-trash-2">
+                  <path d="M3 6h18" />
+                  <path d="M19 6l-1 14H6L5 6" />
+                  <path d="M10 11v6" />
+                  <path d="M14 11v6" />
+                  <path d="M9 6V4h6v2" />
+                </svg>
+              </button>
+            </div>
+          `;
+          postsContainer.appendChild(card);
+        });
+      });
   });
 });
-    <?php if ($total_posts == 0): ?>
-   
-    document.getElementById("addPostBtn").click();
-  <?php endif; ?>
-  });
 
   function openEditor(button) {
     const card = button.closest(".card");
