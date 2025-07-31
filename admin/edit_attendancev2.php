@@ -61,6 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $traineeData = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
     $schedule_start = $traineeData['schedule_start'] ?? '08:00'; 
 
+   
+    
+
     $hours = 0;
     $hours_late = 0;
 
@@ -74,7 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $workedInterval = $timeInObj->diff($timeOutObj);
-        $hours = round($workedInterval->h + ($workedInterval->i / 60), 2);
+$hours = round($workedInterval->h + ($workedInterval->i / 60), 2);
+
+
+$breakStart = new DateTime("$date 12:00");
+$breakEnd = new DateTime("$date 13:00");
+
+
+if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
+    $hours -= 1; 
+}
+
 
         $scheduleObj = new DateTime("$date $schedule_start");
         if ($timeInObj > $scheduleObj) {
@@ -375,7 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   const SCHEDULE_START = "<?= $schedule_start ?>";
 </script>
 <script>
-  function calculateHours() {
+function calculateHours() {
   const date = document.querySelector('input[name="date"]').value;
   const timeIn = document.getElementById("time_in").value;
   const timeOut = document.getElementById("time_out").value;
@@ -387,17 +400,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const end = new Date(`${date}T${timeOut}`);
 
     let diff = (end - start) / 1000 / 60 / 60;
-    if (diff < 0) diff += 24; 
+    if (diff < 0) diff += 24;
+
+   
+    const breakStart = new Date(`${date}T12:00`);
+    const breakEnd = new Date(`${date}T13:00`);
+    if (start < breakEnd && end > breakStart) {
+      diff -= 1; 
+    }
 
     hoursField.value = diff.toFixed(2);
 
     const expected = new Date(`${date}T${SCHEDULE_START}`);
-
     const lateDiff = (start - expected) / 1000 / 60 / 60;
-
     hoursLateField.value = lateDiff > 0 ? lateDiff.toFixed(2) : "0.00";
   }
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const timeIn = document.getElementById("time_in");

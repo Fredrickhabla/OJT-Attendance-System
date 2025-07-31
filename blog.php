@@ -721,6 +721,22 @@ card.setAttribute("data-post-id", "0");
 
       container.prepend(card);
     });
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+  const query = this.value.toLowerCase();
+  const cards = document.querySelectorAll("#postsContainer .card");
+
+  cards.forEach(card => {
+    const title = card.querySelector("h3").innerText.toLowerCase();
+    const content = card.getAttribute("data-content").toLowerCase();
+
+    if (title.includes(query) || content.includes(query)) {
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+});
     <?php if ($total_posts == 0): ?>
    
     document.getElementById("addPostBtn").click();
@@ -850,21 +866,7 @@ quill.getModule('toolbar').addHandler('image', () => {
 
 
 
-document.getElementById("searchInput").addEventListener("input", function () {
-  const query = this.value.toLowerCase();
-  const cards = document.querySelectorAll("#postsContainer .card");
 
-  cards.forEach(card => {
-    const title = card.querySelector("h3").innerText.toLowerCase();
-    const content = card.getAttribute("data-content").toLowerCase();
-
-    if (title.includes(query) || content.includes(query)) {
-      card.style.display = "flex";
-    } else {
-      card.style.display = "none";
-    }
-  });
-});
 
 
 

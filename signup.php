@@ -177,8 +177,16 @@ background: #00bf63;
 
 .logo-img1 {
   margin-bottom: 60px;
-  margin-top:60px;
-  width: 140px;
+  margin-top: 60px;
+  width: 190px;
+
+  /* Brightness and contrast */
+  filter: brightness(1.4) contrast(1.2);
+
+ 
+
+  /* Optional: slight scale on hover */
+  transition: all 0.3s ease-in-out;
 }
 
 /* Right Panel */

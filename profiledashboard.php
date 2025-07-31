@@ -1012,7 +1012,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
   <div class="tooltip-wrapper">
     <input id="coordName" name="coordName" type="text"
       value="<?= htmlspecialchars($coordinator['name'] ?? '') ?>"
-      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> disabled>
     <?php if ($disableCoordinatorInputs): ?>
       <span class="tooltip-text">You cannot update an existing user coordinator.</span>
     <?php endif; ?>
@@ -1024,7 +1024,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
   <div class="tooltip-wrapper">
     <input id="position" name="position" type="text"
       value="<?= htmlspecialchars($coordinator['position'] ?? '') ?>"
-      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> disabled>
     <?php if ($disableCoordinatorInputs): ?>
       <span class="tooltip-text">You cannot update an existing user coordinator.</span>
     <?php endif; ?>
@@ -1036,7 +1036,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
   <div class="tooltip-wrapper">
     <input id="coordEmail" name="coordEmail" type="email"
       value="<?= htmlspecialchars($coordinator['email'] ?? '') ?>"
-      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> disabled>
     <?php if ($disableCoordinatorInputs): ?>
       <span class="tooltip-text">You cannot update an existing user coordinator.</span>
     <?php endif; ?>
@@ -1048,7 +1048,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
   <div class="tooltip-wrapper">
     <input id="phone" name="phone" type="text"
       value="<?= htmlspecialchars($coordinator['phone'] ?? '') ?>"
-      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> required>
+      <?= $disableCoordinatorInputs ? 'disabled' : '' ?> disabled>
     <?php if ($disableCoordinatorInputs): ?>
       <span class="tooltip-text">You cannot update an existing user coordinator.</span>
     <?php endif; ?>
