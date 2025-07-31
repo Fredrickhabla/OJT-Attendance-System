@@ -263,10 +263,13 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </td>
                 <td>
                   <?php
-                    if (!empty($row['time_out'])) {
-                      $timeOut = DateTime::createFromFormat('H:i:s', $row['time_out']);
-                      echo $timeOut ? $timeOut->format('g:i A') : htmlspecialchars($row['time_out']);
-                    }
+                    if (!empty($row['time_out']) && $row['time_out'] !== '00:00:00') {
+    $timeOut = DateTime::createFromFormat('H:i:s', $row['time_out']);
+    echo $timeOut ? $timeOut->format('g:i A') : htmlspecialchars($row['time_out']);
+} else {
+    echo '—'; // or 'N/A'
+}
+
                   ?>
                 </td>
                 <td><?= htmlspecialchars($row['hours']) ?></td>

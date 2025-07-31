@@ -26,8 +26,6 @@ if (!$user_id) {
 }
 
 if (isset($_GET['download_all_dtr'])) {
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=all_dtr_records.csv');
 
     $startDate = $_GET['start'] ?? '';
     $endDate = $_GET['end'] ?? '';
@@ -45,6 +43,17 @@ if (isset($_GET['download_all_dtr'])) {
     $stmt->execute();
     $result = $stmt->get_result();
 
+    if ($result->num_rows === 0) {
+        // No data found, don't generate file
+        echo "<script>
+            alert('No DTR records found for the selected date range.');
+            window.history.back();
+        </script>";
+        exit;
+    }
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename=all_dtr_records.csv');
     $output = fopen("php://output", "w");
     fputcsv($output, ['Name', 'Date', 'Time In', 'Time Out', 'Total Hours']);
 
