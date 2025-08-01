@@ -123,7 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $time_out = '00:00:00';
         $hours = 0;
 
-        // --- Get trainee schedule
         $schedStmt = $conn->prepare("SELECT schedule_start FROM trainee WHERE trainee_id = ?");
         $schedStmt->bind_param("s", $trainee_id);
         $schedStmt->execute();
@@ -152,10 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Transaction log
 logTransaction($pdo, $user_id, $full_name, "Trainee timed in at $currentTime with status: $status", $username);
 
-// Audit log
 logAudit($pdo, $user_id, "Time In", $currentTime, null, $username);
 
 
@@ -169,7 +166,7 @@ if (isset($_POST['time_out'])) {
     } elseif ($existing['time_out'] !== "00:00:00") {
         $_SESSION['flash'][] = "You have already timed out today.";
     } else {
-        // Get trainee's schedule
+   
         $schedStmt = $conn->prepare("SELECT schedule_start, schedule_end FROM trainee WHERE trainee_id = ?");
         $schedStmt->bind_param("s", $trainee_id);
         $schedStmt->execute();
@@ -183,7 +180,7 @@ if (isset($_POST['time_out'])) {
         $timeOut = new DateTime($currentTime);
         $interval = $timeOut->diff($timeIn);
         $totalMinutes = ($interval->h * 60) + $interval->i;
-        $hoursWorked = round($totalMinutes / 60, 2); 
+        $hoursWorked = floor(min(round($totalMinutes / 60, 2), 8)); 
 
 
         $lunchStart = new DateTime($timeIn->format('Y-m-d') . ' 12:00:00');

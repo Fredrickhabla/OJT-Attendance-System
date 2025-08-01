@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('../conn.php'); // Optional, in case you need DB for other features
+include('../conn.php'); 
 
 if (isset($_SESSION['user_id']) || isset($_SESSION['ValidAdmin'])) {
     header('Location: dashboardv2.php');
@@ -14,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    // Hardcoded login check
     if ($username === 'admin' && $password === 'admin2314') {
         $_SESSION['ValidAdmin'] = true;
         $_SESSION['user_name'] = 'Administrator';

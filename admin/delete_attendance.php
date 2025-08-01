@@ -14,7 +14,7 @@ if (!$id) {
     exit;
 }
 
-// Fetch record to confirm deletion
+
 $stmt = $pdo->prepare("SELECT * FROM attendance_records WHERE id = ?");
 $stmt->execute([$id]);
 $record = $stmt->fetch();

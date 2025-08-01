@@ -44,7 +44,7 @@ if (isset($_GET['download_all_dtr'])) {
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
-        // No data found, don't generate file
+        
         echo "<script>
             alert('No DTR records found for the selected date range.');
             window.history.back();
@@ -965,7 +965,7 @@ tbody tr:hover {
           </tr>
         </thead>
         <tbody id="dtrBody">
-          <!-- Data will be injected here -->
+          
         </tbody>
       </table>
     </div>
@@ -973,7 +973,7 @@ tbody tr:hover {
       <button class="trainee-btn" onclick="closeDTRModal()">Close</button>
     </div>
   </div>
-  <!-- Date Range Modal -->
+
 
 
 </div>

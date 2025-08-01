@@ -23,7 +23,7 @@ try {
     $pdo = new PDO("mysql:host=localhost;dbname=ojtformv3", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Get current user
+   
     $stmt = $pdo->prepare("SELECT username, name, password_hashed FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,12 +34,12 @@ try {
         exit();
     }
 
-    // Update password
+    
     $newHashed = password_hash($new, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare("UPDATE users SET password_hashed = ? WHERE user_id = ?");
     $stmt->execute([$newHashed, $user_id]);
 
-    // Logging
+   
     $sys_user = $user['username'] ?? 'unknown_user';
 
     $oldInputValues = [

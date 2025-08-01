@@ -783,7 +783,7 @@ border-radius: 4px;
       }
     });
 
-    // Attach to all edit buttons
+   
     document.querySelectorAll(".edit-btn").forEach(btn => {
       btn.addEventListener("click", function () {
         openEditor(this.closest(".blog-card"));

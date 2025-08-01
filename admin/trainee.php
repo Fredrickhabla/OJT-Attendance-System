@@ -3,7 +3,6 @@ session_start();
 include('../connection.php');
 require_once 'logger.php';
 
-// Check if user is logged in and is an admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -20,11 +19,10 @@ if (isset($_SESSION['LAST_ACTIVITY']) &&
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
-$limit = 12; // Number of trainees per page
+$limit = 12; 
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
-// NEW SEARCH + WHERE LOGIC HERE
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $whereClause = "WHERE t.active = 'Y'";
 
@@ -38,7 +36,7 @@ if (!empty($search)) {
     )";
 }
 
-// Count total rows (after filtering)
+
 $countSql = "SELECT COUNT(*) as total 
              FROM trainee t
              LEFT JOIN users u ON t.user_id = u.user_id
@@ -47,7 +45,7 @@ $countResult = $conn->query($countSql);
 $totalTrainees = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalTrainees / $limit);
 
-// Fetch filtered + paginated trainees
+
 $sql = "SELECT t.*, u.email 
         FROM trainee t
         LEFT JOIN users u ON t.user_id = u.user_id
@@ -60,19 +58,18 @@ $result = $conn->query($sql);
 $trainees = [];
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        // Normalize full name
+       
         $fullName = ucwords(strtolower($row["first_name"] . ' ' . $row["surname"]));
 
-        // Normalize address
+       
         $fullAddress = $row["address"];
 
-        // Match the last 2 word groups in the address
         if (preg_match('/(?:\b|^)([\w\s]+),?\s+([\w\s]+)$/', $fullAddress, $matches)) {
             $district = ucwords(strtolower(trim($matches[1])));
             $city = ucwords(strtolower(trim($matches[2])));
             $shortAddress = "$district, $city";
         } else {
-            $shortAddress = ucwords(strtolower($fullAddress)); // fallback
+            $shortAddress = ucwords(strtolower($fullAddress)); 
         }
 
         $trainees[] = [

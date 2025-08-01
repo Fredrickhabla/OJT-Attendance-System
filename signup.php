@@ -179,17 +179,11 @@ background: #00bf63;
   margin-bottom: 60px;
   margin-top: 60px;
   width: 190px;
-
-  /* Brightness and contrast */
   filter: brightness(1.4) contrast(1.2);
-
- 
-
-  /* Optional: slight scale on hover */
   transition: all 0.3s ease-in-out;
 }
 
-/* Right Panel */
+
 .right-panel {
   background: white;
   flex: 3;
@@ -198,7 +192,7 @@ background: #00bf63;
   color: #065f46;
   border-top-left-radius: 32px;
   border-bottom-left-radius: 32px;
-position: relative; /* ✅ Add this line */
+position: relative; 
   
 }
 .right-panel h2 {
@@ -442,7 +436,7 @@ function resetForm() {
   const form = document.getElementById("signup-form");
   form.reset();
 
-  // Manually uncheck radio buttons
+
   const roleRadios = document.querySelectorAll('input[name="role"]');
   roleRadios.forEach(radio => radio.checked = false);
 }

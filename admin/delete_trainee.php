@@ -4,7 +4,7 @@ include('../connection.php');
 $trainee_id = $_POST['trainee_id'] ?? '';
 
 if (!empty($trainee_id)) {
-    // Archive the trainee (set active to 'N')
+    
     $archiveStmt = $conn->prepare("UPDATE trainee SET active = 'N' WHERE trainee_id = ?");
     $archiveStmt->bind_param("s", $trainee_id);
 

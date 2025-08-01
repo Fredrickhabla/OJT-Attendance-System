@@ -5,14 +5,13 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Database connection
 require_once 'connection.php';
 
 $user_id = $_SESSION['user_id'];
 $success = "";
 $error   = "";
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id            = $_POST['id'] ?? '';
     $date          = $_POST['date'] ?? '';
@@ -22,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description   = $_POST['work_description'] ?? '';
     $signature_path = $_POST['existing_signature'] ?? '';
 
-    // Handle file upload
+   
     if (!empty($_FILES['signature']['name']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = "uploads/";
         if (!is_dir($upload_dir)) {
@@ -51,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 }
 
-// Fetch latest record
+
 $stmt = $conn->prepare("SELECT * FROM attendance_records WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();

@@ -13,7 +13,7 @@ if (!$id) {
     exit;
 }
 
-// Fetch current record
+
 $stmt = $pdo->prepare("SELECT * FROM attendance_records WHERE id = ?");
 $stmt->execute([$id]);
 $record = $stmt->fetch();
@@ -23,7 +23,7 @@ if (!$record) {
     exit;
 }
 
-// Handle form submit
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
     $time_in = $_POST['time_in'];
@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $work_description = $_POST['work_description'];
     $signature_path = $_POST['existing_signature'] ?? $record['signature'];
 
-    // Handle signature upload
     if (!empty($_FILES['signature']['name']) && $_FILES['signature']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = 'uploads/';
         if (!is_dir($upload_dir)) {

@@ -23,7 +23,7 @@ if (!isset($_GET['user_id']) || empty($_GET['user_id'])) {
     die("No user ID provided.");
 }
 
-$user_id = trim($_GET['user_id']); // IMPORTANT: do NOT use intval()
+$user_id = trim($_GET['user_id']); 
 
 $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);

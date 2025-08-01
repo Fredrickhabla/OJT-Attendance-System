@@ -33,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Update query
     if (!empty($_FILES['profile_picture']['name'])) {
         $query = "UPDATE coordinator SET name=?, position=?, email=?, phone=?, school=?, profile_picture=? WHERE coordinator_id=?";
 $stmt = $conn->prepare($query);
@@ -49,15 +48,15 @@ $stmt->bind_param("ssssss", $name, $position, $email, $phone, $school, $id);
 
     if ($stmt->execute()) {
         if ($stmt->affected_rows > 0) {
-            // User info
+          
             $user_id = $_SESSION['user_id'] ?? 'user_unknown';
             $fullname = $_SESSION['username'] ?? 'unknown user';
 
-            // Transaction log
+         
             $desc = "Updated coordinator profile (ID: $id)";
             logTransaction($pdo, $user_id, $fullname, $desc, "System");
 
-            // Build only changed fields
+           
             $oldChanged = [];
             $newChanged = [];
 
@@ -88,7 +87,6 @@ $stmt->bind_param("ssssss", $name, $position, $email, $phone, $school, $id);
                 $newChanged['profile_picture'] = $imagePath;
             }
 
-            // Only log if there's a change
             if (!empty($oldChanged) || !empty($newChanged)) {
                 $activity = "Update coordinator profile ID [$id]";
                 logAudit(

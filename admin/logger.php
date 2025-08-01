@@ -1,10 +1,9 @@
 <?php
-// logger.php
 function generateUUID() {
-    return uniqid("log_", true); // Or use better UUID if needed
+    return uniqid("log_", true); 
 }
 
-// Transaction Log
+
 function logTransaction($pdo, $user_id, $fullname, $description, $transaction_user) {
     $transaction_id = generateUUID();
     $stmt = $pdo->prepare("INSERT INTO transaction_logs (
@@ -13,7 +12,6 @@ function logTransaction($pdo, $user_id, $fullname, $description, $transaction_us
     $stmt->execute([$transaction_id, $user_id, $fullname, $description, $transaction_user]);
 }
 
-// Audit Log
 function logAudit($pdo, $user_id, $activity, $new_value, $old_value, $sys_user, $success_yn = 'Y') {
     $audit_id = generateUUID();
     $stmt = $pdo->prepare("INSERT INTO audit_logs (

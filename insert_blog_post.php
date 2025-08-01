@@ -25,7 +25,7 @@ if (empty($title) || empty($content)) {
     exit();
 }
 
-// Get trainee and user info for logging
+
 $stmt = $conn->prepare("SELECT trainee_id, first_name, surname FROM trainee WHERE user_id = ?");
 $stmt->bind_param("s", $user_id);
 $stmt->execute();
@@ -42,14 +42,14 @@ $full_name = $trainee["first_name"] . " " . $trainee["surname"];
 $sys_user = $_SESSION["username"] ?? 'system_user';
 
 if (empty($post_id) || $post_id === "0") {
-    // INSERT new post
+    
     $stmt = $conn->prepare("INSERT INTO blog_posts (trainee_id, title, content, status, created_at, updated_at) VALUES (?, ?, ?, 'published', NOW(), NOW())");
     $stmt->bind_param("sss", $trainee_id, $title, $content);
 
     if ($stmt->execute()) {
         $new_id = $conn->insert_id;
 
-        // Log insert
+       
         logTransaction($conn, $user_id, $full_name, "Created blog post '$title'", $sys_user);
         logAudit($conn, $user_id, "Insert Blog", "Title: $title\nContent: $content", "", $sys_user);
 
@@ -59,7 +59,7 @@ if (empty($post_id) || $post_id === "0") {
     }
 
 } else {
-    // UPDATE existing post
+    
     $oldStmt = $conn->prepare("SELECT title, content FROM blog_posts WHERE post_id = ?");
     $oldStmt->bind_param("i", $post_id);
     $oldStmt->execute();
@@ -68,7 +68,7 @@ if (empty($post_id) || $post_id === "0") {
     $old_title = $oldPost["title"] ?? '';
     $old_content = $oldPost["content"] ?? '';
 
-    // Only proceed if something changed
+    
     if ($old_title === $title && $old_content === $content) {
         echo json_encode(["success" => true, "message" => "No changes made"]);
     } else {

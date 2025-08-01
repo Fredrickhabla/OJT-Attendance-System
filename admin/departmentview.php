@@ -222,7 +222,7 @@ while ($trainee = $traineeResult->fetch_assoc()) {
 
 .card {
   flex: 1;
-  border: 2px solid #16a34a; /* Tailwind's green-600 */
+  border: 2px solid #16a34a; 
   padding: 1.5rem;
   text-align: center;
   display: flex;
@@ -251,7 +251,7 @@ while ($trainee = $traineeResult->fetch_assoc()) {
   
 }
 
-/* Table container */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -260,13 +260,13 @@ table {
   border: 2px solid #16a34a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-   border-radius: 8px;        /* ← Rounded corners */
+   border-radius: 8px;       
   overflow: hidden;  
   height: 100%;
 
 }
 
-/* Table header row */
+
 thead {
   background-color:rgb(68, 131, 15);
   color: white;
@@ -276,7 +276,7 @@ thead {
 }
 
 
-/* Table cells */
+
 th, td {
   padding: 12px 16px;
   text-align: left;
@@ -286,22 +286,22 @@ th, td {
 
 tbody td {
   line-height: 1.4;
-  white-space: nowrap;  /* Prevent wrapping */
-  height: 50px;          /* Fixed row height */
+  white-space: nowrap;  
+  height: 50px;         
   vertical-align: middle;
 }
 
 
 tbody tr {
-  border-bottom: 1px solid #d1d5db; /* light gray line */
+  border-bottom: 1px solid #d1d5db; 
 }
 
-/* Hover effect */
+
 tbody tr:hover {
   background-color: #f0fdf4;
 }
 
-/* Status badges */
+
 .badge {
   padding: 0.3rem 0.7rem;
   border-radius: 9999px;
@@ -327,7 +327,7 @@ tbody tr:hover {
 }
 
 .modal-overlay {
-  display: none; /* Keep this */
+  display: none; 
   position: fixed;
   top: 0; 
   left: 0;
@@ -340,7 +340,7 @@ tbody tr:hover {
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* Modal Box */
+
 .modal-box {
   background-color: #fff;
   padding: 24px;
@@ -351,7 +351,7 @@ tbody tr:hover {
   animation: slideDown 0.25s ease-out;
 }
 
-/* Title and Subtitle */
+
 .modal-title {
   font-size: 1.5rem;
   color: #14532d;
@@ -369,7 +369,6 @@ tbody tr:hover {
   color: #15803d;
 }
 
-/* Textarea */
 .remarks-textarea {
   width: 100%;
   padding: 12px;
@@ -383,7 +382,6 @@ tbody tr:hover {
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Action Buttons */
 .modal-actions {
   margin-top: 18px;
   display: flex;
@@ -420,7 +418,6 @@ tbody tr:hover {
   background-color: #d1d5db;
 }
 
-/* Animations */
 @keyframes slideDown {
   from {
     transform: translateY(-15px);
@@ -510,8 +507,7 @@ tbody tr:hover {
 
   <!-- Main Content -->
   <div class="content">
-<!-- Topbar with department name and back link -->
-<!-- Topbar with Department Name and Back Icon -->
+
 <div class="topbar" style="
     padding: 10px 16px;
     display: flex;
@@ -522,11 +518,9 @@ tbody tr:hover {
     border: none;
 ">
 
-    <!-- Department Name -->
+    
     <span><?= htmlspecialchars($dept['name']) ?></span>
 
-
-    <!-- Back Icon Link -->
     <a href="department.php" class="back-home" style="
         text-decoration: none;
         color:rgb(255, 255, 255);
@@ -541,8 +535,7 @@ tbody tr:hover {
 
    <section class="cards">
   <div class="card">
-    <!--  Trainee Icon -->
-    <!-- Better Trainee Icon -->
+   
 <svg xmlns="http://www.w3.org/2000/svg" height="60px" class="icon" viewBox="0 0 24 24" fill="#16a34a">
   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
 </svg>
@@ -551,7 +544,7 @@ tbody tr:hover {
   </div>
 
   <div class="card">
-    <!-- 🔄 Ongoing Icon -->
+   
     <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1 4 1 10 7 10" />
       <polyline points="23 20 23 14 17 14" />
@@ -561,7 +554,7 @@ tbody tr:hover {
   </div>
 
   <div class="card">
-    <!-- Completed Icon -->
+   
     <svg xmlns="http://www.w3.org/2000/svg" height="60px" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 12l2 2l4 -4" />
       <circle cx="12" cy="12" r="10" />

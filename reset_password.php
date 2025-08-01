@@ -13,7 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $token = $_POST['token'];
     $password = $_POST['password'];
 
-    // Check if token is valid and get username
     $stmt = $conn->prepare("SELECT username FROM password_resets WHERE token = ?");
     $stmt->bind_param("s", $token);
     $stmt->execute();
@@ -24,12 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $new_pass = password_hash($password, PASSWORD_DEFAULT);
 
-        // Update user's password
         $update = $conn->prepare("UPDATE users SET password_hashed = ? WHERE username = ?");
         $update->bind_param("ss", $new_pass, $username);
         $update->execute();
 
-        // Delete the token
+
         $delete = $conn->prepare("DELETE FROM password_resets WHERE username = ?");
         $delete->bind_param("s", $username);
         $delete->execute();

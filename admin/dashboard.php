@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Redirect if not logged in
+
 if (!isset($_SESSION['ValidAdmin']) || $_SESSION['ValidAdmin'] !== true) {
     header('Location: index.php');
     exit;

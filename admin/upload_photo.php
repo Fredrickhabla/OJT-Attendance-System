@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('../conn.php');
-require_once 'logger.php'; // <-- Add this line
+require_once 'logger.php'; 
 
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {

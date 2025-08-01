@@ -3,7 +3,6 @@ session_start();
 include('../conn.php');
 require_once 'logger.php';
 
-// Check if user is logged in and is an admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -31,6 +30,7 @@ $stmt = $pdo->query("
            CONCAT(u.first_name, ' ', u.surname) AS full_name
     FROM attendance_record ar
     LEFT JOIN trainee u ON ar.trainee_id = u.trainee_id
+    WHERE u.active = 'Y'
     ORDER BY ar.date DESC
 ");
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -167,7 +167,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <h1 class="acerlogo">OJT - ACER</h1>
+      <h1>OJT - ACER</h1>
       <div class="menu-label">Menu</div>
       <nav class="nav">
         <a href="dashboardv2.php">
@@ -188,31 +188,32 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </svg>
           Coordinator
         </a>
-        <a href="report.php">
+        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+        <a href="report.php" class="<?= $current_page == 'report.php' ? 'active' : '' ?>">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
           </svg>
           <strong>Report</strong>
         </a>
         <a href="blogadmin.php">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
-          </svg>
-          Blogs
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+            </svg>
+            <span>Blogs</span>
         </a>
-      <a href="department.php" style="display: flex; align-items: center;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
-          </svg>
-          <span>Department</span>
-      </a>
+        <a href="department.php">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+           </svg>
+            <span>Department</span>
+        </a>
 
       </nav>
     </div>
     <div class="logout">
       <a href="/ojtform/logout.php">
-        <i class="bi bi-box-arrow-right"></i> Logout
+        <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
     </div>
   </aside>
@@ -225,9 +226,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h3 class="text-center text-success mb-4"><i class="bi bi-table"></i> Attendance Records</h3>
 
         <div class="mb-3 text-end">
-  <!-- <a href="export_csv.php" class="btn btn-success btn-sm">
-    <i class="bi bi-file-earmark-spreadsheet"></i> Export Full CSV
-  </a> -->
+ 
   <button id="exportCSV" class="btn btn-outline-success btn-sm">
     <i class="bi bi-funnel"></i> Export Filtered CSV
   </button>
@@ -267,7 +266,7 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $timeOut = DateTime::createFromFormat('H:i:s', $row['time_out']);
     echo $timeOut ? $timeOut->format('g:i A') : htmlspecialchars($row['time_out']);
 } else {
-    echo '—'; // or 'N/A'
+    echo '—'; // 
 }
 
                   ?>
@@ -310,16 +309,15 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
   $(document).ready(function () {
-    // ✅ Initialize DataTable once
+  
     const table = $('#attendanceTable').DataTable({
       "order": [[1, "desc"]],
       "pageLength": 10
     });
 
-    // ✅ CSV export for filtered results
     $('#exportCSV').on('click', function () {
       const headers = ['Name', 'Date', 'Time In', 'Time Out', 'Hours', 'Hours Late'];
-      const rows = table.rows({ search: 'applied' }).nodes(); // only visible rows
+      const rows = table.rows({ search: 'applied' }).nodes(); 
       const csvData = [headers.join(',')];
 
       rows.each(function (row) {
@@ -343,7 +341,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       document.body.removeChild(link);
     });
 
-    // ✅ Signature image modal (if you're still using it)
     document.querySelectorAll('.signature-img').forEach(function (img) {
       img.addEventListener('click', function () {
         const src = this.getAttribute('src');

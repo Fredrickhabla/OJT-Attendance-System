@@ -129,7 +129,7 @@ $conn->close();
   <?php endif; ?>
 
   <form method="POST" action="">
-    <!-- Personal Information -->
+  
     <div class="mb-3">
       <label for="full_name" class="form-label">Full Name:</label>
       <input type="text" name="full_name" id="full_name" class="form-control"
@@ -156,7 +156,7 @@ $conn->close();
              required value="<?= htmlspecialchars($_POST['owner_manager'] ?? '') ?>">
     </div>
     <hr>
-    <!-- Account Information -->
+    
     <div class="mb-3">
       <label for="position" class="form-label">Position:</label>
       <input type="text" name="position" id="position" class="form-control"
@@ -180,7 +180,6 @@ $conn->close();
   </form>
 </div>
 
-<!-- JS: Bootstrap bundle + password toggle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const toggle = document.getElementById('togglePassword');

@@ -293,8 +293,8 @@ if ($coordinatorResult->num_rows > 0) {
 }
 .trainee-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two equal columns */
-  gap: 4px 20px; /* Adjust vertical/horizontal spacing */
+  grid-template-columns: 1fr 1fr; 
+  gap: 4px 20px; 
   margin-top: 5px;
 }
 

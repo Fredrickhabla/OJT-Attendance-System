@@ -584,7 +584,7 @@ $trainee = [
     </form>
   </div>
 </div>
-<!-- Delete Confirmation Modal -->
+
 <div id="deleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; z-index:999;">
   <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:10px; position:relative; text-align:center;">
     <span id="closeDeleteModal" style="position:absolute; top:10px; right:15px; font-size:20px; cursor:pointer;">&times;</span>
@@ -613,22 +613,19 @@ window.onclick = function(event) {
     document.getElementById('editModal').style.display = "none";
   }
 };
-// Show Delete Modal
+
 document.getElementById('deleteBtn').addEventListener('click', function () {
   document.getElementById('deleteModal').style.display = 'block';
 });
 
-// Close Delete Modal via X
 document.getElementById('closeDeleteModal').addEventListener('click', function () {
   document.getElementById('deleteModal').style.display = 'none';
 });
 
-// Cancel Delete Modal via button
 document.getElementById('cancelDelete').addEventListener('click', function () {
   document.getElementById('deleteModal').style.display = 'none';
 });
 
-// Close modals when clicking outside
 window.onclick = function(event) {
   if (event.target == document.getElementById('editModal')) {
     document.getElementById('editModal').style.display = "none";

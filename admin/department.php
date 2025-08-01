@@ -3,7 +3,6 @@ session_start();
 include('../connection.php');
 require_once 'logger.php';
 
-// Check if user is logged in and is an admin
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
@@ -181,7 +180,7 @@ width: 100%;
   justify-content: center;
   background-color: white;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* <-- Added */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
 
     opacity: 0;
   transform: translateY(20px);
@@ -195,8 +194,8 @@ width: 100%;
   }
 }
 .card:hover {
-  transform: translateY(-5px); /* <-- Added */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* <-- Added */
+  transform: translateY(-5px); 
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); 
 }
 
 .card .icon {
@@ -271,7 +270,7 @@ width: 100%;
     </div>
   </aside>
 
-  <!-- Main Area -->
+  
   <!-- Main Area -->
 <div style="flex: 1; display: flex; flex-direction: column;">
   <div class="topbar topbar-space-between">

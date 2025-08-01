@@ -931,6 +931,7 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
               <input id="schedule" type="text" readonly placeholder="Click to select schedule" />
               <div id="schedulePicker">
                 <div class="days">
+                  <label><input type="checkbox" id="selectAllDays"> Select All</label>
                   <label><input type="checkbox" name="days" value="M"> M</label>
                   <label><input type="checkbox" name="days" value="T"> T</label>
                   <label><input type="checkbox" name="days" value="W"> W</label>
@@ -1103,6 +1104,12 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
   const scheduleDaysInput = document.getElementById('schedule_days');
   const scheduleStartInput = document.getElementById('schedule_start');
   const scheduleEndInput = document.getElementById('schedule_end');
+  const selectAllDaysCheckbox = document.getElementById('selectAllDays');
+
+  selectAllDaysCheckbox.addEventListener('change', () => {
+  dayCheckboxes.forEach(cb => cb.checked = selectAllDaysCheckbox.checked);
+  updateScheduleInput(); // update the text field
+});
 
   function formatTime24to12(time24) {
     if (!time24) return '';
@@ -1226,7 +1233,7 @@ function submitPasswordChange() {
   const current = document.getElementById("currentPassword").value;
   const newPass = document.getElementById("newPassword").value;
   const confirm = document.getElementById("confirmPassword").value;
-
+  
   if (!current || !newPass || !confirm) {
     alert("All fields are required.");
     return;

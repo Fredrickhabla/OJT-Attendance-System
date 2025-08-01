@@ -89,6 +89,11 @@ if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
 }
 
 
+if ($hours > 8) {
+    $hours = 8;
+}
+
+
         $scheduleObj = new DateTime("$date $schedule_start");
         if ($timeInObj > $scheduleObj) {
             $lateInterval = $scheduleObj->diff($timeInObj);
@@ -179,6 +184,7 @@ if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
       background-color: #f0f2f5;
       color: #333;
     }
+      
     .layout {
       display: flex;
       height: 100vh;
@@ -203,6 +209,7 @@ if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
       margin-bottom: 16px;
       opacity: 0.8;
     }
+
     .nav {
       display: flex;
       flex-direction: column;
@@ -219,6 +226,9 @@ if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
     }
     .nav a:hover {
       background-color: #14532d;
+    }
+    .nav svg {
+      margin-right: 8px;
     }
     .logout {
       margin-top: auto;
@@ -282,52 +292,58 @@ if ($timeInObj < $breakEnd && $timeOutObj > $breakStart) {
 <body>
 
 <div class="layout">
-<aside class="sidebar">
-  <div>
-    <h1 class="acerlogo">OJT - ACER</h1>
-    <div class="menu-label">Menu</div>
-    <nav class="nav">
-      <a href="dashboardv2.php">
-        <span style="display:inline-flex; align-items:center; margin-right:8px;">
+  <aside class="sidebar">
+    <div>
+      <h1>OJT - ACER</h1>
+      <div class="menu-label">Menu</div>
+      <nav class="nav">
+        <a href="dashboardv2.php">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 4l9 5.75V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.75z" />
           </svg>
-        </span>
-        Dashboard
-      </a>
-      <a href="trainee.php">
-        <span style="display:inline-flex; align-items:center; margin-right:8px;">
+          Dashboard
+        </a>
+        <a href="trainee.php">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-        </span>
-        Trainee
-      </a>
-      <a href="coordinator.php">
-        <span style="display:inline-flex; align-items:center; margin-right:8px;">
+          Trainee
+        </a>
+        <a href="coordinator.php">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zM12 14v7m0-7l-9-5m9 5l9-5" />
           </svg>
-        </span>
-        Coordinator
-      </a>
-      <a href="report.php">
-        <span style="display:inline-flex; align-items:center; margin-right:8px;">
+          Coordinator
+        </a>
+        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+        <a href="report.php" class="<?= $current_page == 'report.php' ? 'active' : '' ?>">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h6M9 7h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
           </svg>
-        </span>
-        Report
+          <strong>Report</strong>
+        </a>
+        <a href="blogadmin.php">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13H7m10-4H7m0 8h4" />
+            </svg>
+            <span>Blogs</span>
+        </a>
+        <a href="department.php">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 21h16M4 10h16M10 6h4m-7 4v11m10-11v11M12 14v3" />
+           </svg>
+            <span>Department</span>
+        </a>
+
+      </nav>
+    </div>
+    <div class="logout">
+      <a href="/ojtform/logout.php">
+        <i class="bi bi-box-arrow-right"></i>   Logout
       </a>
-    </nav>
-  </div>
-  <div class="logout">
-    <a href="logout.php">
-      <i class="bi bi-box-arrow-right" style="margin-right:8px;"></i>
-      Logout
-    </a>
-  </div>
-</aside>
+    </div>
+  </aside>
 
 
   <div class="content">

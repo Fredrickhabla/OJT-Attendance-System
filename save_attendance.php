@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// ✅ MySQL database connection
+
 $host = "localhost";
 $dbname = "ojtform";
 $username = "root";
@@ -12,14 +12,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// ✅ Check if user is logged in
+
 if (!isset($_SESSION['user_id'])) {
     die("Access denied. Please log in.");
 }
 
-// ✅ Only allow POST requests
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Collect form data
+  
     $user_id   = $_SESSION['user_id'];
     $date      = $_POST['date'] ?? '';
     $time_in   = $_POST['time_in'] ?? '';
@@ -27,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hours     = floatval($_POST['hours'] ?? 0);
     $work_desc = $_POST['work_description'] ?? '';
 
-    // Validate required fields
+    
     if (empty($date) || empty($time_in) || empty($time_out) || empty($hours) || empty($work_desc)) {
         die("All fields are required.");
     }
 
-    // ✅ Handle signature upload (no background removal)
+ 
     $signature_path = '';
     if (!empty($_FILES['signature']['name'])) {
         if ($_FILES['signature']['error'] === UPLOAD_ERR_OK) {
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ✅ Insert data into the database
+   
     $stmt = $conn->prepare("
         INSERT INTO attendance_records 
         (user_id, date, time_in, time_out, hours, work_description, signature, created_at) 

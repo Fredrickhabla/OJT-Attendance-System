@@ -12,10 +12,10 @@ header('Content-Disposition: attachment; filename=attendance_record.csv');
 
 $output = fopen('php://output', 'w');
 
-// CSV column headers
+
 fputcsv($output, ['Name', 'Date', 'Time In', 'Time Out', 'Hours', 'Hours Late', 'Status']);
 
-// Fetch records with JOIN to trainee table to get names
+
 $sql = "
     SELECT 
         ar.date, ar.time_in, ar.time_out, ar.hours, ar.hours_late, ar.status,

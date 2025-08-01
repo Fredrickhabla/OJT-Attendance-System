@@ -3,7 +3,7 @@ session_start();
 require_once 'logger.php';
 
 if (isset($_SESSION["user_id"]) && !isset($_SESSION["logout_logged"])) {
-    $_SESSION["logout_logged"] = true; // 🔐 Prevent future logs
+    $_SESSION["logout_logged"] = true; 
 
     $user_id = $_SESSION["user_id"];
 
@@ -40,11 +40,10 @@ if (isset($_SESSION["user_id"]) && !isset($_SESSION["logout_logged"])) {
             $full_name = 'Unknown Name';
         }
 
-        // ✅ Only log ONCE
         logTransaction($pdo, $user_id, $full_name, "Logged out", $username);
 
     } catch (PDOException $e) {
-        // handle logging errors silently
+      
     }
 }
 

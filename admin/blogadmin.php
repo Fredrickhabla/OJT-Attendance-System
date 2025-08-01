@@ -344,9 +344,9 @@ flex-direction: column;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* spacing between filters and blog-list */
+  gap: 24px; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* Disable scroll here */
+  overflow: hidden; 
    
 }
 
@@ -486,13 +486,13 @@ flex-direction: column;
   color: #10b981;
 }
 
-/* New Search Container */
+
 .search-container {
     margin-left: auto;
    position: relative;
   display: flex;
   align-items: center;  
-  width: 320px; /* or any size */
+  width: 320px; 
 }
 
 .search-input {

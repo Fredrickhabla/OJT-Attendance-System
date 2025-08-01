@@ -13,7 +13,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $user_id = intval($_GET['id']);
 
-// Delete user
+
 $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
 if ($stmt->execute([$user_id])) {
     header("Location: manage_users.php?deleted=success");

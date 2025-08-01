@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
    
    if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
-    $old_picture = $coor['profile_picture']; // Get old picture path BEFORE update
+    $old_picture = $coor['profile_picture']; 
 
     $uploadFileName = time() . "_" . basename($_FILES["profile_picture"]["name"]);
     $relativePath = "uploads/coordinators/" . $uploadFileName;
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $absolutePath)) {
         $updatePicSQL = "UPDATE coordinator SET profile_picture = '$relativePath' WHERE user_id = '$user_id'";
         if ($conn->query($updatePicSQL)) {
-            // ✅ Log the change
+            
             logTransaction($conn, $user_id, $full_name, "Updated profile picture", $user_name);
             logAudit($conn, $user_id, "Update Picture", $relativePath, $old_picture, $user_name);
         }
@@ -672,7 +672,6 @@ document.getElementById('profile_picture').addEventListener('change', function (
     document.getElementById('passwordModal').style.display = 'none';
   }
 
-  // Optional: Close modal when clicking outside
   window.onclick = function(event) {
     const modal = document.getElementById('passwordModal');
     if (event.target == modal) {

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Redirect if not logged in
+
 if (!isset($_SESSION["user_id"])) {
     header("Location: index.php");
     exit();
@@ -13,7 +13,7 @@ $success = "";
 $error = "";
 $attendance = null;
 
-// Handle data and save
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION["user_id"];
     $date = $_POST["date"];
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $hours = $_POST["hours"];
     $work_description = trim($_POST["work_description"]);
 
-    // Fetch trainee_id using user_id
+
 $trainee_stmt = $conn->prepare("SELECT trainee_id FROM trainee WHERE user_id = ?");
 $trainee_stmt->bind_param("s", $user_id);
 $trainee_stmt->execute();
@@ -33,14 +33,14 @@ if ($trainee_stmt->num_rows === 1) {
     $trainee_stmt->fetch();
     $trainee_stmt->close();
 
-    // Proceed with form data
+   
     $date = $_POST["date"];
     $time_in = $_POST["time_in"];
     $time_out = $_POST["time_out"];
     $hours = $_POST["hours"];
     $work_description = trim($_POST["work_description"]);
 
-    // Handle file upload
+   
     $signature_path = "";
     if (!empty($_FILES["signature"]["name"])) {
         $upload_dir = "uploads/";
