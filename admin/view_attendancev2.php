@@ -253,7 +253,6 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </button>
 </div>
 
-
         <?php if ($records): ?>
         <div class="table-responsive">
           <table id="attendanceTable" class="table table-bordered table-striped">

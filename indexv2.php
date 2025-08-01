@@ -34,11 +34,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !isset($_POST['quick_login'])) {
                 logTransaction($conn, $user_id, $name, "User logged in via cookie", $username);
 
                 if ($role === "admin") {
-                    header("Location: admin/dashboardv2.php");
-                } else {
-                    header("Location: dashboardv2.php");
-                }
-                exit();
+        header("Location: admin/dashboardv2.php");
+    } elseif ($role === "coordinator") {
+        header("Location: coordinator/coorddashboard.php");
+    } elseif ($role === "student") {
+        header("Location: dashboardv2.php");
+    } else {
+        header("Location: indexv2.php");
+    }
+    exit();
+
             } else {
                 $error = "Remember Me token invalid. Please enter your password.";
             }
