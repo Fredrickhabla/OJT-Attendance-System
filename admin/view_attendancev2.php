@@ -159,6 +159,17 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
       display: block;
       cursor: pointer;
     }
+
+    .trainee-btn {
+      background-color: #14532d;
+      color: white;
+      padding: 6px 14px;
+      border: 1px solid white;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -220,7 +231,17 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <!-- Main Content -->
   <div class="content">
-    <div class="topbar">Attendance Records</div>
+    <div class="topbar" style="
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+"> Attendance Records  <button class="trainee-btn" data-bs-toggle="modal" data-bs-target="#downloadModal">
+    <i class="bi bi-download"></i> Download All DTR
+  </button></div>
     <div class="main">
       <div class="table-container">
         <h3 class="text-center text-success mb-4"><i class="bi bi-table"></i> Attendance Records</h3>
@@ -301,6 +322,31 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
+<!-- Download Modal -->
+<div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="download_dtr.php" method="GET" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="downloadModalLabel">Download DTR</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="start_date" class="form-label">Start Date</label>
+          <input type="date" class="form-control" name="start_date" id="start_date" required>
+        </div>
+        <div class="mb-3">
+          <label for="end_date" class="form-label">End Date</label>
+          <input type="date" class="form-control" name="end_date" id="end_date" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Download</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
