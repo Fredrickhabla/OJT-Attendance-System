@@ -201,7 +201,7 @@ if ($trainee_picture_path) {
 }
 
 
-logTransaction($pdo, $user_id, $updated_user_name, "Profile updated", $username);
+logTransaction($pdo, $user_id, $updated_user_name, "New Profile updated", $username);
 
 echo "<script>
     alert('Profile saved successfully.');
@@ -609,7 +609,17 @@ h2 {
             </div>
             <div class="form-group">
               <label for="phoneNumber">Phone Number<span style="color: red;">*</span></label>
-              <input id="phoneNumber" type="text" name="phoneNumber" value="<?= htmlspecialchars($trainee['phone_number'] ?? '') ?>" required/>
+              <input 
+  id="phoneNumber" 
+  type="tel" 
+  name="phoneNumber" 
+  pattern="[0-9]{11}" 
+  inputmode="numeric" 
+  maxlength="11" 
+  value="<?= htmlspecialchars($trainee['phone_number'] ?? '') ?>" 
+  required 
+  title="Please enter a valid 11-digit phone number without spaces or letters." />
+
             </div>
             <div class="form-group">
               <label for="address">Address<span style="color: red;">*</span></label>

@@ -586,6 +586,11 @@ body {
 
       <!-- Blog Posts -->
      <div class="posts" id="postsContainer">
+
+     <p id="noPostsMessage" style="<?= empty($posts) ? '' : 'display: none;' ?>; text-align:center; font-style:italic; color:gray;">
+  No blog posts yet. Click "New Post" to get started!
+</p>
+
   <?php foreach ($posts as $post): ?>
  <div class="card filled" data-post-id="<?= $post['post_id'] ?>" data-content='<?= htmlspecialchars(json_encode($post['content'])) ?>'>
     <div class="post-content">
@@ -687,6 +692,8 @@ body {
     // Handle new post button
     document.getElementById("addPostBtn").addEventListener("click", function () {
       const container = document.getElementById("postsContainer");
+      const message = document.getElementById("noPostsMessage");
+  if (message) message.style.display = "none";
 
       const card = document.createElement("div");
 card.className = "card filled fade-in";
