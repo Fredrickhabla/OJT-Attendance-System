@@ -586,7 +586,17 @@ if (isset($_SESSION['change_error'])) {
   </div>
   <div class="form-group">
     <label for="phone">Phone</label>
-    <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($coor['phone']) ?>" required/>
+    <input 
+  type="tel" 
+  id="phone" 
+  name="phone" 
+  value="<?= htmlspecialchars($coor['phone']) ?>" 
+  required 
+  pattern="^\+?[0-9]*$" 
+  inputmode="numeric"
+  oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
+/>
+
   </div>
   <div class="form-group">
   <label for="school">School</label>
@@ -633,6 +643,11 @@ if (isset($_SESSION['change_error'])) {
   </div>
 
 <script>
+
+  document.getElementById('phone').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9+]/g, ''); 
+  });
+
 document.getElementById('profile_picture').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {

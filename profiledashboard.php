@@ -918,7 +918,17 @@ $coordId = !empty($selectedCoordinatorId) ? $selectedCoordinatorId : $coordinato
             </div>
             <div class="form-group">
               <label for="phoneNumber">Phone Number</label>
-              <input id="phoneNumber" type="text" name="phoneNumber" value="<?= htmlspecialchars($trainee['phone_number'] ?? '') ?>" required/>
+              <input 
+  id="phoneNumber" 
+  type="text" 
+  name="phoneNumber" 
+  pattern="\d{11}" 
+  inputmode="numeric" 
+  maxlength="11" 
+  value="<?= htmlspecialchars($trainee['phone_number'] ?? '') ?>" 
+  required 
+  title="Please enter an 11-digit phone number (numbers only)." />
+
             </div>
             <div class="form-group">
               <label for="address">Address</label>
@@ -1281,7 +1291,9 @@ document.querySelectorAll('.tooltip-wrapper input[disabled]').forEach(input => {
     });
   });
 
-
+document.getElementById('phoneNumber').addEventListener('input', function (e) {
+    this.value = this.value.replace(/\D/g, ''); // Removes all non-digit characters
+  });
 
 </script>
 <script src="autologout.js"></script>

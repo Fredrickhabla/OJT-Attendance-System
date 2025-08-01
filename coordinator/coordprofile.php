@@ -302,7 +302,16 @@ $conn->close();
           </div>
           <div class="form-group">
             <label for="phone">Phone<span style="color: red;">*</span></label>
-            <input type="tel" id="phone" name="phone" required/>
+            <input 
+  type="tel" 
+  id="phone" 
+  name="phone" 
+  inputmode="numeric" 
+  pattern="\d{11}" 
+  maxlength="11" 
+  required 
+  title="Enter an 11-digit phone number (numbers only)" />
+
           </div>
 
           <div class="form-group">
@@ -321,6 +330,11 @@ $conn->close();
 </body>
 </html>
 <script>
+
+  document.getElementById('phone').addEventListener('input', function () {
+  this.value = this.value.replace(/\D/g, ''); 
+});
+
   const input = document.getElementById('profile_picture');
   const avatarWrapper = document.querySelector('.avatar-wrapper');
 
