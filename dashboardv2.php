@@ -180,8 +180,7 @@ if (isset($_POST['time_out'])) {
         $timeOut = new DateTime($currentTime);
         $interval = $timeOut->diff($timeIn);
         $totalMinutes = ($interval->h * 60) + $interval->i;
-        $hoursWorked = floor(min(round($totalMinutes / 60, 2), 8)); 
-
+        $hoursWorked = ($totalMinutes / 60 >= 8) ? 8 : round($totalMinutes / 60, 2);
 
         $lunchStart = new DateTime($timeIn->format('Y-m-d') . ' 12:00:00');
         $lunchEnd = new DateTime($timeIn->format('Y-m-d') . ' 13:00:00');

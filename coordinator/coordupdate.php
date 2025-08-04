@@ -593,6 +593,7 @@ if (isset($_SESSION['change_error'])) {
   value="<?= htmlspecialchars($coor['phone']) ?>" 
   required 
   pattern="^\+?[0-9]*$" 
+  maxlength="11" 
   inputmode="numeric"
   oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
 />

@@ -22,7 +22,8 @@ $stmt->fetch();
 $stmt->close();
 
 $all_coordinators = [];
-$result = $conn->query("SELECT coordinator_id, name FROM coordinator ORDER BY name");
+$result = $conn->query("SELECT coordinator_id, name FROM coordinator WHERE active = 'Y' ORDER BY name");
+
 while ($row = $result->fetch_assoc()) {
     $all_coordinators[] = $row;
 }

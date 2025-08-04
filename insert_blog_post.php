@@ -80,7 +80,8 @@ if (empty($post_id) || $post_id === "0") {
             $new_value = "Title: $title\nContent: $content";
 
             logTransaction($conn, $user_id, $full_name, "Updated blog post ID $post_id", $sys_user);
-            logAudit($conn, $user_id, "Update Blog", $new_value, $old_value, $sys_user);
+            logAudit($conn, $user_id, "Update Blog {$post_id}", $new_value, $old_value, $sys_user);
+
 
             echo json_encode(["success" => true, "post_id" => $post_id]);
         } else {
