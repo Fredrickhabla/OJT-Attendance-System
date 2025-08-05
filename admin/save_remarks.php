@@ -3,13 +3,13 @@ session_start();
 include('../connection.php');
 require_once '../logger.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'coordinator') {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: /ojtform/indexv2.php");
     exit;
 }
 
-$coordinator_id = $_SESSION['user_id'] ?? 'unknown';
-$coordinator_name = $_SESSION['username'] ?? 'unknown';
+$admin_id = $_SESSION['user_id'] ?? 'unknown';
+$admin_name = $_SESSION['username'] ?? 'unknown';
 
 $trainee_id = $_POST['trainee_id'];
 $remarks = $conn->real_escape_string($_POST['remarks']);
@@ -27,16 +27,16 @@ $conn->query("UPDATE trainee SET remarks = '$remarks' WHERE trainee_id = '$train
 
 logTransaction(
     $conn,
-    $coordinator_id,
-    $coordinator_name,
+    $admin_id,
+    $admin_name,
     "Admin added remark: $trainee_id",
-    $coordinator_name
+    $admin_name
 );
 
 
 logAudit(
     $conn,
-    $coordinator_id,
+    $admin_id,
     "Add Remark: $trainee_id",
     $remarks,
     $old_remark,
